@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Options page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- For fonts -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+<style>
+    .optBut {
+        font-size: xx-large
+    }
+</style>
+
+
+<body>
+    <script src="options.js"></script>
+    <h1 class="p-5" style="font-size: xxx-large;text-align: center; font-weight: 700;">Options page</h1>
+    <div class="d-flex flex-row m-4">
+        <div class="optBut">Press this button to remove all the tags that you have allocated to a bookmark</div>
+        <h1 class="btn btn-success navbar-brand optBut ml-auto" id="clearTags" style="float: right;">Clear Tags</a>
+    </div>
+    <div class="d-flex flex-row m-4">
+        <div class="optBut">Press this button to remove all the information that you have written about bookmarks</div>
+        <h1 class="btn btn-success navbar-brand optBut ml-auto" id="clearInfo"  style="float: right;">Clear Info</a>
+    </div>
+    <div id="t" class="d-flex flex-row m-4">
+        <div class="optBut">Chose the default colour of bookmarks (Don't add the hashtag)</div>
+        <div class="input-group mx-4 ml-auto" style="max-width: 169px;">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon1" style="max-height: 38px;">#</span>
+            </div>
+            <input type="text" class="form-control" style="max-width: 169px" placeholder="Hex code" id="colour">
+          </div>
+    </div>
+
+
+    
+</body>
+</html>
