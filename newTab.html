@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Tag Organiser</title>
+  <title>New Tab - Bookmark Manager</title>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <!-- jQuery library -->
@@ -12,7 +12,115 @@
     <!-- For fonts -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Self made stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+    <!-- For picking colours  -->
+  <style>
+    .searchContainerFocus{
+    position: absolute !important;
+    top: 15% !important;
+    width: 80% !important;
+    transition: all 1s;
+  }
+
+  #bod{
+      /* https://images.unsplash.com/photo-1564089969562-7b8667a4adec?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80 */
+      /* https://images.unsplash.com/photo-1587606607115-1165198fd0de?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80 */
+      /* background-image: url("https://images.unsplash.com/photo-1452723312111-3a7d0db0e024?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1489&q=80"); */
+      background-size: cover;
+      width: 100%;
+      height: 100%;
+  }
+
+  a{
+      text-decoration: none;
+  }
+
+  .form-control:focus {
+      border-color: inherit;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+  }
+
+  .divFocus{
+      position: relative !important;
+      top: 20% !important;
+      overflow: scroll;
+      transition: all 1s;
+  }
+
+  ::-webkit-scrollbar-track
+  {
+      box-shadow: black;
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 5px;
+    background-color: #F5F5F5;
+  }
+
+  ::-webkit-scrollbar
+  {
+      width: 5px;
+      border-radius: 5px;
+    background-color: #F5F5F5;
+  }
+
+  ::-webkit-scrollbar-thumb
+  {
+      box-shadow: black;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #555;
+  }
+
+  .dropdownButton {
+      width: 15%;
+  }
+
+  .textColour {
+      color: white;
+  }
+
+  .hober {
+      cursor: pointer;
+  }
+  .insideTag {
+      margin-left: 0px;
+  }
+
+
+  .dropdown-submenu {
+      position:relative;
+  }
+
+  li:hover > ul.dropdown-menu {
+      display: block;
+  }
+
+  .dropdown-submenu>.dropdown-menu {
+      top:0px;
+      left:99.7%;
+      /* left:-10rem; 10rem is the min-width of dropdown-menu */
+      margin-top:-6px;
+      border-radius: 0rem 0.25rem 0.25rem 0.25rem ;
+  }
+
+  /* rotate caret on hover */
+  .dropdown-menu > li > a:hover:after {
+      text-decoration: underline;
+      transform: rotate(-90deg);
+  } 
+
+  .folder{
+      color: black;
+      padding: 14px 28px;
+      font-size: 16px;
+      cursor: pointer;
+  }
+  .open{
+    opacity: 1;
+  }
+
+  </style>
+
+
 </head>
 <body id="bod" style="overflow: hidden;">
     <script src="main.js"></script>
@@ -36,10 +144,57 @@
           </ul>
         </div>
     </nav>
-
-    <div id="searchContainer" class="d-flex justify-content-center md-form px-3 m-auto" style="position: relative; top: 20%; width: 70%;" >
-        <input class="form-control" id="searchButton" type="text" placeholder="Search Bookmarks, Tags and info" aria-label="Search" style="border-radius: 15px; font-size: xx-large;opacity: 0.7;" autocomplete="off">
+    <div id="searchContainer"class="d-flex flex-row" style="position: relative; top: 20%;">
+      <input class="form-control" id="searchButton" type="text" placeholder="Search Bookmarks/Tags/Description" aria-label="Search" style="border-radius: 15px; font-size: xx-large;opacity: 0.7;margin-left: 2%; width: 68%;" autocomplete="off">
+        <button id="dropdownButton" type="button" class="btn dropdown-toggle btn-m mx-3 mt-2 py-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 160px;height: 80%; font-size: x-large;font-weight: 300;">Filter</button>
+        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+          <li><a class="dropdown-item dropdown-sort" href="#" style="width: 160px;" id="Default">Default</a></li>
+          <li><a class="dropdown-item dropdown-sort" href="#" id="Popular">Popular</a></li>
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" >Tags</a>
+            <ul class="dropdown-menu tagMenu" id="tagMenu" style="overflow: auto; height: 300px;">
+            </ul>
+          </li>
+          <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="#" style="z-index: 2;">Folders</a>
+            <ul class="dropdown-menu folderMenu" id="folderMenu" style="overflow: auto; height: 300px;">
+            </ul>
+          </li>
+        </ul>
+        <div class="modal fade" id="newTag" tabindex="-1" role="dialog" aria-labelledby="allTagsModalTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h5 id="modalTagTitle" class="modal-title">Add new tag</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body" id="modal-tag-information">
+                    <input type="text" class="form-control" id="newTagName" placeholder="Tag name" autocomplete="off">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary" id="saveTagChangesModal" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+          </div>
+        </div>
     </div>
+    <div class="modal fade" id="errorMessage" tabindex="-1" role="dialog" aria-labelledby="messages" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+              <h5 id="errorTitle" class="modal-title">Error</h5>
+            </div>
+            <div class="modal-body" id="modal-tag-information">
+                <div id="errorBody"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+      </div>
+    </div>
+    
     <div id="bookmarks" style="position: relative; top: 35%; margin-left: 2%; overflow-x: hidden;">
 
     </div>

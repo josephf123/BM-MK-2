@@ -2,9 +2,11 @@ var result;
 var count = 0;
 var objectValue;
 var colours = ["#ED6A5A", "#F4F1BB", "#9BC1BC", "#2CC1CC", "#E6EBE0", "#4C56DB", "#916482"]
+var colour1 = "#AED4E6"
 var alph = "abcdefghijklmnopqrstuvwxyz".split("")
+
 document.addEventListener("DOMContentLoaded", async() => {
-    await search
+    result = await search
     await title()
     let width = await findColNum()
     await grid2(result, width)
@@ -13,9 +15,8 @@ document.addEventListener("DOMContentLoaded", async() => {
 var search = new Promise(function (resolve, reject) {
     chrome.bookmarks.getTree(function (data) {
         if (data) {
-            result = data[0].children[0].children;
-            resolve(data)
-            //console.log(data)
+            thingo = data[0].children[0].children;
+            resolve(thingo)
         }
     })
 })
@@ -29,32 +30,36 @@ async function findColNum(){
 
 async function grid2(result, x){
     let isBookmarkNext = true;
+    let isFolderBehind = true
     let data = result
     async function betterGrid(data, isBookmarkNext){
         for(var i=0; i < data.length; i++){
             if(data[i].children){
-                console.log(data[i])
                 await gridFolder(data[i], x)
                 let isBookmarkNext = true;
                 let checkDataIncep = data[i]
-                console.log(data[i+1])
                 if (checkIncep(data[i], result) >= 1){
                     while (checkIncep(checkDataIncep, result) >= 1) {
                         checkDataIncep = findIt(result, data[i].parentId)
                     }
                 }
                 let place = findIndex(checkDataIncep, result)
-                console.log(result[place+1])
+                if (result[place-1].children){
+                    isFolderBehind = false
+                }
                 if (result[place+1].children){
                     isBookmarkNext = false
                 }
                 await betterGrid(data[i].children, isBookmarkNext)
             }
             else{
-                console.log(data[i])
                 if (checkIncep(data[i], result) >= 1 && i == (data.length - 1) && isBookmarkNext){
                     await gridBookmark(data[i], x, "last")
                 }
+                else if (checkIncep(data[i], result) >= 1 && i == (data.length - 1) && isFolderBehind){
+                    await gridBookmark(data[i], x, "folderNext")
+                }
+                
                 else{
                     await gridBookmark(data[i], x)
                 }
@@ -74,8 +79,6 @@ function checkIncep(object, data){
 
 function checkInception(object, data, value){
     total = value + 1
-    console.log(total)
-    console.log(object)
     if (object.parentId != 1){
         checkInception(findIt(data, object.parentId), data, total)
     }
@@ -98,14 +101,17 @@ async function gridBookmark(bookmark, x, position){
     let styleVariable = "";
     if (incep >= 1){
         styleVariable = "border-left: 1px solid;"
-        if (position == "last"){
+        if (position == "folderNext"){
+            styleVariable += "margin-top:-1px;"
+        }
+        else if (position == "last"){
             styleVariable += "border-bottom: 1px solid;"
         }
     }
 
-    let backgroundColour = "#778899"
+    let backgroundColour = colour1
     if (incep >= 1){
-        backgroundColour = "#5a6977"
+        backgroundColour = pSBC(incep * -0.2, colour1)
     }
     let globOnline = true;
     let bookmarkTag = await stored(String(bookmark.id))
@@ -135,7 +141,7 @@ async function gridBookmark(bookmark, x, position){
     $(rowDiv).hover(function () {
         $(div).css("background-color", "#4285F4")
         }, function () {
-            $(div).css("background-color", "#778899")
+            $(div).css("background-color", colour1)
         })
     a.appendTo(div)
     div.appendTo(rowDiv)
@@ -170,26 +176,31 @@ async function gridBookmark(bookmark, x, position){
         })
         $div.appendTo(rowDiv)
         //First check if it has any tag at all bcz most of them won't
-        simpleHover($div, online, colours[i], backgroundColour )
+        if (online){
+            simpleHover($div, online, colours[i], pSBC((incep) * 0.2, colour1))
+        }
+        else{
+            simpleHover($div, online, colours[i], pSBC((incep) * -0.2, colour1))
+        }
     }
     rowDiv.appendTo("#grid")
 
 }
 
-async function gridFolder(folder, x){
-    let globOnline;
-    let folderTag = await stored(String(folder.id))
+async function gridFolder(object, x){
+    let globOnline = true;
+    let folderTag = await stored(String(object.id))
     if (folderTag == undefined){
         globOnline = false
     }
-    let rowDiv = $("<div>", {"class":"row d-flex", id: "r" + String(folder.id)})
+    let rowDiv = $("<div>", {"class":"row d-flex", id: "r" + String(object.id)})
     let div = $("<div>", {
         "class": "p-1 col-5",
-        "id": "@" + String(folder.id),
+        "id": "@" + String(object.id),
         "style": "border-top: 1px solid;border-left: 1px solid;border-bottom: 1px solid;"
     })
     let p = $("<p>", {
-        "text": folder.title,
+        "text": object.title,
         "class": "agrid",
         "style": "flex: 1; display: flex"
     })
@@ -197,7 +208,7 @@ async function gridFolder(folder, x){
     $(rowDiv).hover(function () {
         $(div).css("background-color", "#2BBBAD")
         }, function () {
-            $(div).css("background-color", "#778899")
+            $(div).css("background-color", colour1)
         }
     )
     p.appendTo(div)
@@ -210,7 +221,7 @@ async function gridFolder(folder, x){
         else{
             online = await checkIfTagged(folderTag, i)
         }
-        let identification = String(alph[i]) + String(folder.id)
+        let identification = String(alph[i]) + String(object.id)
         let styleAttribute = "border-bottom: 1px solid; "
         if (i%2==0){
             styleAttribute += "border-left: 1px solid;border-right: 1px solid;"
@@ -220,25 +231,29 @@ async function gridFolder(folder, x){
             let type = identification.charAt(0)
             let id = identification.slice(1)
             let folderTag = await stored(String(id))
-            console.log(folderTag)
             let alreadyThere = await checkIfAlready(folderTag, type)
-            console.log(alreadyThere)
             if (alreadyThere){
-                console.log("removing")
                 await removeStorage($div, id, type)
+                await removeStorageFolder($div, id, type, object.children)
             }
             else{
                 await setStorage($div, id, type)
+                await setStorageFolder($div, id, type, object.children)
             }
             
         })
         $div.appendTo(rowDiv)
         //First check if it has any tag at all bcz most of them won't
-        simpleHover($div, online, colours[i], "#5a6977")
+        let incep = checkIncep(object,result)
+        if (online){
+            simpleHover($div, online, colours[i], pSBC((incep + 1) * 0.2, colour1))
+        }
+        else{
+            simpleHover($div, online, colours[i], pSBC((incep + 1) * -0.2, colour1))
+        }
     }
     rowDiv.appendTo("#grid")
 }
-
 
 
 async function title(){
@@ -253,7 +268,7 @@ async function title(){
     fragment.appendChild(titleRow)
     let titleTitle = document.createElement("div")
     titleTitle.className = "col-5 p-1"
-    titleTitle.style = "border-style:solid none solid solid; border-width: 1px; background-color: #778899;"
+    titleTitle.style = "border-style:solid none solid solid; border-width: 1px; background-color: #AED4E6;"
     titleTitle.innerHTML = "Bookmark Title"
     titleRow.appendChild(titleTitle)
     for(var i=0; i < colNames.length; i++){
@@ -321,6 +336,35 @@ async function checkIfTagged(fold, index){
     }
 }
 
+//Need to fix nested hover (not the folder's folder but the folder's folder's bookmarks )
+async function setStorageFolder(element, id, type, data){
+    for(var i=0; i < data.length; i++){
+        let bookmarkId = data[i].id
+        let element = $("#" + type + bookmarkId)
+        console.log()
+        await setStorage(element, bookmarkId, type)
+        if (data[i].children){
+            await setStorageFolder(element, id, type, data[i].children)
+        }
+    }
+}
+
+async function removeStorageFolder(element, id, type, data){
+    console.log("ooga boogs")
+    for(var i=0; i < data.length; i++){
+        let bookmarkId = data[i].id
+        let element = $("#" + type + bookmarkId)
+        console.log()
+        await removeStorage(element, bookmarkId, type)
+        if (data[i].children){
+            await removeStorageFolder(element, id, type, data[i].children)
+        }
+    }
+}
+
+
+
+
 async function setStorage(element, id, type){
     let index = typeToIndex(type)
     let tags = await stored("tags")
@@ -335,26 +379,28 @@ async function setStorage(element, id, type){
         
     }
     let prev = await stored(id)
+    console.log(prev)
     if(prev && prev != ","){
         newTag = prev + tags[tagIndex] + "," 
     }
     else {
         newTag = tags[tagIndex] + ","
     }
-    await makeStorage(id, newTag)
+    if (prev == undefined || !(prev.includes(tags[tagIndex]))){
+            await makeStorage(id, newTag)
+    }
     element.css("background-color", colours[index])
-    element.on("mouseout", function(){
-        let id = element[0].id.slice(1)
-        let object = findIt(result, id)
-        if (checkIncep(object, result) >= 1){
-            simpleHover(element, true, colours[i], "#5a6977")
-        }
-        else{
-            simpleHover(element, true, colours[i], "#778899")
-        }
-    })
+    let newID = element[0].id.slice(1)
+    let object = findIt(result, newID)
+    let score = checkScore(object)
+    let background = pSBC((score + 2) * 0.2, colour1)
+    simpleHover(element, true, colours[tagIndex], background)
+
     
 }
+
+
+
 
 var makeStorage = function (id, text){
     return new Promise(function (resolve, reject){
@@ -384,14 +430,21 @@ async function removeStorage(element, id, type){
     }
     await makeStorage(id, newTag)
     let object = findIt(result, id)
-    let backgroundCol = "#778899"
-    if (checkIncep(object, result) >= 1){
-        backgroundCol = "#5a6977"
-    }
+    let backgroundCol = colour1
+    let score = checkScore(object)
+    backgroundCol = pSBC(score * -0.2, colour1)
     element.css("background-color", backgroundCol)
-    element.on("mouseout", function(){
-        simpleHover(element, false, colours[index], backgroundCol)
-    })
+    simpleHover(element, false, colours[index], backgroundCol)
+
+
+}
+function checkScore(obj){
+    let inc = checkIncep(obj,result)
+    let chi = 0
+    if (obj.children){
+        chi = 1
+    }
+    return (inc + chi)
 
 }
 
@@ -468,4 +521,29 @@ function findIt(data, objectId) {
     if (objectValue) {
         return objectValue
     }
+}
+
+let pSBC=(p,c0,c1,l)=>{
+	let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";
+	if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;
+	if(!this.pSBCr)this.pSBCr=(d)=>{
+		let n=d.length,x={};
+		if(n>9){
+			[r,g,b,a]=d=d.split(","),n=d.length;
+			if(n<3||n>4)return null;
+			x.r=i(r[3]=="a"?r.slice(5):r.slice(4)),x.g=i(g),x.b=i(b),x.a=a?parseFloat(a):-1
+		}else{
+			if(n==8||n==6||n<4)return null;
+			if(n<6)d="#"+d[1]+d[1]+d[2]+d[2]+d[3]+d[3]+(n>4?d[4]+d[4]:"");
+			d=i(d.slice(1),16);
+			if(n==9||n==5)x.r=d>>24&255,x.g=d>>16&255,x.b=d>>8&255,x.a=m((d&255)/0.255)/1000;
+			else x.r=d>>16,x.g=d>>8&255,x.b=d&255,x.a=-1
+		}return x};
+	h=c0.length>9,h=a?c1.length>9?true:c1=="c"?!h:false:h,f=this.pSBCr(c0),P=p<0,t=c1&&c1!="c"?this.pSBCr(c1):P?{r:0,g:0,b:0,a:-1}:{r:255,g:255,b:255,a:-1},p=P?p*-1:p,P=1-p;
+	if(!f||!t)return null;
+	if(l)r=m(P*f.r+p*t.r),g=m(P*f.g+p*t.g),b=m(P*f.b+p*t.b);
+	else r=m((P*f.r**2+p*t.r**2)**0.5),g=m((P*f.g**2+p*t.g**2)**0.5),b=m((P*f.b**2+p*t.b**2)**0.5);
+	a=f.a,t=t.a,f=a>=0||t>=0,a=f?a<0?t:t<0?a:a*P+t*p:0;
+	if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
+	else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
 }

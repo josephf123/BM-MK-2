@@ -63,6 +63,9 @@ function clearInfo(res){
 function clearTags(res){
     for(var i=0; i < res.length;i++){
         if(res[i].children){
+            chrome.storage.local.remove(res[i].id, function(){
+                console.log("All are cleared!")
+            })
             clearTags(res[i].children)
         }
         else{
