@@ -1,12 +1,12 @@
 {
-  "name": "Bookmark organiser",
-  "version": "1.1",
-  "description": "Organises your bookmarks",
-  "permissions": ["declarativeContent", "storage", "activeTab", "bookmarks", "history"],
+  "name": "BM Bookmark Manager",
+  "version": "2.1.7",
+  "description": "Displays and organises your bookmarks",
+  "permissions": ["storage", "bookmarks", "history"],
   "icons": {
-    "16": "images/bookmark-icon-16.png",
-    "48": "images/bookmark-icon-48.png",
-    "128": "images/bookmark-icon-128.png"
+    "16": "images/BM squish.png",
+    "48": "images/BM squish@4x.png",
+    "128": "images/BM squish@8x.png"
   },
   "chrome_url_overrides" : {
     "newtab" : "newTab.html"
@@ -16,7 +16,10 @@
     "scripts": ["main.js"],
     "persistent": false
   },
+  "browser_action": {
+    "default_icon": "images/BM squish@8x.png"
+  },
   "content_security_policy":
-  "script-src 'self' https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js https://fonts.googleapis.com;  object-src 'self'",
+  "script-src 'self' https://www.google-analytics.com https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js https://fonts.googleapis.com;  object-src 'self'",
   "manifest_version": 2
 }

@@ -1,4 +1,12 @@
-
+var stored = function (id){
+    return new Promise(function (resolve, reject){
+        chrome.storage.local.get([id], function (res) {
+            resolve(res[id])
+    
+        })
+    })
+}
+// Line 1061
 const pSBC=(p,c0,c1,l)=>{
 	let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";
 	if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;
@@ -25,89 +33,183 @@ const pSBC=(p,c0,c1,l)=>{
 }
 let data, popularList, textColour, avgCol, imgUrl, img, bookmarkColourList;
 
+let currentState = "popular"
 
-let maxPerPage = 0
+let hasBeenClicked = false
+
+let maxPerPage = 0;
 
 
 
-async function findImgUrl(){
-    imgUrl = await getURL()
-    await imageLoad(imgUrl)
-    // console.log(imgUrl)
-    // img.crossOrigin = '';
-    // img.src = imgUrl    
-    let rgbCol = getAverageRGB(img)
-    avgCol = rgbToHex(rgbCol["r"], rgbCol["g"], rgbCol["b"])
-    console.log(avgCol)
-    console.log("dfsf")
-    let invertedRGB = invertColour(rgbCol["r"], rgbCol["g"], rgbCol["b"])
-    hexCol = rgbToHex(invertedRGB["r"], invertedRGB["g"], invertedRGB["b"])
-    console.log("this")
+// chrome.browserAction.onClicked.addListener(function(){
+//     console.log("hiya")
+//     chrome.tabs.create({'url': chrome.extension.getURL('newTab.html')}, function(tab) {
+//         // Tab opened.
+//     });
+// })
+
+// async function findImgUrl(){
+//     imgUrl = await getURL()
+//     await imageLoad(imgUrl)
+//     // console.log(imgUrl)
+//     // img.crossOrigin = '';
+//     // img.src = imgUrl    
+//     let rgbCol = getAverageRGB(img)
+//     avgCol = rgbToHex(rgbCol["r"], rgbCol["g"], rgbCol["b"])
+//     console.log(avgCol)
+//     console.log("dfsf")
+//     let invertedRGB = invertColour(rgbCol["r"], rgbCol["g"], rgbCol["b"])
+//     hexCol = rgbToHex(invertedRGB["r"], invertedRGB["g"], invertedRGB["b"])
+//     console.log("this")
     
-}
+// }
 
-function imageLoad(src){
-    return new Promise((resolve,reject) =>{
-        img = new Image();
-        img.onload = () => resolve(img)
-        img.src = imgUrl
-        img.crossOrigin = '';
-    })
+// function imageLoad(src){
+//     return new Promise((resolve,reject) =>{
+//         img = new Image();
+//         img.onload = () => resolve(img)
+//         img.src = imgUrl
+//         img.crossOrigin = '';
+//     })
 
-}
+// }
 
-async function getURL(){
-    let data = await fetch("https://api.unsplash.com/photos/random?count=1&collections=155105&client_id=a4cc58d9f413a6bf9645e3b03cfb04c23ee7e3bfb2d86b72ada163eef96ecc15")
-    let source = await data.json()
-    source = source[0]["urls"]["regular"]
-    return source
-}
+// async function getURL(){
+//     let data = await fetch("https://api.unsplash.com/photos/random?count=1&collections=155105&client_id=a4cc58d9f413a6bf9645e3b03cfb04c23ee7e3bfb2d86b72ada163eef96ecc15")
+//     let source = await data.json()
+//     source = source[0]["urls"]["regular"]
+//     return source
+// }
 
 let randomColours = ["D17A22","095256","BC5D2E","FF7733","F7B538","17BEBB","61CC3D","59CD90","067BC2","E1612A","F25F5C",
                     "247BA0","446E80","D62828","F77F00","FCBF49","FDC6B5","fbca9a","5158BB","2E86AB","A23B72","F18F01",
                     "C73E1D","2274A5","32936F","95D9C3","388697", "685470", "B1DDCA", "A9B3CE", "C0596E", "4E6474"]
 
 
+//Change main colour
+//114B5F-03A0B5
 chrome.runtime.onInstalled.addListener(async function() {
+    console.log("Hoowee")
     await makeStorage("tags", "Work,Entertainment,For Later,")
-    await makeStorage("colour", "2BBBAD")
-})
+    //For now just make it so it is only colours but later I will add photos
+    await makeStorage("colConfig", "s")
+    // This will be colour order, either col-col, col-random, random-col or random-random
+    await makeStorage("colourOrder", "114B5F-03A0B5")
+    
+    await makeStorage("colourCollection", "114B5F-03A0B5")
+    // When the home button is pressed, will it go to default of popular
+    await makeStorage("home", "popular")
+    // When the application loads, either the default or popular shows up
+    await makeStorage("onLoad", "popular")
+});
+
+async function sendPageAndColour(){
+    let colCol = await stored("colourCollection")
+    console.log(colCol)
+    ga('set', 'dimension1', colCol);
+
+    //ga('set', 'dimension2', userID)
+    
+    ga('send', 'event', 'colour scheme', colCol, "For colours");
+
+    ga('send', 'pageview', location.pathname)
+}
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga'); // Note: https protocol here
+    
+    ga('create', 'UA-175257786-1', 'auto');
+    
+    ga('set', 'checkProtocolTask', function(){}); // Removes failing protocol check. @see: http://stackoverflow.com/a/22152353/1958200
+    
+    ga('require', 'displayfeatures');
+
+    sendPageAndColour()
+    
+
+    // ga(function(tracker) {
+    //     // Logs the trackers name.
+    //     // (Note: default trackers are given the name "t0")
+    //     console.warn(tracker)
+    //     console.warn(tracker.get('name'));
+      
+    //     // Logs the client ID for the current user.
+    //     console.warn(tracker.get('clientId'));
+      
+    //     // Logs the URL of the referring site (if available).
+    //     console.warn(tracker.get('storedClientId'));
+    // });
+    //For the colour that the user uses
+    
+    
+
 let randomNum1 = Math.round(Math.random() * (randomColours.length - 1))
-let hexCol = randomColours[randomNum1]
+//let hexCol = "247BA0"
+//"AB4E68"
 // randomColours[randomNum1]
 
 document.addEventListener("DOMContentLoaded", async() => {
-    let rgbofHex = hexToRgb(hexCol)
-    let inverted = invertColour(rgbofHex["r"], rgbofHex["g"], rgbofHex["b"])
-    let invert = rgbToHex(inverted["r"], inverted["g"], inverted["b"])
-    console.log(hexCol)
-    console.log(invert)
-    if (Math.random() > 0.5){
-        let temp = hexCol
-        hexCol = invert
-        invert = temp
+    data = await search
+    console.log("testing")
+    // let rgbofHex = hexToRgb(hexCol)
+    // let inverted = invertColour(rgbofHex["r"], rgbofHex["g"], rgbofHex["b"])
+    //let invert = rgbToHex(inverted["r"], inverted["g"], inverted["b"])
+    let colConfig = await stored("colConfig")
+    let dataColours;
+    if (colConfig == "s"){
+        dataColours = await stored("colourOrder")
     }
+    else if (colConfig == "r"){
+        let arr = await stored("colourCollection")
+        let randIndex = Math.round(Math.random() * arr.length)
+        console.log(arr.length, randIndex, "h")
+        if (randIndex > (arr.length - 1)){
+            randIndex = arr.length - 1
+        }
+        dataColours = arr[randIndex]
+    }
+    let backgroundColour = dataColours.slice(0,6)
+    let hexCol = dataColours.slice(7)
+    avgCol = backgroundColour
+    // let invert = "93C0A4"
+    console.log(hexCol)
+    console.log(backgroundColour)
+    // if (Math.random() > 0.5){
+    //     let temp = hexCol
+    //     hexCol = invert
+    //     invert = temp
+    // }
     console.log(avgCol)
-    avgCol = invert
     //avgCol = pSBC(-0.7, "#" + invert)
     //avgCol = avgCol.slice(1)
-    $("#bod").css("background-color", invert)
+    $("#bod").css("background-color", backgroundColour)
     //await findImgUrl()
     let hexCol1 = "#" + hexCol
-    let hexCol2 = pSBC(-0.4, hexCol1)
+    let hexCol2 = pSBC(-0.2, hexCol1)
     console.log(hexCol1)
-    let hexCol3 = pSBC(-0.8, hexCol1)
-    bookmarkColourList = [hexCol1, hexCol2 , hexCol3 ]
+    let hexCol3 = pSBC(-0.4, hexCol1)
+    let hexCol4 = pSBC(-0.6, hexCol1)
+    let hexCol5 = pSBC(-0.7, hexCol1)
+    let hexCol6 = pSBC(-0.75, hexCol1)
+    bookmarkColourList = [hexCol1, hexCol2 , hexCol3, hexCol4, hexCol5, hexCol6]
     textColour = pickBlackOrWhite(bookmarkColourList[0])
-    data = await search
-    let backImg = "url(" + imgUrl + ")"
-    $("#bod").css("background-image", backImg)
+    
+    // let backImg = "url(" + imgUrl + ")"
+    // $("#bod").css("background-image", backImg)
     console.log("testing")
     console.log(data)
-    renderPop(data)
+    await onLoadApp()
     console.log("testt")
     await renderTags()
     onSearchBarFocus()
+    $(".icon").on("hover", function () {
+        console.log("testing")
+    })
     $("#tagPage").on("click", function (){
         window.location.href = "tagManage.html"
     })
@@ -118,20 +220,365 @@ document.addEventListener("DOMContentLoaded", async() => {
         console.log(this.id)
         displayWithTag(this.id)
     })
-    $("#bookmarks").on("mouseover", function (){
-        $(this).css("opacity", 1)
+    $("#searchButton").on("keyup", function (e){
+        console.log(e.target.value)
+        searchFunction(e.target.value)
     })
     sortBookmarks()
     await renderFolders()
+    $(".dropdown-item-folder").on("click", function (){
+        displayWithFolder(this.id)
+    })
+    $("#saveChangesInfoModal").on("click", function(){
+        let textModal = $("textarea")[0].value
+        let id = $("textarea")[0].id.substring(1)
+        console.log(textModal)
+        console.log(id)
+        saveChangesModal(id,textModal)
 
+    })
+    $("#dropdownFolder").on("click", function(){
+        let array = []
+        findAllFolders(data, array)
+        $("#bookmarks").empty()
+        onFocusOrFilter()
+        for(var i=0; i < array.length; i++){
+            printFolder(array[i])
+            onClickOpen(array[i])
+        }
+    })
+    $("#dropdownTag").on("click", async function(){
+        let tags = await stored("tags")
+        let tagArray = tags.split(",")
+        tagArray.pop()
+        $("#bookmarks").empty()
+        onFocusOrFilter()
+        for(var i=0; i < tagArray.length; i++){
+            console.log(tagArray[i])
+            let array = []
+            await find(data, tagArray[i], array)
+            let folderStructure = {
+                "id": "Tag" + i,
+                "children": array,
+                "title": tagArray[i],
+                "parentId": 0
+            }
+            printFolder(folderStructure, true)
+            console.log("heyo")
+            onClickOpen(folderStructure)
+        }
+       
+    })
+    $("#homeButton").on("click", async function(){
+        let currentHomeState = await stored("home")
+        $("#bookmarks").empty()
+        onFocusOrFilter()
+        if (currentHomeState == "default"){
+            for(var i=0; i < data.length; i++){
+                if (data[i].children){  
+                    printFolder(data[i])
+                    
+                }
+                else if (!data[i].children){
+                    printBookmark(data[i])
+                }
+            }
+            initializeFolderOpen()
+        }
+        else if (currentHomeState == "popular"){
+            for(var i=0; i < popularList.length;i++){
+                let object = findIt(data, popularList[i])
+                printBookmark(object)
+            }
+        }
+        
+        
+    })
+    $("#homeButton").hover(function(){
+        $(this).css("color", "white")
+        $(this).css("cursor", "pointer")
+    }, function(){
+        $(this).css("color", "black")
+    })
+
+    
 })
+//For the bookmarks so when you hover over them they go transparent
+function buttonHovering(array, colour, exclusive){
+    for(let i=0; i < array.length;i++){
+        console.log(colour)
+        $(array[i]).css("border", "1px solid " + colour)
+        if (arguments.length == 3 && arguments[2] == true){
+            $(array[i]).addClass("focused")
+            changeFocus(array[i], colour)
+        }
+        else {
+            changeFocus(array[i], colour)
+            $(array[i]).on("click", function(){
+                for(var k=0; k < array.length;k++){
+                    if (k == i){
+                        $(array[k]).addClass("focused")
+                    }
+                    else{
+                        $(array[k]).removeClass("focused")
+                    }
+                }
+                for(var j=0; j < array.length; j++){
+                    changeFocus(array[j], colour)
+                }
+            })
+        }
+        
+    }
+
+}
+
+function findAllFolders(d, array){
+    for(var i=0; i < d.length; i++){
+        if (d[i].children){
+            array.push(d[i])
+        }
+    }
+}
+
+
+async function saveChangesModal(id, text){
+    let key = "i" + id
+    await makeStorage(key, text)
+}
+
+async function displayIconModal(id){
+    let object = findIt(data, id)
+    let tags = await stored(id)
+    if (tags != undefined){
+        tags = tags.split(",")
+        tags.pop()
+    }
+    else{
+        tags = ["none"]
+    }
+    console.log(tags)
+    $("#infoModal").empty()
+    let row = $("<div class='row margin py-2' style='margin-left: 0px'></div>")
+    let urlTitle = $("<div>URL:</div>")
+    let url = $("<a>",{
+        href: object.url,
+        text: object.url,
+        class: "ml-2"
+    })
+    urlTitle.appendTo(row)
+    url.appendTo(row)
+    $("#infoTitle").text(object.title)
+    $("#infoModal").append(row)
+    let tagParagraph = $("<p class='margin' style='margin-bottom:0px'>Tags:</p>")
+    let ul = $("<ul class='margin' style='margin-bottom:-10px'>")
+    for(var i=0;i < tags.length; i++){
+        let tag = $("<li>", {
+            text: tags[i],
+            class: "margin"
+        })
+        tag.appendTo(ul)
+    }
+    let addTags = $("<div class='btn btn-primary d-flex mt-3'>Add tags </div>")
+    let infoTitle = $("<p class='margin d-inline-flex pt-3'>Info:</p>")
+    let infoSubscript = $("<p class='margin d-inline-flex pt-3' style='float:right; color: #A9A9A9'>max chars: 200</p>")
+    let textInformation = await stored("i" + id)
+    if (textInformation == undefined){
+        textInformation = ""
+    }
+    let textbox = $("<textarea>", {
+        row: "5",
+        style: "margin-left: 45px; width:405px;", 
+        text: textInformation, maxlength: "200", 
+        class : "form-control",
+        id: "m" + id
+    })
+    if (object.children){
+        var openChildrenDiv = $("<div>", {
+            id: "this",
+            class: "btn btn-success mx-2 my-3",
+            text: "Open all bookmarks inside the folder"
+    
+        })
+    }
+    
+    $("#infoModal").append(tagParagraph)
+    $("#infoModal").append(ul)
+    $("#infoModal").append(addTags)
+    $("#infoModal").append(infoTitle)
+    $("#infoModal").append(infoSubscript)
+    $("#infoModal").append(textbox)
+    if (object.children){
+        $("#infoModal").append(openChildrenDiv)
+    }
+    $("#informationModal").modal('show')
+}
+
+
+async function searchFunction(searchWord){
+    console.log(currentState)
+    let searchW = searchWord.toUpperCase()
+    console.log(searchW)
+
+    let displayedBookmarks = false;
+    console.log(currentState.slice(0,2))
+    if (currentState.slice(0,2) == "T+"){
+        let tagName = currentState.slice(2)
+        let array = []
+        await find(data, tagName, array)
+        if (array.length > 0){
+            displayedBookmarks = array
+        }
+        i
+    }
+    else if (currentState.slice(0,2) == "F+"){
+        console.log("wasa")
+        let folderId = currentState.slice(2)
+        let object = findIt(data, folderId)
+        console.log(object)
+        if (object.children.length > 0){
+            displayedBookmarks = object.children
+        }
+        
+    }
+    else if (currentState == "popular"){
+        let array = []
+        for(var i=0; i < popularList.length;i++){
+            let object = findIt(data, popularList[i])
+            array.push(object)
+        }
+        console.log(array)
+        displayedBookmarks = array
+    }
+    else if (currentState == "default"){
+        displayedBookmarks = data
+    }
+    // let allBookmarks = $("#bookmarks").children()
+    // console.log(allBookmarks)
+    let searchArray = []
+    if (displayedBookmarks != false){
+        console.log(displayedBookmarks)
+        await insideSearch(searchW, displayedBookmarks, searchArray)
+    }
+    console.log(searchArray)
+    let all = $("#bookmarks").children()
+    for(var i=0; i < all.length; i++){
+        all[i].remove()
+    }
+    for (var i=0; i < searchArray.length; i++){
+        console.log(searchArray[i])
+        if (searchArray[i].children){
+            printFolder(searchArray[i])
+            onClickOpen(searchArray[i])
+        }
+        else{
+            printBookmark(searchArray[i])
+        }
+    }
+}
+
+async function insideSearch(searchWord, listBookmark, searchArray){
+    for (var i=0; i < listBookmark.length; i++){
+        let id;
+        (listBookmark[i].id.startsWith("a")) ?  id = listBookmark[i].id.slice(1) : id = listBookmark[i].id
+        console.log(id)
+        let object = findIt(data, id)
+        if (object.children){
+            let infoData = await stored("i" + object.id)
+            console.log(infoData)
+            if (infoData == undefined){
+                infoData = ""
+            }
+            let allData = (object.title + infoData).toUpperCase()
+            if (allData.includes(searchWord)){
+                searchArray.push(object)
+            }
+            await insideSearch(searchWord, listBookmark[i].children, searchArray)
+        }
+        else{
+            let infoData = await stored("i" + object.id)
+            console.log(infoData)
+
+            if (infoData == undefined){
+                infoData = ""
+            }
+            let allData = (object.url + object.title + infoData).toUpperCase() 
+            if (allData.includes(searchWord)){
+                searchArray.push(object)
+            }
+        }
+
+    }
+}
+
+
+function displayWithFolder(folderName){
+    let folderId = folderName.slice(1)
+    let object = findIt(data, folderId)
+    let objectChildren = object.children
+    if (objectChildren.length > 0){
+        currentState = "F+" + folderName
+        hasBeenClicked = true
+        onFocusOrFilter()
+        $("#bookmarks").empty()
+        for (var i=0; i < objectChildren.length; i++){
+            if (objectChildren[i].children){
+                printFolder(objectChildren[i])
+                onClickOpen(objectChildren[i])
+            }
+            else{
+                printBookmark(objectChildren[i])
+            }
+        }
+    }
+    else {
+        $("#errorMessage").modal("show")
+        let string = 'Sorry, there are no bookmarks that are in folder "' + object.title + '"'
+        $("#errorBody").text(string)
+    }
+    
+
+
+}
+
+
+async function find(data, tagName, array){
+    for(var i=0; i< data.length;i++){
+        if (await checkIfTag(data[i], tagName)){
+            console.log("123")
+            array.push(data[i])
+        }
+    }
+}
+
+async function displayWithTag(tagName){
+    let array = []
+    await find(data, tagName, array)
+    if (array.length != 0){
+        currentState = "T+" + tagName
+        hasBeenClicked = true
+        onFocusOrFilter()
+        $("#bookmarks").empty()
+        for(var i=0; i < array.length; i++){
+            console.log("###################")
+            console.log(array)
+            if (array[i].children){
+                printFolder(array[i])
+                onClickOpen(array[i])
+            }
+            printBookmark(array[i])
+        }
+    }
+    else{
+        $("#errorMessage").modal("show")
+        let string = 'Sorry, there are no bookmarks that are under the tag "' + tagName + '"'
+        $("#errorBody").text(string)
+    }
+    console.log(array)
+}
 
 async function renderFolders(){
-    let newlyPressed = false
     if (arguments.length == 1){
-        newlyPressed = true
-    }
-    if (newlyPressed){
         console.log("This is running")
         let final = await stored("newFolder")
         let title = final.title
@@ -167,21 +614,22 @@ async function renderFolders(){
             })
             $("#folderMenu").append(drop)
         }
-        console.warn($folder)
         console.log(isNew)
         let check = await stored("newFolder")
         console.log(check)
         console.log("WWWOAWEOWAEAWE")
-        for(var j=0; j < $folder.length; j++){
-            let folderId = $folder[j].id.slice(1)
-            console.log("this is folder id")
-            console.log(folderId)
-            if (check.id == folderId){
-                isNew = true
-                console.log("WWWOAWEOWAEAWE")
+        if (check != undefined){
+            for(var j=0; j < $folder.length; j++){
+                let folderId = $folder[j].id.slice(1)
+                console.log("this is folder id")
+                console.log(folderId)
+                if (check.id == folderId){
+                    isNew = true
+                    console.log("WWWOAWEOWAEAWE")
+                }
             }
         }
-        if (!isNew){
+        if (!isNew && check != undefined){
             let final = await stored("newFolder")
             let title = final.title
             if (title.length >= 15){
@@ -339,7 +787,9 @@ async function renderTags(){
         console.log(this.id)
         displayWithTag(this.id)
     })
-
+    if (tags.length > 6){
+        $("#tagMenu").css("height", "300px")
+    }
     console.log(tags)
 }
 
@@ -347,7 +797,7 @@ async function renderTags(){
 function initializeFolderOpen(){
     $(".folder").each( function () {
         console.log("fdsfd")
-        let object = findIt(result, this.id)
+        let object = findIt(data, this.id)
         onClickOpen(object)
 
     })
@@ -355,6 +805,7 @@ function initializeFolderOpen(){
 
 function onClickOpen(object) {
     let buttonId = "#" + String(object.id)
+    console.log(buttonId)
     $(buttonId).on("click", function () {
         if (!$(buttonId).hasClass("open")) {
             for (var i = object.children.length - 1; i >= 0; i--) {
@@ -366,7 +817,7 @@ function onClickOpen(object) {
                     console.log("wh")
                     console.log(object.children[i])
                     printFolder(object.children[i], object.id)
-                    onClickOpen(findIt(result, object.children[i].id))
+                    onClickOpen(findIt(data, object.children[i].id))
                 }
             }
             $(buttonId).addClass("open")
@@ -407,13 +858,16 @@ function clickClose(obj) {
 
 function sortBookmarks(){
     let first = true
-    let currentState = $("#dropdownButton").text()
-    $(".dropdown-sort").on("click", function() {
+    let curState = $("#dropdownButton").text()
+    $(".dropdown-sort").on("click", async function() {
         onFocusOrFilter()
         let changeState = this.innerHTML
-        if (first || currentState != changeState){
+        console.log(changeState)
+        if (first || curState != changeState){
             first = false
             if (changeState == "Default"){
+                currentState = "default"
+                hasBeenClicked = true
                 $("#bookmarks").empty()
                 for(var i=0; i < data.length; i++){
                     if (data[i].children){  
@@ -428,10 +882,31 @@ function sortBookmarks(){
 
             }
             else if (changeState == "Popular"){
+                currentState = "popular"
+                hasBeenClicked = true
+                $("#bookmarks").empty()
                 for(var i=0; i < popularList.length;i++){
                     let object = findIt(data, popularList[i])
                     printBookmark(object)
                 }
+            }
+            else if (changeState == "Newest first"){
+                currentState = "Newest first"
+                hasBeenClicked = true
+                $("#bookmarks").empty()
+                for(var i=data.length -1; i >= 0; i--){
+                    if (data[i].children){  
+                        printFolder(data[i])
+                        
+                    }
+                    else if (!data[i].children){
+                        printBookmark(data[i])
+                    }
+                }
+                initializeFolderOpen()
+            }
+            else{
+                console.log("nope")
             }
         }
         
@@ -442,29 +917,7 @@ function sortBookmarks(){
 
 async function displayWithTag(tagName){
     let array = []
-    async function find(data){
-        for(var i=0; i< data.length;i++){
-            if (await checkIfTag(data[i], tagName)){
-                console.log("123")
-                array.push(data[i])
-            }
-
-            // if (data[i].children){
-            //     if (await checkIfTag(data[i], tagName)){
-            //         console.log("123")
-            //         array.push(data[i])
-            //     }
-            //     find(data[i].children)
-            // }
-            // else{
-            //     if (await checkIfTag(data[i], tagName)){
-            //         console.log("123")
-            //         array.push(data[i])
-            //     }
-            // }
-        }
-    }
-    await find(data)
+    await find(data, tagName, array)
     if (array.length != 0){
         onFocusOrFilter()
         $("#bookmarks").empty()
@@ -519,22 +972,28 @@ function pickBlackOrWhite(colour){
     green = parseInt(green, 16)
     let blue = colour.slice(5,7)
     blue = parseInt(blue, 16)
-    if ((red*0.299 + green*0.587 + blue*0.114) > 150){
+    console.log(red*0.299 + green*0.587 + blue*0.114)
+    if ((red*0.299 + green*0.587 + blue*0.114) > 110){
+        
         return false
     }
     return true
 }
 
 function onSearchBarFocus(){
+    
     $("#searchButton").focus(() => {
         onFocusOrFilter()
-        
-
-        let children = maxPerPage
-        for(var i=children; popularList.length > i;i++){
-            let object = findIt(data, popularList[i])
-            printBookmark(object)
+        $("#expandIcon").remove()
+        if (!hasBeenClicked){
+            hasBeenClicked = true
+            let children = maxPerPage
+            for(var i=children; popularList.length > i;i++){
+                let object = findIt(data, popularList[i])
+                printBookmark(object)
+            }
         }
+        
     })
     
     
@@ -554,7 +1013,7 @@ function checkIncep(object, data){
     let value = -1
     function checkInception(object, data, value){
         total = value + 1
-        if (object.parentId != 1){
+        if (object.parentId > 1){
             checkInception(findIt(data, object.parentId), data, total)
         }
         return total
@@ -567,7 +1026,7 @@ function checkIncep(object, data){
 let search = new Promise(function (resolve) {
     chrome.bookmarks.getTree(function (data) {
         if (data) {
-            result = data[0].children[0].children;
+            let result = data[0].children[0].children;
             resolve(result) 
         }
     })
@@ -596,34 +1055,74 @@ var makeStorage = function (id, text){
     })
 }
 
-function findIt(data, objectId) {
-    for (var i = 0; i < data.length; i++) {
-        if (data[i].children) {
-            if (data[i].id == objectId) {
-                objectValue = data[i]
-            }
-            else {
-                findIt(data[i].children, objectId)
-            }
+// function findIt(dataArray, objectId) {
+//     let checking = false
+//     let objectValue;
+//     for (var i = 0; i < dataArray.length; i++) {
+//         if (dataArray[i].children) {
+//             if (dataArray[i].id == objectId) {
+//                 checking = true
+//                 objectValue = dataArray[i]
+//             }
+//             else {
+//                 findIt(dataArray[i].children, objectId)
+//             }
+//         }
+//         else {
+//             if (dataArray[i].id == objectId) {
+//                 checking = true
+//                 objectValue = dataArray[i]
+//             }
+//         }
+//     }
+//     if (checking) {
+//         console.log("this")
+//         return objectValue
+//     }
+// }
+
+
+function innerfindIt(dataArray, objectId) {
+    for (var i = 0; i < dataArray.length; i++){
+        if (dataArray[i].id == objectId) {
+            console.log("Zoo wee mama")
+            let object = dataArray[i]
+            return object
+            
         }
-        else {
-            if (data[i].id == objectId) {
-                objectValue = data[i]
+        else{
+            if (dataArray[i].children) {
+                if (innerfindIt(dataArray[i].children, objectId) != false){
+                    return innerfindIt(dataArray[i].children, objectId)
+                }
+                
+            }
+            else{
+                continue;
             }
         }
     }
-    if (objectValue) {
-        return objectValue
-    }
+    return false
+
 }
+
+function findIt(dataArray, objectId){
+    let found = false
+    let object;
+    return innerfindIt(dataArray, objectId)
+}
+
+
 
 function printFolder(object){
     let fragment = document.createDocumentFragment();
     let folderDiv = document.createElement("div")
     folderDiv.className = "folder btn col-2 m-3 btn-sm"
     folderDiv.id = object.id
-    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; opacity: 0.3; background-color:" + avgCol
-
+    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + avgCol
+    if (arguments.length == 2 && arguments[1] == true){
+        folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%;border-radius: 1.5em; background-color:" + avgCol
+    }
     let bookmarkRowDivision = document.createElement("div")
     bookmarkRowDivision.className = "d-flex flex-row margin"
     bookmarkRowDivision.style = "overflow-wrap: anywhere;"
@@ -638,48 +1137,53 @@ function printFolder(object){
     }
     
     bookmarkText.class = "d-inline-flex"
+    if (arguments.length == 1){
+        console.log("Im a fat phony")
+        var bookmarkIcon = document.createElement("i")
+        bookmarkIcon.innerHTML = "info"
+        $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-1 item-info ml-auto")
+        $(bookmarkIcon).on("click", function (e){
+            event.stopPropagation()
+            displayIconModal(object.id)
     
-
-    let bookmarkIcon = document.createElement("i")
-    bookmarkIcon.innerHTML = "info"
-    $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-1 item-info ml-auto")
-    bookmarkIcon.id = "i" + object.id
-
-    $(bookmarkIcon).hover(function(){
-        $(bookmarkIcon).css("cursor", "pointer")
-        $(bookmarkIcon).css("color", "white")
-        $(bookmarkText).css("color", "black")
-    }, function(){
-        $(bookmarkIcon).css("cursor", "default")
-        $(bookmarkIcon).css("color", "black")
-        $(folderDiv).hover(function () {
-
         })
-    })
-
-    $(folderDiv).mouseenter(function(){
-        if (!$(folderDiv).hasClass("open")){
-            $(folderDiv).css("opacity", 1)
-        }
-        else{
-            $(folderDiv).css("opacity", 0.3)
-        }
-        //$(folderDiv).css("background-color", bookmarkColourList[checkIncep(object, data)])
-        $(bookmarkIcon).mouseenter(function(){
+        $(bookmarkIcon).hover(function(){
             $(bookmarkIcon).css("cursor", "pointer")
             $(bookmarkIcon).css("color", "white")
-        }).mouseleave(function(){
+            $(bookmarkText).css("color", "black")
+        }, function(){
             $(bookmarkIcon).css("cursor", "default")
             $(bookmarkIcon).css("color", "black")
-
+            $(folderDiv).hover(function () {
+    
+            })
         })
-    }).mouseleave(function(){
-        if (!$(folderDiv).hasClass("open")){
-            $(folderDiv).css("opacity", 0.3)
-        }
+        $(folderDiv).mouseenter(function(){
+            if (!$(folderDiv).hasClass("open")){
+                $(folderDiv).css("opacity", 1)
+            }
+            else{
+                $(folderDiv).css("opacity", 0.6)
+            }
+            //$(folderDiv).css("background-color", bookmarkColourList[checkIncep(object, data)])
+            $(bookmarkIcon).mouseenter(function(){
+                $(bookmarkIcon).css("cursor", "pointer")
+                $(bookmarkIcon).css("color", "white")
+            }).mouseleave(function(){
+                $(bookmarkIcon).css("cursor", "default")
+                $(bookmarkIcon).css("color", "black")
+    
+            })
+        }).mouseleave(function(){
+            if (!$(folderDiv).hasClass("open")){
+                $(folderDiv).css("opacity", 0.6)
+            }
+    
+            //$(folderDiv).css("background-color", "white")
+        })
+    }
+    
 
-        //$(folderDiv).css("background-color", "white")
-    })
 
     // $(folderDiv).on("click", function(){
     //     for(var i=0; i < object.children.length; i++){
@@ -697,8 +1201,11 @@ function printFolder(object){
     fragment.appendChild(folderDiv)
     folderDiv.appendChild(bookmarkRowDivision)
     bookmarkRowDivision.appendChild(bookmarkText)
-    bookmarkRowDivision.appendChild(bookmarkIcon)
-    if (arguments.length == 2){
+    if (arguments.length == 1){
+        bookmarkRowDivision.appendChild(bookmarkIcon)
+    }
+    
+    if (arguments.length == 2 && arguments[1] != true){
         document.getElementById(arguments[1]).after(fragment)
     }
     else{
@@ -708,23 +1215,31 @@ function printFolder(object){
 }
 
 function printBookmark(object, parent){
-    let hasParent = (arguments.length == 2) ? true : false
-    let fragment = document.createDocumentFragment();
-    let bookmarkDiv = document.createElement("div")
-    bookmarkDiv.className = "bookmark btn col-2 m-3 btn-sm"
-    bookmarkDiv.id = object.id
-    //Problem with incep
-    console.log(checkIncep(object, data))
-    console.log(bookmarkColourList)
-    if (hasParent){
-        bookmarkDiv.style = "background-color: " + avgCol +";border-radius: 13px; font-size: 120%; border: 3px solid" + bookmarkColourList[0]
-        textColour = pickBlackOrWhite(avgCol)
-
+    console.log(object)
+    let hasParent;
+    if (arguments.length == 2){
+        hasParent = true
     }
     else{
-        bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%;"
-
+        hasParent = false
     }
+    console.log("testing ")
+    let fragment = document.createDocumentFragment();
+    console.log("testing ")
+    let bookmarkDiv = document.createElement("div")
+    console.log("testing ")
+    bookmarkDiv.className = "bookmark btn col-2 m-3 btn-sm"
+    console.log(object.id)
+    bookmarkDiv.id = object.id
+    //Problem with incep
+    // if (hasParent){
+    //     bookmarkDiv.style = "background-color: " + avgCol +";border-radius: 13px; font-size: 120%; border: 3px solid" + bookmarkColourList[0]
+    //     //textColour = pickBlackOrWhite(avgCol)
+
+    // }
+
+    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; border-radius: 1.5em"
+
 
     let bookmarkClickable = document.createElement("a")
     bookmarkClickable.href = object.url
@@ -732,11 +1247,12 @@ function printBookmark(object, parent){
     bookmarkClickable.id = "a" + object.id
 
     let bookmarkRowDivision = document.createElement("div")
-    bookmarkRowDivision.className = "d-flex flex-row margin"
+    bookmarkRowDivision.className = "d-flex flex-row-reverse margin"
     bookmarkRowDivision.style = "overflow-wrap: anywhere;"
 
     let bookmarkText = document.createElement("p")
     bookmarkText.innerHTML = object.title
+    bookmarkText.className = "flex-fill"
     if (object.title.length >= 50) {
         if (textColour){
             bookmarkText.style = "color: #ffffff;width:70%; font-size: 80%"
@@ -754,14 +1270,18 @@ function printBookmark(object, parent){
         }
     }
     
-    bookmarkText.class = "d-inline-flex"
+    
     
 
     let bookmarkIcon = document.createElement("i")
     bookmarkIcon.innerHTML = "info"
-    $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-1 item-info ml-auto")
+    $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-2 mr-1 item-info")
     bookmarkIcon.id = "i" + object.id
+    $(bookmarkIcon).on("click", function (e){
+        e.preventDefault()
+        displayIconModal(object.id)
 
+    })
     $(bookmarkIcon).hover(function(){
         $(bookmarkIcon).css("cursor", "pointer")
         $(bookmarkIcon).css("color", "white")
@@ -769,9 +1289,6 @@ function printBookmark(object, parent){
     }, function(){
         $(bookmarkIcon).css("cursor", "default")
         $(bookmarkIcon).css("color", "black")
-        $(bookmarkDiv).hover(function () {
-
-        })
     })
 
     $(bookmarkDiv).mouseenter(function(){
@@ -803,8 +1320,9 @@ function printBookmark(object, parent){
     fragment.appendChild(bookmarkClickable)
     bookmarkClickable.appendChild(bookmarkDiv)
     bookmarkDiv.appendChild(bookmarkRowDivision)
-    bookmarkRowDivision.appendChild(bookmarkText)
     bookmarkRowDivision.appendChild(bookmarkIcon)
+    bookmarkRowDivision.appendChild(bookmarkText)
+    
     if (arguments.length == 2){
         document.getElementById(arguments[1]).after(fragment)
     }
@@ -816,6 +1334,72 @@ function printBookmark(object, parent){
 
 // Popular finding algorithm
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+async function onLoadApp(){
+    let onLoad = await stored("onLoad")
+    if (onLoad == "popular"){
+        let list = []
+        await getAllInside(list,data)
+        popularList = sortDescend(list)
+        popularList = removeDuplicates(popularList)
+        let counter = 0
+        let endIt = false
+        while ($("#bookmarks").height() < ($("#bod").height()/3.4) || endIt){
+            for(var i=0; i < 5; i++){
+                let index = counter * 5 + i
+                console.log(popularList[index])
+                let object;
+                if (index < popularList.length){
+                    object = findIt(data, popularList[index])
+                    printBookmark(object)
+                    maxPerPage ++
+                }
+                else{
+                    //Do nothing
+                    endIt = true
+                    break
+                }
+                
+            }
+            if (endIt){
+                break
+            }
+            counter++
+        }
+        let outerDiv = $("<div>", {
+            class: "d-flex justify-content-center"
+        })
+        let expandIcon = $("<i>", {
+            text: "expand_more",
+            class: "material-icons",
+            style: "font-size: 52px; color: " + bookmarkColourList[0],
+            id: "expandIcon"
+        })
+        outerDiv.append(expandIcon)
+        $("#bookmarks").append(outerDiv)
+        //$("#bookmarks").append(expandIcon)
+        expandIcon.on("click", function(){
+            expandIcon.remove()
+            onFocusOrFilter()
+            let children = maxPerPage
+            for(var i=children; popularList.length > i;i++){
+                let object = findIt(data, popularList[i])
+                printBookmark(object)
+            }
+            hasBeenClicked = true
+        })
+        expandIcon.hover(function(){
+            expandIcon.css("cursor", "pointer")
+        }, function(){
+            expandIcon.css("cursor", "")
+    
+        })
+    }
+    else if (onLoad == "default"){
+        console.log("heyo")
+    }
+}
+
+
 
 async function renderPop(data){
     let list = [];
@@ -823,18 +1407,52 @@ async function renderPop(data){
     console.log(list)
     popularList = sortDescend(list)
     popularList = removeDuplicates(popularList)
+    console.log(popularList)
+    let tester = 0
     let counter = 0
     console.log($("#bookmarks").height())
     console.log($("#bod").height())
-    while ($("#bookmarks").height() < ($("#bod").height()/3)){
+    while ($("#bookmarks").height() < ($("#bod").height()/4)){
         for(var i=0; i < 5; i++){
+            tester += 1
             let index = counter * 5 + i
+            console.log(popularList[index])
             let object = findIt(data, popularList[index])
+            console.log(object)
             printBookmark(object)
             maxPerPage ++
         }
         counter++
     }
+    console.log(tester)
+    let outerDiv = $("<div>", {
+        class: "d-flex justify-content-center"
+    })
+    let expandIcon = $("<i>", {
+        text: "expand_more",
+        class: "material-icons",
+        style: "font-size: 52px; color: " + bookmarkColourList[0],
+        id: "expandIcon"
+    })
+    outerDiv.append(expandIcon)
+    $("#bookmarks").append(outerDiv)
+    //$("#bookmarks").append(expandIcon)
+    expandIcon.on("click", function(){
+        expandIcon.remove()
+        onFocusOrFilter()
+        let children = maxPerPage
+        for(var i=children; popularList.length > i;i++){
+            let object = findIt(data, popularList[i])
+            printBookmark(object)
+        }
+        hasBeenClicked = true
+    })
+    expandIcon.hover(function(){
+        expandIcon.css("cursor", "pointer")
+    }, function(){
+        expandIcon.css("cursor", "")
+
+    })
 }
 function removeDuplicates(list){
     let idList = []
@@ -869,23 +1487,15 @@ function removeDuplicates(list){
 
 // }
 
-var stored = function (id){
-    return new Promise(function (resolve, reject){
-        chrome.storage.local.get([id], function (res) {
-            resolve(res[id])
-    
-        })
-    })
-}
 
 
-async function getAllInside(list, data){
-    for (var i=0; i < data.length; i++){
-        if(!data[i].children){
-            await findAllVisits(list, data[i].id, data[i].url)
+async function getAllInside(list, dataArray){
+    for (var i=0; i < dataArray.length; i++){
+        if(!dataArray[i].children){
+            await findAllVisits(list, dataArray[i].id, dataArray[i].url)
         }
-        else if (data[i].children){
-            getAllInside(list, data[i].children)
+        else if (dataArray[i].children){
+            await getAllInside(list, dataArray[i].children)
         }
     }
 }

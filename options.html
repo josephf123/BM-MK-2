@@ -15,33 +15,210 @@
 </head>
 <style>
     .optBut {
-        font-size: xx-large
+        font-size: large;
+        width: 750px;
+    }
+    .optButX {
+        font-size: large;
+        width: 160px;
     }
 </style>
 
 
-<body>
+<body >
     <script src="options.js"></script>
-    <h1 class="p-5" style="font-size: xxx-large;text-align: center; font-weight: 700;">Options page</h1>
-    <div class="d-flex flex-row m-4">
-        <div class="optBut">Press this button to remove all the tags that you have allocated to a bookmark</div>
-        <h1 class="btn btn-success navbar-brand optBut ml-auto" id="clearTags" style="float: right;">Clear Tags</a>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <img style="height: 45px; padding-right: 10px;"src="images/BW@8x.png" alt="Logo">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" id="homePage" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tagPage" href="#">Tag manager</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" id="optionsPage" href="#">Options</a>
+            </li>
+          </ul>
+        </div>
+    </nav>
+    <div id="top" class="jumbotron" style="height: 15px; padding: 0px; background-color: transparent;">
+      <div id="alertz" class="alert alert-dismissible alert-success m-4 collapse"></div>
+      <div id="alertx" class="alert alert-dismissible alert-danger m-4 collapse"></div>
     </div>
-    <div class="d-flex flex-row m-4">
-        <div class="optBut">Press this button to remove all the information that you have written about bookmarks</div>
-        <h1 class="btn btn-success navbar-brand optBut ml-auto" id="clearInfo"  style="float: right;">Clear Info</a>
-    </div>
-    <div id="t" class="d-flex flex-row m-4">
-        <div class="optBut">Chose the default colour of bookmarks (Don't add the hashtag)</div>
-        <div class="input-group mx-4 ml-auto" style="max-width: 169px;">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="basic-addon1" style="max-height: 38px;">#</span>
+
+
+    <div class="container" style="max-width: none;">
+      <h1 style="font-size: xxx-large;text-align: center; font-weight: 700;">Options page</h1>
+      <div class="row">
+        <div id="colourButton" class="btn flex-fill m-2 p-2 focused" style="text-align: center;">Colours</div>
+        <div id="memoryButton" class="btn  flex-fill m-2 p-2" style="text-align: center;">Memory</div>
+        <div id="configurationButton" class="btn flex-fill m-2 p-2" style="text-align: center;">Configuration</div>
+      </div>
+      <div id="colourOption" class="row" style="justify-content: center;">
+        <div class="col-md-5 mx-2" style="margin-top: 50px;">
+          <!-- <div class="d-flex justify-content-center my-2 p-2 btn" style="font-size: xx-large;background-color: #B44F4B;">Colour Scheme</div> -->
+          <div id="multipleColours">
+            <div id="colourPicker" style="border: 1px solid #A9A9A9; width:100%; height: 100%; border-radius: 1em; padding: 5px;background-color: #DCDCDC;">
+              <div class="row m-3">
+                <div id="singleColour" class="d-flex btn m-1" style="flex-grow: 2;">Single colour</div>
+                <div id="rotateColour" class="d-flex btn m-1" style="flex-grow: 2;">Rotate colours</div>
+              </div>
+              <div id="optionColour" style="overflow-y: scroll; height: 400px;">
+                <div id="selectAllDiv" class="m-3" style="flex-direction: row;">
+                  <input id="selectAll" type="checkbox">
+                  <div class="d-inline-flex mx-4">Select all</div>
+                </div>
+                <div id="deselectDiv" class="m-3" style="flex-direction: row;">
+                  <div id="deSelect" class="d-inline-flex mx-5 btn btn-secondary">Deselect</div>
+                </div>
+
+              </div>
             </div>
-            <input type="text" class="form-control" style="max-width: 169px" placeholder="Hex code" id="colour">
           </div>
+
+        </div>
+        <div id="selectOwn" class="col-md-5 mx-2" style="margin-top: 50px; background-color: #DCDCDC;border-radius: 1em; border: 1px solid #A9A9A9;">
+          
+        <div class="d-flex justify-content-center my-2" style="font-size: x-large;">Select your own colour</div>
+          <div class="mt-2">
+            <div class="d-flex" style="width: 100%;">
+              <div class="d-flex col-8">Background colour</div>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1">#</span>
+                </div>
+                <input type="text" class="form-control" id="backgroundColour">
+              </div>
+            </div>
+            <div class="d-flex" style="width: 100%;">
+                <div class="d-flex col-8">Bookmark colour</div>
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">#</span>
+                  </div>
+                  <input type="text" class="form-control" id="bookmarkColour">
+                </div>
+            </div>
+            <div class=" d-flex flex-row">
+              <div class="btn btn-success m-2 col-7 mr-auto" id="confirmButton" >Confirm</div>
+              <div class="btn btn-info m-2 col-4 ml-auto" id="resetButton">Reset Colours</div>
+            </div>
+            <div id="preview" class="btn-outline-success btn d-flex m-3 justify-content-center">Show preview</div>
+              <div id="toggling" style="display: none;">
+              <div class="mr-auto m-2">Preview</div>
+              <div id="demoBackground" style="background-color: hotpink; width:100%; height: 100%; border-radius: 1em; padding: 5px;">
+                <div class="d-flex btn m-4 demoBookmark" style="background-color: lightcyan;">Bookmark 1</div>
+                <div class="d-flex btn m-4 demoBookmark" style="background-color: lightcyan;">Bookmark 2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="memoryOption" class="row" style="justify-content: center; display: none;">
+        <div class="col-md-5 mx-2" style="margin-top: 50px;">
+          <!-- <div class="d-flex justify-content-center p-2 my-2 btn" style="font-size: xx-large;background-color: #5F9EA0;">Reset storage</div> -->
+          <div class="d-flex flex-row my-4">
+            <div class="optBut m-2">Press this button to remove all the tags that you have allocated to a bookmark</div>
+            <h1 class="btn navbar-brand  ml-auto p-2" style="font-size: large; width: 160px" id="clearTags">Clear Tags</h1>
+          </div>
+          <div class="d-flex flex-row my-4">
+            <div class="optBut m-2">Press this button to remove all the information that you have written about bookmarks</div>
+            <h1 class="btn navbar-brand ml-auto" style="font-size: large; width: 160px" id="clearInfo">Clear Info</h1>
+          </div>
+        </div>
+      </div>
+
+      <div id="configurationOption" class="row" style="justify-content: center; display: none;">
+        <div class="col-md-5 mx-2" style="margin-top: 50px;">
+          <!-- <div class="d-flex justify-content-center p-2 my-2 btn" style="font-size: xx-large;background-color: #5F9EA0;">Reset storage</div> -->
+          <div class="d-flex flex-row my-4">
+            <div class="optBut m-2">What display would you like to appear when clicking the home icon</div>
+          </div>
+          <div class="row">
+            <div id="defaultHomeAction" class="btn btn-warning flex-fill m-2">Default</div>
+            <div id="popularHomeAction" class="btn btn-warning flex-fill m-2">Popular</div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
+<!-- 
 
-
-    
+    <div class="container" style="max-width: none;">
+      <div class="row">
+        <div class="col-md-4">
+          <div id="toggling" style="display: none; position: relative; height: 400px;top: 50%; margin-top: -200px;">
+            <div class="mr-auto m-2">Preview</div>
+            <div id="demoBackground" style="background-color: hotpink; width:100%; height: 100%; border-radius: 1em; padding: 5px;">
+              <div class="d-flex btn m-4 demoBookmark" style="background-color: lightcyan;">Bookmark 1</div>
+              <div class="d-flex btn m-4 demoBookmark" style="background-color: lightcyan;">Bookmark 2</div>
+              <div class="d-flex btn m-4 demoBookmark" style="background-color: lightcyan;">Bookmark 3</div>
+              <div class="d-flex btn m-4 demoBookmark" style="background-color: lightcyan;">Bookmark 4</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <h1 style="font-size: xxx-large;text-align: center; font-weight: 700;">Options page</h1>
+          <div class="d-flex flex-row my-4">
+              <div class="optBut m-2">Press this button to remove all the tags that you have allocated to a bookmark</div>
+              <h1 class="btn btn-success navbar-brand optButX ml-auto p-2" id="clearTags">Clear Tags</a>
+          </div>
+          <div class="d-flex flex-row my-4">
+              <div class="optBut m-2">Press this button to remove all the information that you have written about bookmarks</div>
+              <h1 class="btn btn-success navbar-brand optButX ml-auto" id="clearInfo">Clear Info</a>
+          </div>
+          <div class="justify-content-center">
+            <div id="what" class="my-4 p-2" style="background-color: grey; border-radius: 0.25rem; text-align: center;">Colour Scheme</div>
+          </div>
+          <div class="d-flex" style="width: 100%;">
+            <div class="d-flex col-8">Background colour</div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">#</span>
+              </div>
+              <input type="text" class="form-control" id="backgroundColour">
+            </div>
+          </div>
+          <div class="d-flex" style="width: 100%;">
+              <div class="d-flex col-8">Bookmark colour</div>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1">#</span>
+                </div>
+                <input type="text" class="form-control" id="bookmarkColour">
+              </div>
+          </div>
+          <div class=" d-flex flex-row">
+            <div class="btn btn-success m-2 col-7 mr-auto" id="confirmButton" >Confirm</div>
+            <div class="btn btn-info m-2 col-4 ml-auto" id="resetButton">Reset Colours</div>
+          </div>
+          <div id="preview" class="btn-outline-success btn d-flex m-3 justify-content-center">Show preview</div>
+        </div>
+      <div class="col-md-4">
+        <div id="multipleColours" style="position: relative; height: 400px;top: 50%; margin-top: -200px;">
+          <div class="mr-auto m-2">Colour options</div>
+          <div id="demoBackground" style="border: 1px solid; width:100%; height: 100%; border-radius: 1em; padding: 5px;">
+            <div class="row m-3">
+              <div id="singleColour" class="d-flex btn m-1" style="flex-grow: 2;">Single colour</div>
+              <div id="rotateColour" class="d-flex btn m-1" style="flex-grow: 2;">Rotate colours</div>
+            </div>
+            <div id="optionColour" style="overflow-y: scroll; height: 300px;">
+              <div id="selectAllDiv" class="m-3" style="flex-direction: row;">
+                <input id="selectAll" type="checkbox">
+                <div class="d-inline-flex mx-4">Deselect</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div> -->
 </body>
 </html>
