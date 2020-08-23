@@ -400,6 +400,11 @@ async function displayIconModal(id){
             text: "Open all bookmarks inside the folder"
     
         })
+        openChildrenDiv.on("click", function(){
+            for(var i=0; i < object.children.length; i++){
+                chrome.tabs.create({"url": object.children[i].url, "active": false})
+            }
+        })
     }
     
     $("#infoModal").append(tagParagraph)
