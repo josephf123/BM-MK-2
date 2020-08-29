@@ -27,7 +27,7 @@ let currentWidth = 0;
     
     ga('require', 'displayfeatures');
 
-    ga('send', 'pageview', location.pathname)
+    ga('send', 'pageview', "/tagManager.html")
 
     function sendData(){
         ga('send', 'event', 'tag', 'added', "For tags");

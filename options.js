@@ -12,7 +12,7 @@
     
     ga('require', 'displayfeatures');
     
-    ga('send', 'pageview', location.pathname);
+    ga('send', 'pageview', "/options.html");
 //Whenever a colour is selected, make all the buttons etc change in order to make that the theme of the page
 //Make tag manager consistent with the other two pages
 //Add favicons into home screen

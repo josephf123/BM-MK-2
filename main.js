@@ -88,8 +88,11 @@ let randomColours = ["D17A22","095256","BC5D2E","FF7733","F7B538","17BEBB","61CC
 
 //Change main colour
 //114B5F-03A0B5
-chrome.runtime.onInstalled.addListener(async function() {
+
+
+chrome.runtime.onInstalled.addListener(async function(details) {
     console.log("Hoowee")
+    console.log(details.reason)
     await makeStorage("tags", "Work,Entertainment,For Later,")
     //For now just make it so it is only colours but later I will add photos
     await makeStorage("colConfig", "s")
@@ -101,7 +104,12 @@ chrome.runtime.onInstalled.addListener(async function() {
     await makeStorage("home", "popular")
     // When the application loads, either the default or popular shows up
     await makeStorage("onLoad", "popular")
+    
+    
 });
+
+
+
 
 async function sendPageAndColour(){
     let colCol = await stored("colourCollection")
@@ -112,7 +120,7 @@ async function sendPageAndColour(){
     
     ga('send', 'event', 'colour scheme', colCol, "For colours");
 
-    ga('send', 'pageview', location.pathname)
+    ga('send', 'pageview', "/newTab.html")
 }
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -154,6 +162,12 @@ let randomNum1 = Math.round(Math.random() * (randomColours.length - 1))
 // randomColours[randomNum1]
 
 document.addEventListener("DOMContentLoaded", async() => {
+    // chrome.tabs.query({"active": false, "currentWindow": true }, function (tabs) {
+    //     console.log(tabs);
+    // });
+    chrome.topSites.get(function(mostVisited){
+        console.log(mostVisited)
+    })
     data = await search
     console.log("testing")
     // let rgbofHex = hexToRgb(hexCol)
@@ -341,6 +355,37 @@ function findAllFolders(d, array){
     }
 }
 
+async function searchTags(searchWord, id){
+    let tags = await stored("tags")
+    if (tags != undefined){
+        tags = tags.split(",")
+        tags.pop()
+    }
+    let storedTags = await stored(id)
+    if (storedTags != undefined){
+        storedTags = storedTags.split(",")
+        storedTags.pop()
+    }
+    console.log(storedTags, "stored tags")
+    let acceptedArray = []
+    // I can optimise this to check if the searched word includes a tag that the obj already has
+    for(var i=0; i < tags.length;i++){
+        if ((tags[i].toUpperCase()).includes(searchWord.toUpperCase())){
+            console.log(tags[i])
+            acceptedArray.push(tags[i])
+            if (storedTags != undefined){
+                for(var j=0; j < storedTags.length; j++){
+                    console.log(storedTags[j])
+                    console.log(tags[i])
+                    if (storedTags[j] == tags[i]){
+                        acceptedArray = acceptedArray.filter(word => word != tags[i])
+                    }
+                }
+            }
+        }
+    }
+    console.log(acceptedArray)
+}
 
 async function saveChangesModal(id, text){
     let key = "i" + id
@@ -355,12 +400,12 @@ async function displayIconModal(id){
         tags.pop()
     }
     else{
-        tags = ["none"]
+        tags = ["No Tags"]
     }
     console.log(tags)
     $("#infoModal").empty()
     let row = $("<div class='row margin py-2' style='margin-left: 0px'></div>")
-    let urlTitle = $("<div>URL:</div>")
+    let urlTitle = $("<div style='font-size: 20px;'>URL</div>")
     let url = $("<a>",{
         href: object.url,
         text: object.url,
@@ -369,23 +414,34 @@ async function displayIconModal(id){
     urlTitle.appendTo(row)
     url.appendTo(row)
     $("#infoTitle").text(object.title)
-    $("#infoModal").append(row)
-    let tagParagraph = $("<p class='margin' style='margin-bottom:0px'>Tags:</p>")
-    let ul = $("<ul class='margin' style='margin-bottom:-10px'>")
+    
+    let tagParagraph = $("<p class='margin' style='text-align: center; margin-bottom:0px; font-size: 20px;'>Tags</p>")
+    let div = $("<div>")
     for(var i=0;i < tags.length; i++){
-        let tag = $("<li>", {
+        let tag = $("<div>", {
             text: tags[i],
-            class: "margin"
+            class: "btn m-2 d-inline-flex btn-primary",
+            style: "border-radius: 1.5em"
         })
-        tag.appendTo(ul)
+        tag.appendTo(div)
     }
-    let addTags = $("<div class='btn btn-primary d-flex mt-3'>Add tags </div>")
-    let infoTitle = $("<p class='margin d-inline-flex pt-3'>Info:</p>")
-    let infoSubscript = $("<p class='margin d-inline-flex pt-3' style='float:right; color: #A9A9A9'>max chars: 200</p>")
+    let addTagSearch = $("<div class='form-group mb-4 mx-3' ></div>")
+    let inTagSearch = $("<input placeholder='Search or create tags' class='form-control' style='border-width: 0; border-bottom-width: 1px; border-radius: 0; padding-left: 0;'>")
+    inTagSearch.appendTo(addTagSearch)
+    let infoTitle = $("<p class='margin pt-3' style='font-size: 20px; text-align: center;'>Info</p>")
+    // let infoSubscript = $("<p class='margin d-inline-flex pt-3' style='float:right; color: #A9A9A9'>max chars: 200</p>")
     let textInformation = await stored("i" + id)
     if (textInformation == undefined){
         textInformation = ""
     }
+    inTagSearch.on("focus", function(){
+        console.log("t")
+    })
+    inTagSearch.on("keyup", function (e){
+        console.log(e.target.value)
+        // searchFunction(e.target.value)
+        searchTags(e.target.value, id)
+    })
     let textbox = $("<textarea>", {
         row: "5",
         style: "margin-left: 45px; width:405px;", 
@@ -406,12 +462,20 @@ async function displayIconModal(id){
             }
         })
     }
-    
-    $("#infoModal").append(tagParagraph)
-    $("#infoModal").append(ul)
-    $("#infoModal").append(addTags)
+    let tagDivision = $("<div style='border-width: 0px 0px 0px 0px; border-style: solid; border-color: #03a0bf;min-height: 200px;'></div>")
+
+    let line = $("<div style='background-color: #dee2e6; height: 1px;' class='my-2'></div>")
+    // $("#infoModal").append(row)
+    tagDivision.append(tagParagraph)
+    tagDivision.append(addTagSearch)
+    tagDivision.append(div)
+    // $("#infoModal").append(tagParagraph)
+    // $("#infoModal").append(addTagSearch)
+    // $("#infoModal").append(div)
+    $("#infoModal").append(tagDivision)
+    $("#infoModal").append(line)
     $("#infoModal").append(infoTitle)
-    $("#infoModal").append(infoSubscript)
+    // $("#infoModal").append(infoSubscript)
     $("#infoModal").append(textbox)
     if (object.children){
         $("#infoModal").append(openChildrenDiv)
@@ -1219,6 +1283,15 @@ function printFolder(object){
 
 }
 
+function findDomain(url){
+    let expression = /https?:\/\/[a-zA-Z0-9_\.]+\//
+    if (expression.exec(url)){
+        let domain = expression.exec(url)[0]
+        return domain
+    }
+    return false
+}
+
 function printBookmark(object, parent){
     console.log(object)
     let hasParent;
@@ -1228,9 +1301,7 @@ function printBookmark(object, parent){
     else{
         hasParent = false
     }
-    console.log("testing ")
     let fragment = document.createDocumentFragment();
-    console.log("testing ")
     let bookmarkDiv = document.createElement("div")
     console.log("testing ")
     bookmarkDiv.className = "bookmark btn col-2 m-3 btn-sm"
@@ -1274,8 +1345,37 @@ function printBookmark(object, parent){
             bookmarkText.style = "width:70%;"
         }
     }
-    
-    
+    let domain = findDomain(object.url)
+    console.log(domain)
+    let favicon = document.createElement("img")
+    // favicon.src = "chrome://favicon/" + domain
+    // favicon.src = domain + "favicon.ico"
+
+    // let sendMessage = "chrome-search://ntpicon/?size=24%401x&url=" + domain
+    let sendMessage = "https://plus.google.com/_/favicon?domain=" + domain
+
+    switch(domain){
+        case "https://www.youtube.com/":
+            sendMessage = "https://www.youtube.com/s/desktop/ee2e5595/img/favicon_32.png"
+            break;
+        case "https://mail.google.com/":
+            sendMessage = "https://ssl.gstatic.com/ui/v1/icons/mail/images/favicon5.ico"
+            break;
+        case "https://drive.google.com/":
+            sendMessage = "https://ssl.gstatic.com/docs/doclist/images/infinite_arrow_favicon_5.ico"
+            break;
+        case "https://classroom.google.com/":
+            sendMessage = "https://ssl.gstatic.com/classroom/favicon.png"
+            break;
+        case "https://github.com/":
+            sendMessage = "https://github.githubassets.com/favicons/favicon.svg"
+        default:
+            break;
+    }
+
+    favicon.src = sendMessage
+    console.log(sendMessage)
+    favicon.style = "width: 24px; height: 24px; margin: 4px 0px 0px 4px"
     
 
     let bookmarkIcon = document.createElement("i")
@@ -1327,6 +1427,8 @@ function printBookmark(object, parent){
     bookmarkDiv.appendChild(bookmarkRowDivision)
     bookmarkRowDivision.appendChild(bookmarkIcon)
     bookmarkRowDivision.appendChild(bookmarkText)
+    bookmarkRowDivision.appendChild(favicon)
+
     
     if (arguments.length == 2){
         document.getElementById(arguments[1]).after(fragment)
