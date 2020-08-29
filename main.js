@@ -384,7 +384,71 @@ async function searchTags(searchWord, id){
             }
         }
     }
+    displayTagOptions(acceptedArray, searchWord, id)
     console.log(acceptedArray)
+}
+
+function displayTagOptions(arr, word, objId){
+    let isWordInArr = false
+    if (word == ""){
+        isWordInArr = true
+    }
+    let largeTagDiv = $("<div id='largeTagDiv' style='position: absolute'></div>")
+    for(var i=0; i < arr.length; i++){
+        if (arr[i].toUpperCase() == word.toUpperCase()){
+            isWordInArr = true
+        }
+        let tagDiv = $("<div class='d-inline-flex addTag pl-2' style='background-color: white; height: 50px; width: 434px;'></div>") 
+        tagDiv.css("border", "1px solid black")
+        // tagDiv.css("font-size", "22px")
+        tagDiv.css("border-width", 0)
+        tagDiv.css("border-left-width", "1px")
+        tagDiv.css("border-right-width", "1px")
+        if (isWordInArr && i == arr.length -1){
+            tagDiv.css("border-bottom-width", "1px")
+        }
+        tagDiv.attr("id", arr[i])
+        tagDiv.text(arr[i])
+        largeTagDiv.append(tagDiv)
+    }
+    if (!isWordInArr){
+        let addTagString = "<div id='" + word + "' class='d-inline-flex addTag createTag pl-2' style='background-color: white; height: 50px; width: 434px;border: 1px solid black;'></div>"
+        let addTag = $(addTagString)
+        if (arr.length == 0){
+            addTag.css("border-top-width", 0)
+        }
+        addTag.text("Add tag: " + word)
+        largeTagDiv.append(addTag)
+    }
+    $("#inputTags").after(largeTagDiv)
+    $(".addTag").each(function(){
+        console.log("bruhhhhh")
+        $(this).hover(function(){
+            $(this).css("background-color", "blue")
+        }, function(){
+            $(this).css("background-color", "white")
+        })
+        $(this).on("click", async function(){
+            let tagName = this.id
+            let tags = await stored(objId)
+            if (tags == undefined){
+                tags = ""
+            }
+            tags = tags + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
+            console.log(tags)
+            await makeStorage(objId, tags)
+            console.log("this just worked")
+            if ($(this).hasClass("createTag")){
+                let ta = await stored("tags")
+                ta = ta + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
+                await makeStorage("tags", ta)
+            }
+        })
+    })
+    // largeTagDiv.on("click", function(){
+    //     console.log(this)
+    // })
+    console.log("Add tag:", word)
 }
 
 async function saveChangesModal(id, text){
@@ -416,7 +480,7 @@ async function displayIconModal(id){
     $("#infoTitle").text(object.title)
     
     let tagParagraph = $("<p class='margin' style='text-align: center; margin-bottom:0px; font-size: 20px;'>Tags</p>")
-    let div = $("<div>")
+    let div = $("<div class='ml-2'>")
     for(var i=0;i < tags.length; i++){
         let tag = $("<div>", {
             text: tags[i],
@@ -426,7 +490,7 @@ async function displayIconModal(id){
         tag.appendTo(div)
     }
     let addTagSearch = $("<div class='form-group mb-4 mx-3' ></div>")
-    let inTagSearch = $("<input placeholder='Search or create tags' class='form-control' style='border-width: 0; border-bottom-width: 1px; border-radius: 0; padding-left: 0;'>")
+    let inTagSearch = $("<input id='inputTags' placeholder='Search or create tags' class='form-control' style='border-width: 0; border-bottom-width: 1px; border-radius: 0; padding-left: 0;'>")
     inTagSearch.appendTo(addTagSearch)
     let infoTitle = $("<p class='margin pt-3' style='font-size: 20px; text-align: center;'>Info</p>")
     // let infoSubscript = $("<p class='margin d-inline-flex pt-3' style='float:right; color: #A9A9A9'>max chars: 200</p>")
@@ -436,11 +500,13 @@ async function displayIconModal(id){
     }
     inTagSearch.on("focus", function(){
         console.log("t")
+        searchTags("", id)
     })
     inTagSearch.on("keyup", function (e){
-        console.log(e.target.value)
-        // searchFunction(e.target.value)
-        searchTags(e.target.value, id)
+        $("#largeTagDiv").remove()
+        if (e.target.value != ""){
+            searchTags(e.target.value, id)
+        }
     })
     let textbox = $("<textarea>", {
         row: "5",
