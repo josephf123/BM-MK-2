@@ -393,7 +393,8 @@ function displayTagOptions(arr, word, objId){
     if (word == ""){
         isWordInArr = true
     }
-    let largeTagDiv = $("<div id='largeTagDiv' style='position: absolute'></div>")
+    // This makes it stop working but it was also not working before this so idk
+    let largeTagDiv = $("<div id='largeTagDiv' style='position: absolute; z-index: 5'></div>")
     for(var i=0; i < arr.length; i++){
         if (arr[i].toUpperCase() == word.toUpperCase()){
             isWordInArr = true
@@ -404,6 +405,7 @@ function displayTagOptions(arr, word, objId){
         tagDiv.css("border-width", 0)
         tagDiv.css("border-left-width", "1px")
         tagDiv.css("border-right-width", "1px")
+        tagDiv.css("z-index", "5")
         if (isWordInArr && i == arr.length -1){
             tagDiv.css("border-bottom-width", "1px")
         }
@@ -428,13 +430,15 @@ function displayTagOptions(arr, word, objId){
         }, function(){
             $(this).css("background-color", "white")
         })
-        $(this).on("click", async function(){
+        $(this).on("click", async function(event){
+            event.stopPropagation();
             let tagName = this.id
             let tags = await stored(objId)
             if (tags == undefined){
                 tags = ""
             }
-            tags = tags + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
+            tagName = tagName.charAt(0).toUpperCase() + tagName.slice(1)
+            tags = tags + tagName + ","
             console.log(tags)
             await makeStorage(objId, tags)
             console.log("this just worked")
@@ -443,11 +447,14 @@ function displayTagOptions(arr, word, objId){
                 ta = ta + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
                 await makeStorage("tags", ta)
             }
+            $("<div>", {
+                text: tags[i],
+                class: "btn m-2 d-inline-flex btn-primary",
+                style: "border-radius: 1.5em"
+            })
+            await displayIconModal(objId)
         })
     })
-    // largeTagDiv.on("click", function(){
-    //     console.log(this)
-    // })
     console.log("Add tag:", word)
 }
 
@@ -480,17 +487,23 @@ async function displayIconModal(id){
     $("#infoTitle").text(object.title)
     
     let tagParagraph = $("<p class='margin' style='text-align: center; margin-bottom:0px; font-size: 20px;'>Tags</p>")
-    let div = $("<div class='ml-2'>")
+    let div = $("<div id='containsTags'class='ml-2'>")
     for(var i=0;i < tags.length; i++){
         let tag = $("<div>", {
-            text: tags[i],
             class: "btn m-2 d-inline-flex btn-primary",
             style: "border-radius: 1.5em"
         })
+        let tagTextText = "<p class='mb-0'>" + tags[i] + "</p>"
+        let tagText = $(tagTextText)
+        
+        let deleteTagIconText = "<i class='material-icons ml-1' style='position:relative; left: 5px'>cancel</i>"
+        let deleteTagIcon = $(deleteTagIconText)
+        tagText.appendTo(tag)
+        deleteTagIcon.appendTo(tag)
         tag.appendTo(div)
     }
-    let addTagSearch = $("<div class='form-group mb-4 mx-3' ></div>")
-    let inTagSearch = $("<input id='inputTags' placeholder='Search or create tags' class='form-control' style='border-width: 0; border-bottom-width: 1px; border-radius: 0; padding-left: 0;'>")
+    let addTagSearch = $("<div class='form-group mb-4 mx-3' style='z-index: 4'></div>")
+    let inTagSearch = $("<input id='inputTags' placeholder='Search or create tags' class='form-control' style='border-width: 0; border-bottom-width: 1px; border-radius: 0; padding-left: 0;z-index: 5'>")
     inTagSearch.appendTo(addTagSearch)
     let infoTitle = $("<p class='margin pt-3' style='font-size: 20px; text-align: center;'>Info</p>")
     // let infoSubscript = $("<p class='margin d-inline-flex pt-3' style='float:right; color: #A9A9A9'>max chars: 200</p>")
@@ -498,10 +511,19 @@ async function displayIconModal(id){
     if (textInformation == undefined){
         textInformation = ""
     }
+    // FIXXXX
+    //searchTags("", id)
     inTagSearch.on("focus", function(){
         console.log("t")
         searchTags("", id)
     })
+    // inTagSearch.on("blur", function(event){
+    //     console.log("t")
+    //     console.log(event)
+    //     $("#largeTagDiv").remove()
+    //     event.stopPropagation()()
+        
+    // })
     inTagSearch.on("keyup", function (e){
         $("#largeTagDiv").remove()
         if (e.target.value != ""){
@@ -1516,7 +1538,7 @@ async function onLoadApp(){
         popularList = removeDuplicates(popularList)
         let counter = 0
         let endIt = false
-        while ($("#bookmarks").height() < ($("#bod").height()/3.4) || endIt){
+        while ($("#bookmarks").height() < ($("#bod").height()/2.5) || endIt){
             for(var i=0; i < 5; i++){
                 let index = counter * 5 + i
                 console.log(popularList[index])
