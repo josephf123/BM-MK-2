@@ -165,9 +165,6 @@ document.addEventListener("DOMContentLoaded", async() => {
     // chrome.tabs.query({"active": false, "currentWindow": true }, function (tabs) {
     //     console.log(tabs);
     // });
-    chrome.topSites.get(function(mostVisited){
-        console.log(mostVisited)
-    })
     data = await search
     console.log("testing")
     // let rgbofHex = hexToRgb(hexCol)
@@ -394,7 +391,7 @@ function displayTagOptions(arr, word, objId){
         isWordInArr = true
     }
     // This makes it stop working but it was also not working before this so idk
-    let largeTagDiv = $("<div id='largeTagDiv' style='position: absolute; z-index: 5'></div>")
+    let largeTagDiv = $("<div id='largeTagDiv' style='position: absolute; z-index: 5; width:434px;height: 300px;overflow: auto'></div>")
     for(var i=0; i < arr.length; i++){
         if (arr[i].toUpperCase() == word.toUpperCase()){
             isWordInArr = true
@@ -432,6 +429,7 @@ function displayTagOptions(arr, word, objId){
         })
         $(this).on("click", async function(event){
             event.stopPropagation();
+            console.log(event)
             let tagName = this.id
             let tags = await stored(objId)
             if (tags == undefined){
@@ -454,6 +452,15 @@ function displayTagOptions(arr, word, objId){
             })
             await displayIconModal(objId)
         })
+    })
+    $("#inputTags").on("focusout", function(e){
+        console.log(e)
+        console.log(e.target.id)
+        console.log("yea baby")
+        setTimeout(function(){
+            $("#largeTagDiv").remove()
+        }, 200)
+        
     })
     console.log("Add tag:", word)
 }
@@ -513,23 +520,47 @@ async function displayIconModal(id){
     }
     // FIXXXX
     //searchTags("", id)
-    inTagSearch.on("focus", function(){
+    // $("#infoModal").on("click", function(e){
+    //     console.log(e.target.id)
+    //     if (e.target.id != "infoModal" && e.target.id != ""){
+    //         console.log("Hi five brosef")
+    //     }
+    // })
+
+    inTagSearch.on("focus", function(e){
+        console.log("this is the rythm of the night")
+        e.stopImmediatePropagation();
+        console.log(e.isImmediatePropagationStopped())
+        console.log(e)
         console.log("t")
         searchTags("", id)
     })
-    // inTagSearch.on("blur", function(event){
-    //     console.log("t")
-    //     console.log(event)
-    //     $("#largeTagDiv").remove()
-    //     event.stopPropagation()()
-        
-    // })
+    
     inTagSearch.on("keyup", function (e){
         $("#largeTagDiv").remove()
         if (e.target.value != ""){
             searchTags(e.target.value, id)
         }
     })
+    
+    
+    // $(".modal-content").on("click", function(){
+    //     if (inTagSearch.is(":focus")){
+    //         //Leave
+    //     }
+    //     else{
+    //         $("#largeTagDiv").remove()
+    //     }
+    // })
+
+    // inTagSearch.on("blur", function(e){
+
+    //     console.log("t")
+    //     console.log(e)
+    //     $("#largeTagDiv").remove()
+        
+        
+    // })
     let textbox = $("<textarea>", {
         row: "5",
         style: "margin-left: 45px; width:405px;", 
@@ -1242,7 +1273,6 @@ var makeStorage = function (id, text){
 function innerfindIt(dataArray, objectId) {
     for (var i = 0; i < dataArray.length; i++){
         if (dataArray[i].id == objectId) {
-            console.log("Zoo wee mama")
             let object = dataArray[i]
             return object
             
@@ -1468,21 +1498,41 @@ function printBookmark(object, parent){
 
     let bookmarkIcon = document.createElement("i")
     bookmarkIcon.innerHTML = "info"
-    $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-2 mr-1 item-info")
+    bookmarkIcon.classList.add("d-inline-flex");
+    bookmarkIcon.classList.add("material-icons");
+    bookmarkIcon.classList.add("icon");
+    bookmarkIcon.classList.add("mt-2");
+    bookmarkIcon.classList.add("mr-1");
+    bookmarkIcon.classList.add("item-info");
+    // $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-2 mr-1 item-info")
     bookmarkIcon.id = "i" + object.id
-    $(bookmarkIcon).on("click", function (e){
+    bookmarkIcon.addEventListener("click", function(e){
         e.preventDefault()
         displayIconModal(object.id)
+    });
+    // $(bookmarkIcon).on("click", function (e){
+    //     e.preventDefault()
+    //     displayIconModal(object.id)
 
-    })
-    $(bookmarkIcon).hover(function(){
-        $(bookmarkIcon).css("cursor", "pointer")
-        $(bookmarkIcon).css("color", "white")
-        $(bookmarkText).css("color", "black")
-    }, function(){
-        $(bookmarkIcon).css("cursor", "default")
-        $(bookmarkIcon).css("color", "black")
-    })
+    // })
+    bookmarkIcon.addEventListener("mouseover", function(e){
+        bookmarkIcon.style.cursor = "pointer"
+        bookmarkIcon.style.color = "white"
+        bookmarkText.style.color = "black"
+    });
+    bookmarkIcon.addEventListener("mouseout", function(e){
+        bookmarkIcon.style.cursor = "default"
+        bookmarkIcon.style.color = "black"
+        bookmarkText.style.color = "white"
+    });
+    // $(bookmarkIcon).hover(function(){
+    //     $(bookmarkIcon).css("cursor", "pointer")
+    //     $(bookmarkIcon).css("color", "white")
+    //     $(bookmarkText).css("color", "black")
+    // }, function(){
+    //     $(bookmarkIcon).css("cursor", "default")
+    //     $(bookmarkIcon).css("color", "black")
+    // })
 
     $(bookmarkDiv).mouseenter(function(){
         if (textColour){
@@ -1538,7 +1588,7 @@ async function onLoadApp(){
         popularList = removeDuplicates(popularList)
         let counter = 0
         let endIt = false
-        while ($("#bookmarks").height() < ($("#bod").height()/2.5) || endIt){
+        while ($("#bookmarks").height() < ($("#bod").height()/3) || endIt){
             for(var i=0; i < 5; i++){
                 let index = counter * 5 + i
                 console.log(popularList[index])

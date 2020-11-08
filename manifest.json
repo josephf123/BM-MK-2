@@ -1,8 +1,8 @@
 {
   "name": "BM Bookmark Manager",
-  "version": "2.1.7",
+  "version": "2.2.0",
   "description": "Displays and organises your bookmarks",
-  "permissions": ["storage", "bookmarks", "history", "topSites"],
+  "permissions": ["storage", "bookmarks", "history"],
   "icons": {
     "16": "images/BM squish.png",
     "48": "images/BM squish@4x.png",
