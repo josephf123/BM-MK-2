@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     $("body").css("background-color", "#" + backCol)
 
+    showPreview()
+
     if (colourConfig == "r"){
         $("#backgroundColour").val("Rotating") 
         $("#bookmarkColour").val("Rotating") 
@@ -159,9 +161,7 @@ document.addEventListener('DOMContentLoaded', async function(){
         colourConfig = "s"
         manyCheckVerify()
         colourSpecify()
-    })
-    $("#preview").on("click", function(){
-        showPreview()
+        location.reload()
     })
     $("#selectAll").on("click", async function() {
         if (allChecked == false){
@@ -186,14 +186,6 @@ document.addEventListener('DOMContentLoaded', async function(){
         }
         
     })
-    // $("#deSelect").on("click", function(){
-    //     console.log("checking")
-    //     $("#deSelect").checked = true
-    //     for(var i=0; i < colourOptions.length; i++){
-    //         document.getElementById("$" + i).disabled = false
-    //         document.getElementById("$" + i).checked = false
-    //     } 
-    // })
     $("#colourButton").on("click", function(){
         $("#memoryOption").css("display", "none")
         $("#configurationOption").css("display", "none")
@@ -234,6 +226,19 @@ document.addEventListener('DOMContentLoaded', async function(){
     buttonHovering(homeButtons, "#" + bookCol)
     let memoryButtons = ["#clearTags", "#clearInfo"]
     buttonHovering(memoryButtons, "#" + bookCol, true)
+
+    $("#flipCol").on("click", async function(){
+        let dataCol = await stored("colourOrder")
+        let backCol = dataCol.slice(0,6)
+        let bookCol = dataCol.slice(7)  
+        console.log(backCol)
+        console.log(bookCol)
+        let colCombo = bookCol + "-" + backCol
+        console.log(colCombo)
+        await makeStorage("colourOrder", colCombo)
+        await makeStorage("colourCollection", colCombo)
+        location.reload()
+    })
 })
 
 
@@ -297,9 +302,6 @@ async function checkWhenLoad(){
         for(var i=0; i < colourOptions.length; i++){
             if (colourOptions[i] == colOrder){
                 document.getElementById("$" + i).checked = true
-            }
-            else{
-                document.getElementById("$" + i).disabled = true
             }
         }
     }
@@ -370,36 +372,11 @@ function changeFocus(obj, col){
 
 function colourSpecify(){
     if (colourConfig == "s"){
-        $("#deselectDiv").css("display", "")
         $("#selectAllDiv").css("display", "none")
     }
     else if (colourConfig == "r"){
-        $("#deselectDiv").css("display", "none")
         $("#selectAllDiv").css("display", "")
     }
-    // $("#rotateColour").hover(function(){
-    //     console.log(colourConfig)
-    //     if (colourConfig == "s"){
-    //         $("#singleColour").removeClass("btn-primary")
-    //         $("#singleColour").addClass("btn-outline-primary")
-    //     }
-    // }, function(){
-    //     if (colourConfig == "s"){
-    //         $("#singleColour").removeClass("btn-outline-primary")
-    //         $("#singleColour").addClass("btn-primary")
-    //     }
-    // })
-    // $("#singleColour").hover(function(){
-    //     if (colourConfig == "r"){
-    //         $("#rotateColour").removeClass("btn-primary")
-    //         $("#rotateColour").addClass("btn-outline-primary")
-    //     }
-    // }, function(){
-    //     if (colourConfig == "r"){
-    //         $("#rotateColour").removeClass("btn-outline-primary")
-    //         $("#rotateColour").addClass("btn-primary")
-    //     }
-    // })
 }
 
 
@@ -449,8 +426,12 @@ function showMoreOptions(){
                 storeColour(id)
             }
             else{
-                undisableCheck(id)
+                console.log("Wait...")
                 console.log("melon")
+                //If the box is unchecked, it goes back to the original colour scheme, number 0
+                let colCombination = colourOptions[0]
+                await makeStorage("colourOrder", colCombination)
+                await makeStorage("colourCollection", colCombination)
                 $("#toggling").css("display", "none")
             }
         }
@@ -486,11 +467,8 @@ async function storeColour(index){
     let colCombination = colourOptions[index]
     await makeStorage("colourOrder", colCombination)
     await makeStorage("colourCollection", colCombination)
-    let backCol = colCombination.slice(0,6)
-    let bookCol = colCombination.slice(7)
-    $("#backgroundColour").val(backCol) 
-    $("#bookmarkColour").val(bookCol) 
-    showPreview()
+    location.reload()
+    
 
 }
 
