@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                 await makeStorage("colourOrder", string)
                 await makeStorage("colourCollection", string)
                 alertFunction("Successfully saved colours", "success")
-                showPreview()
+                location.reload()
             }
         }
         else{
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async function(){
         $("#backgroundColour").val("114B5F") 
         $("#bookmarkColour").val("03A0B5") 
         alertFunction("Successfully reset colours", "success")
-        showPreview()
+        location.reload()
 
     })
     $(".optButX").hover(function(){
