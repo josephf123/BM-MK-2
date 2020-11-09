@@ -131,10 +131,10 @@ document.addEventListener('DOMContentLoaded', async function(){
         console.log(bookmarkColour)
     })
     $("#resetButton").on("click", async function (){
-        await makeStorage("colourOrder", "247BA0-93C0A4")
-        await makeStorage("colourCollection", "247BA0-93C0A4")
-        $("#backgroundColour").val("247BA0") 
-        $("#bookmarkColour").val("93C0A4") 
+        await makeStorage("colourOrder", "114B5F-03A0B5")
+        await makeStorage("colourCollection", "114B5F-03A0B5")
+        $("#backgroundColour").val("114B5F") 
+        $("#bookmarkColour").val("03A0B5") 
         alertFunction("Successfully reset colours", "success")
         showPreview()
 
@@ -179,21 +179,21 @@ document.addEventListener('DOMContentLoaded', async function(){
                 document.getElementById("$" + i).checked = false
             }
             if (selectedArr.length == 0){
-                selectedArr.push("247BA0-93C0A4")
+                selectedArr.push("114B5F-03A0B5")
             }
             await makeStorage("colourCollection", selectedArr)
             allChecked = false
         }
         
     })
-    $("#deSelect").on("click", function(){
-        console.log("checking")
-        $("#deSelect").checked = true
-        for(var i=0; i < colourOptions.length; i++){
-            document.getElementById("$" + i).disabled = false
-            document.getElementById("$" + i).checked = false
-        } 
-    })
+    // $("#deSelect").on("click", function(){
+    //     console.log("checking")
+    //     $("#deSelect").checked = true
+    //     for(var i=0; i < colourOptions.length; i++){
+    //         document.getElementById("$" + i).disabled = false
+    //         document.getElementById("$" + i).checked = false
+    //     } 
+    // })
     $("#colourButton").on("click", function(){
         $("#memoryOption").css("display", "none")
         $("#configurationOption").css("display", "none")
@@ -444,7 +444,8 @@ function showMoreOptions(){
         if (colourConfig == "s"){
             let obj = document.getElementById(this.id)
             if (obj.checked == true){
-                disableCheck(id)
+                // disableCheck(id)
+                unCheckOthers(id)
                 storeColour(id)
             }
             else{
@@ -470,6 +471,15 @@ function showMoreOptions(){
         
         console.log(id)
     })
+}
+
+function unCheckOthers(index){
+    for(var i=0; i< colourOptions.length;i++){
+        if (i != index){
+            console.log(i, index)
+            document.getElementById("$" + i).checked = false
+        }
+    }
 }
 
 async function storeColour(index){
