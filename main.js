@@ -1487,8 +1487,10 @@ function printBookmark(object, parent){
             break;
         case "https://github.com/":
             sendMessage = "https://github.githubassets.com/favicons/favicon.svg"
+            break;
         case "https://calendar.google.com/":
             sendMessage = "https://calendar.google.com/googlecalendar/images/favicons_fttmIIlBXU2Ldf6JaL09WmFY3NDc1zq1/v3/calendar_19.ico"
+            break;
         default:
             break;
     }
