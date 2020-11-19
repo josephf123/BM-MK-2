@@ -1477,16 +1477,18 @@ function printBookmark(object, parent){
             sendMessage = "https://www.youtube.com/s/desktop/ee2e5595/img/favicon_32.png"
             break;
         case "https://mail.google.com/":
-            sendMessage = "https://ssl.gstatic.com/ui/v1/icons/mail/images/favicon5.ico"
+            sendMessage = "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico"
             break;
         case "https://drive.google.com/":
-            sendMessage = "https://ssl.gstatic.com/docs/doclist/images/infinite_arrow_favicon_5.ico"
+            sendMessage = "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png"
             break;
         case "https://classroom.google.com/":
             sendMessage = "https://ssl.gstatic.com/classroom/favicon.png"
             break;
         case "https://github.com/":
             sendMessage = "https://github.githubassets.com/favicons/favicon.svg"
+        case "https://calendar.google.com/":
+            sendMessage = "https://calendar.google.com/googlecalendar/images/favicons_fttmIIlBXU2Ldf6JaL09WmFY3NDc1zq1/v3/calendar_19.ico"
         default:
             break;
     }
