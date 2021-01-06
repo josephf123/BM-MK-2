@@ -40,7 +40,6 @@ let hasBeenClicked = false
 let maxPerPage = 0;
 
 
-
 // chrome.browserAction.onClicked.addListener(function(){
 //     console.log("hiya")
 //     chrome.tabs.create({'url': chrome.extension.getURL('newTab.html')}, function(tab) {
@@ -227,10 +226,10 @@ document.addEventListener("DOMContentLoaded", async() => {
     $("#optionsPage").on("click", function (){
         window.location.href = "options.html"
     })
-    $(".dropdown-item-tag").on("click", function (){
-        console.log(this.id)
-        displayWithTag(this.id)
-    })
+    // $(".dropdown-item-tag").on("click", function (){
+    //     console.log(this.id)
+    //     displayWithTag(this.id)
+    // })
     $("#searchButton").on("keyup", function (e){
         console.log(e.target.value)
         searchFunction(e.target.value)
@@ -285,6 +284,7 @@ document.addEventListener("DOMContentLoaded", async() => {
         $("#bookmarks").empty()
         onFocusOrFilter()
         if (currentHomeState == "default"){
+            currentState = "default"
             for(var i=0; i < data.length; i++){
                 if (data[i].children){  
                     printFolder(data[i])
@@ -297,6 +297,7 @@ document.addEventListener("DOMContentLoaded", async() => {
             initializeFolderOpen()
         }
         else if (currentHomeState == "popular"){
+            currentState = "popular"
             for(var i=0; i < popularList.length;i++){
                 let object = findIt(data, popularList[i])
                 printBookmark(object)
@@ -621,7 +622,8 @@ async function searchFunction(searchWord){
     }
     else if (currentState.slice(0,2) == "F+"){
         console.log("wasa")
-        let folderId = currentState.slice(2)
+        let folderId = currentState.slice(3)
+        console.log("this is FOLDER ID", folderId)
         let object = findIt(data, folderId)
         console.log(object)
         if (object.children.length > 0){
@@ -1102,30 +1104,6 @@ function sortBookmarks(){
     })
 }
 
-
-async function displayWithTag(tagName){
-    let array = []
-    await find(data, tagName, array)
-    if (array.length != 0){
-        onFocusOrFilter()
-        $("#bookmarks").empty()
-        for(var i=0; i < array.length; i++){
-            console.log("###################")
-            console.log(array)
-            if (array[i].children){
-                printFolder(array[i])
-                onClickOpen(array[i])
-            }
-            printBookmark(array[i])
-        }
-    }
-    else{
-        $("#errorMessage").modal("show")
-        let string = 'Sorry, there are no bookmarks that are under the tag "' + tagName + '"'
-        $("#errorBody").text(string)
-    }
-    console.log(array)
-}
 
 async function checkIfTag(object, tag){
     let tagString = tag + ","

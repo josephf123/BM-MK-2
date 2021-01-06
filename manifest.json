@@ -17,7 +17,8 @@
     "persistent": false
   },
   "browser_action": {
-    "default_icon": "images/BM squish@8x.png"
+    "default_icon": "images/BM squish@8x.png",
+    "default_popup": "popup.html"
   },
   "content_security_policy":
   "script-src 'self' https://www.google-analytics.com https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js https://fonts.googleapis.com ;  object-src 'self';",
