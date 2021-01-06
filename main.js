@@ -1078,8 +1078,8 @@ function sortBookmarks(){
                     printBookmark(object)
                 }
             }
-            else if (changeState == "Newly added"){
-                currentState = "Newly added"
+            else if (changeState == "Recently added"){
+                currentState = "Recently added"
                 hasBeenClicked = true
                 $("#bookmarks").empty()
                 for(var i=data.length -1; i >= 0; i--){
