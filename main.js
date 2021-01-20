@@ -1608,10 +1608,14 @@ async function onLoadApp(){
             expandIcon.remove()
             onFocusOrFilter()
             let children = maxPerPage
-            for(var i=children; popularList.length > i;i++){
+            for(var i=children; 100 > i;i++){
                 let object = findIt(data, popularList[i])
                 printBookmark(object)
             }
+            // for(var i=children; popularList.length > i;i++){
+            //     let object = findIt(data, popularList[i])
+            //     printBookmark(object)
+            // }
             hasBeenClicked = true
         })
         expandIcon.hover(function(){
