@@ -1570,7 +1570,7 @@ async function onLoadApp(){
         popularList = removeDuplicates(popularList)
         let counter = 0
         let endIt = false
-        while ($("#bookmarks").height() < ($("#bod").height()/3) || endIt){
+        while ($("#bookmarks").height() < ($("#bod").height()/2.5) || endIt){
             for(var i=0; i < 5; i++){
                 let index = counter * 5 + i
                 console.log(popularList[index])
