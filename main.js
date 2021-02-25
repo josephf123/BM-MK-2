@@ -1381,16 +1381,7 @@ function pickBlackOrWhite(colour){
 function onSearchBarFocus(){
     
     $("#searchButton").focus(() => {
-        onFocusOrFilter()
-        $("#expandIcon").remove()
-        if (!hasBeenClicked){
-            hasBeenClicked = true
-            let children = maxPerPage
-            for(var i=children; popularList.length > i;i++){
-                let object = findIt(data, popularList[i])
-                printBookmark(object)
-            }
-        }
+        initialExpandingHome()
         
     })
     
