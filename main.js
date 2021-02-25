@@ -314,6 +314,11 @@ document.addEventListener("DOMContentLoaded", async() => {
     }, function(){
         $(this).css("color", "black")
     })
+    $("#bookmarks").on("click", () => {
+        if (!hasBeenClicked){
+            initialExpandingHome()
+        }
+    })
 
     
 })
@@ -909,7 +914,13 @@ async function renderFolders(){
     else{
         let isNew = false
         let folderArray = []
-        let $folder = $("#folderMenu")[0].children
+        let $folder;
+        if ($("#folderMenu")[0]){
+            $folder = $("#folderMenu")[0].children
+        }
+        else{
+            $folder = []
+        }
         data = await search
         findFolders(data, folderArray)
         console.log("this is folders")
@@ -1392,7 +1403,10 @@ function onFocusOrFilter(){
     $("#dropdownAdd").css("width", menuLength)
     $("#bookmarks").addClass("divFocus")
     $("#bookmarks").css("height", "65%")
+    $("#bookmarks").css("width", "90%")
     $("#bookmarks").scrollTop(0)
+    $("#middleLine").addClass("middleLine")
+
 }
 
 
@@ -1656,6 +1670,11 @@ function printBookmark(object, parent){
     bookmarkClickable.href = object.url
     bookmarkClickable.class = "m-3 clickable"
     bookmarkClickable.id = "a" + object.id
+    
+    bookmarkClickable.addEventListener("click", function(e){
+        e.stopImmediatePropagation()
+    });
+    
 
     let bookmarkRowDivision = document.createElement("div")
     bookmarkRowDivision.className = "d-flex flex-row-reverse margin"
@@ -1731,6 +1750,7 @@ function printBookmark(object, parent){
     bookmarkIcon.id = "i" + object.id
     bookmarkIcon.addEventListener("click", function(e){
         e.preventDefault()
+        e.stopImmediatePropagation()
         displayIconModal(object.id)
     });
     // $(bookmarkIcon).on("click", function (e){
@@ -1811,7 +1831,7 @@ async function onLoadApp(){
         popularList = removeDuplicates(popularList)
         let counter = 0
         let endIt = false
-        while ($("#bookmarks").height() < ($("#bod").height()/2.5) || endIt){
+        while ($("#bookmarks").height() < ($("#bod").height()/2) || endIt){
             for(var i=0; i < 5; i++){
                 let index = counter * 5 + i
                 console.log(popularList[index])
@@ -1847,46 +1867,7 @@ async function onLoadApp(){
         //$("#bookmarks").append(expandIcon)
         console.log("hello?")
         expandIcon.on("click", function(){
-            expandIcon.remove()
-            onFocusOrFilter()
-            let startPoint = maxPerPage
-            // for(var x=0; x < Math.ceil(popularList.length/100); x++){
-            //     console.log("it is being done")
-            //     for(var i=startPoint; 100 + (x* 100) > i;i++){
-            //         if (i < popularList.length){
-            //             let object = findIt(data, popularList[i])
-            //             printBookmark(object)
-            //         }
-
-            //     }
-            //     startPoint += 100
-            // }
-
-            for(var i=startPoint; 100 + startPoint > i;i++){
-                if (i < popularList.length){
-                    let object = findIt(data, popularList[i])
-                    printBookmark(object)
-                }
-            }
-            startPoint += 100
-            $("#bookmarks").on("scroll", () => {
-                let totLength = document.getElementById("bookmarks").scrollHeight
-                let scrolledLength = $("#bookmarks").height() + $("#bookmarks").scrollTop()
-                if (scrolledLength + 200 > totLength){
-                    console.log("$$$$$")
-                    for(var i=startPoint; 100 + startPoint > i;i++){
-                        if (i < popularList.length){
-                            let object = findIt(data, popularList[i])
-                            printBookmark(object)
-                        }
-                        else{
-                            $("#bookmarks").off("scroll")
-                        }
-                    }
-                    startPoint += 100
-                }
-            })
-            hasBeenClicked = true
+            initialExpandingHome()
         })
         expandIcon.hover(function(){
             expandIcon.css("cursor", "pointer")
@@ -1900,6 +1881,36 @@ async function onLoadApp(){
     }
 }
 
+function initialExpandingHome(){
+    $("#expandIcon").remove()
+    onFocusOrFilter()
+    let startPoint = maxPerPage
+    for(var i=startPoint; 100 + startPoint > i;i++){
+        if (i < popularList.length){
+            let object = findIt(data, popularList[i])
+            printBookmark(object)
+        }
+    }
+    startPoint += 100
+    $("#bookmarks").on("scroll", () => {
+        let totLength = document.getElementById("bookmarks").scrollHeight
+        let scrolledLength = $("#bookmarks").height() + $("#bookmarks").scrollTop()
+        if (scrolledLength + 200 > totLength){
+            console.log("$$$$$")
+            for(var i=startPoint; 100 + startPoint > i;i++){
+                if (i < popularList.length){
+                    let object = findIt(data, popularList[i])
+                    printBookmark(object)
+                }
+                else{
+                    $("#bookmarks").off("scroll")
+                }
+            }
+            startPoint += 100
+        }
+    })
+    hasBeenClicked = true
+}
 
 
 async function renderPop(data){
