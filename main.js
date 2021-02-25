@@ -103,6 +103,8 @@ chrome.runtime.onInstalled.addListener(async function(details) {
     await makeStorage("home", "popular")
     // When the application loads, either the default or popular shows up
     await makeStorage("onLoad", "popular")
+    // All the pinned items on screen
+    await makeStorage("pinnedItems", [])
     
     
 });
@@ -353,12 +355,22 @@ function findAllFolders(d, array){
     }
 }
 
+function tagConvert(tagString){
+    let tagArray = []
+    if (tagString != undefined || tagString != ""){
+        tagArray = tagString.split(",")
+        tagArray.pop()
+    }
+    else {
+        tagArray = ["No tags"]
+    }
+    return tagArray
+}
+
 async function searchTags(searchWord, id){
     let tags = await stored("tags")
-    if (tags != undefined){
-        tags = tags.split(",")
-        tags.pop()
-    }
+    tags = tagConvert(tags)
+    console.log(tags)
     let storedTags = await stored(id)
     if (storedTags != undefined){
         storedTags = storedTags.split(",")
@@ -424,7 +436,7 @@ function displayTagOptions(arr, word, objId){
     $(".addTag").each(function(){
         console.log("bruhhhhh")
         $(this).hover(function(){
-            $(this).css("background-color", "blue")
+            $(this).css("background-color", bookmarkColourList[0])
         }, function(){
             $(this).css("background-color", "white")
         })
@@ -446,12 +458,13 @@ function displayTagOptions(arr, word, objId){
                 ta = ta + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
                 await makeStorage("tags", ta)
             }
-            $("<div>", {
-                text: tags[i],
-                class: "btn m-2 d-inline-flex btn-primary",
-                style: "border-radius: 1.5em"
-            })
+            // $("<div>", {
+            //     text: tags[i],
+            //     class: "btn m-2 d-inline-flex btn-primary",
+            //     style: "border-radius: 1.5em"
+            // })
             await displayIconModal(objId)
+            await renderTags()
         })
     })
     $("#inputTags").on("focusout", function(e){
@@ -472,14 +485,24 @@ async function saveChangesModal(id, text){
 }
 
 async function displayIconModal(id){
+    console.log(id)
     let object = findIt(data, id)
     let tags = await stored(id)
-    if (tags != undefined){
-        tags = tags.split(",")
-        tags.pop()
+    if (object.children){
+        $("#removeBookmarkModal").css("display", "none")
+        $("#removeFolderModal").css("display", "")
     }
     else{
+        $("#removeBookmarkModal").css("display", "")
+        $("#removeFolderModal").css("display", "none")
+    }
+    console.log(tags)
+    if (tags == undefined || tags == ""){
         tags = ["No Tags"]
+    }
+    else{
+        tags = tags.split(",")
+        tags.pop()
     }
     console.log(tags)
     $("#infoModal").empty()
@@ -499,16 +522,45 @@ async function displayIconModal(id){
     for(var i=0;i < tags.length; i++){
         let tag = $("<div>", {
             class: "btn m-2 d-inline-flex btn-primary",
-            style: "border-radius: 1.5em"
+            style: "border-radius: 1.5em",
+            id: "clickToNavigate_" + tags[[i]]
         })
+        let tagIncluded = tags[i]
         let tagTextText = "<p class='mb-0'>" + tags[i] + "</p>"
         let tagText = $(tagTextText)
         
-        let deleteTagIconText = "<i class='material-icons ml-1' style='position:relative; left: 5px'>cancel</i>"
+        let deleteTagIconText = "<i id=" + '' + "deleteButton_" + tagIncluded + ' ' + "class='material-icons ml-1' style='position:relative; left: 5px;'>cancel</i>"
         let deleteTagIcon = $(deleteTagIconText)
         tagText.appendTo(tag)
-        deleteTagIcon.appendTo(tag)
         tag.appendTo(div)
+
+        if (tags[i] != "No Tags"){
+            deleteTagIcon.appendTo(tag)
+            tag.on("click", async (e) => {
+                e.preventDefault()
+                let id = tag[0].id
+                id = id.replace("clickToNavigate_", "")
+                console.log(id)
+                $("#informationModal").modal('hide')
+                await displayWithTag(id)
+            })
+        }
+        deleteTagIcon.on("click", async (e) =>{
+            e.preventDefault()
+            e.stopPropagation()
+            let storedTags = await stored(object.id)
+            console.log(object)
+            if (storedTags != ("No Tags," || undefined)){
+                let newTags = storedTags.replace(tagIncluded + ",", "")
+                console.log(newTags)
+                console.log(newTags)
+                await makeStorage(object.id, newTags)
+                await displayIconModal(object.id)
+
+            }
+            
+        })
+        
     }
     let addTagSearch = $("<div class='form-group mb-4 mx-3' style='z-index: 4'></div>")
     let inTagSearch = $("<input id='inputTags' placeholder='Search or create tags' class='form-control' style='border-width: 0; border-bottom-width: 1px; border-radius: 0; padding-left: 0;z-index: 5'>")
@@ -543,8 +595,74 @@ async function displayIconModal(id){
             searchTags(e.target.value, id)
         }
     })
-    
-    
+    $("#removeBookmarkModal").on("click", () => {
+        $("#confirmBody").empty()
+        console.log(id)
+        $("#confirmationMessage").modal("show")
+        let message = $("<p>", {
+            "text": "Are you sure you want to delete this bookmark. Once deleted, it can't be retrieved."
+        })
+        let confirmButton = $("<div>", {
+            class : "btn btn-danger",
+            text : "Delete",
+            style : "position:sticky;left:100%"
+
+        })
+        let cancelButton = $("<div>", {
+            class : "btn btn-secondary",
+            text : "Cancel"
+        })
+        cancelButton.css("cursor", "pointer")
+        confirmButton.css("cursor", "pointer")
+
+
+        cancelButton.on("click", async () => {
+            $("#confirmationMessage").modal("hide")
+            await displayIconModal(id)
+        })
+        confirmButton.on("click", async () => {
+            console.log("delteeee")
+            await deleteBookmark(id)
+            location.reload()
+        })
+        $("#confirmBody").append(message)
+        $("#confirmBody").append(cancelButton)
+        $("#confirmBody").append(confirmButton)
+    })
+    $("#removeFolderModal").css("cursor", "pointer")
+    $("#removeFolderModal").on("click", () => {
+        $("#confirmBody").empty()
+        console.log(id)
+        $("#confirmationMessage").modal("show")
+        let message = $("<p>", {
+            "text": "Are you sure you want to delete this folder and the content inside. Once deleted, it can't be retrieved."
+        })
+        let confirmButton = $("<div>", {
+            class : "btn btn-danger",
+            text : "Delete",
+            style : "position:sticky;left:100%"
+
+        })
+        let cancelButton = $("<div>", {
+            class : "btn btn-secondary",
+            text : "Cancel"
+        })
+        cancelButton.css("cursor", "pointer")
+        confirmButton.css("cursor", "pointer")
+        cancelButton.on("click", async () => {
+            $("#confirmationMessage").modal("hide")
+            await displayIconModal(id)
+        })
+        confirmButton.on("click", async () => {
+            console.log("delteeee")
+            await deleteFolder(id)
+            location.reload()
+        })
+        $("#confirmBody").append(message)
+        $("#confirmBody").append(cancelButton)
+        $("#confirmBody").append(confirmButton)
+    })
+
     // $(".modal-content").on("click", function(){
     //     if (inTagSearch.is(":focus")){
     //         //Leave
@@ -601,6 +719,11 @@ async function displayIconModal(id){
         $("#infoModal").append(openChildrenDiv)
     }
     $("#informationModal").modal('show')
+    // $('#informationModal').on('shown.bs.modal', function() {
+    //     inTagSearch.trigger("focus")
+    // });
+    
+
 }
 
 
@@ -797,12 +920,32 @@ async function renderFolders(){
                 title = title.slice(0,11) + "..."
             }
             console.log(title.length)
+            let div = $("<div>", {
+                class : "d-flex"
+            })
             let drop = $("<a>", {
                 "class": "dropdown-item btn-m hober dropdown-item-folder",
                 "text": title,
                 "id": "f" + folderArray[i].id
             })
-            $("#folderMenu").append(drop)
+            let icon = $("<i>", {
+                id : "pin_folder_" + folderArray[i].id,
+                class : "material-icons ml-1 mt-1",
+                style : "color: #555;",
+                text : "push_pin"
+            })
+            icon.on("click", async (e) => {
+                let id = e.target.id
+                id = "f_" + id.replace("pin_folder_","")
+                console.log(id)
+                let allPinned = await stored("pinnedItems")
+                allPinned.push(id)
+                makeStorage("pinnedItems", allPinned)
+            })
+
+            div.append(icon)
+            div.append(drop)
+            $("#folderMenu").append(div)
         }
         console.log(isNew)
         let check = await stored("newFolder")
@@ -880,6 +1023,7 @@ async function addFolder(){
           // Trigger the button element with a click
             $("#saveTagChangesModal").trigger("click")
         }
+        
     });
     $("#saveTagChangesModal").on("click", async function() {
         console.log("treyvaughn")
@@ -892,13 +1036,58 @@ async function addFolder(){
     })
 }
 
-function addTag(){
+async function manage_tags(){
     console.log("gafds")
+    $("#manage_tags_place").empty()
     $('#newTagName').val('');
-    $("#newTag").modal("show")
-    $('#newTag').on('shown.bs.modal', function() {
-        $('#newTagName').trigger('focus');
-    });
+    $("#manage_tags").modal("show")
+    $("#addNewTagButton").off()
+    let tags = await stored("tags")
+    if (tags == undefined || tags == ""){
+        console.log("Wawwawa")
+        let noTagsMessage = $("<div>", {
+            class : "btn btn-warning",
+            text : "You currently have no tags. Make some!",
+            style : "width: 100%"
+        })
+        $("#manage_tags_place").append(noTagsMessage)
+    }
+    else {
+        tags = tags.split(",")
+        tags.pop()
+        for (var x=0; x < tags.length; x++){
+            let outerDiv = $("<div>", {
+                class : "d-flex p-1"
+            })
+            let tagDiv = $("<div>", {
+                class : "btn",
+                text : tags[x],
+                style: "width:100%; border: 1px solid #dee2e6"
+            })
+            let tagDelete = $("<i>", {
+                class : "material-icons",
+                text : "delete",
+                style: "font-size: 30px;",
+                id: "deleteTag_" + tags[x]
+            })
+            tagDelete.css("cursor", "pointer")
+            tagDelete.on("click", async () => {
+                let id = tagDelete[0].id
+                id = id.replace("deleteTag_", "")
+                let tagString = await stored("tags")
+                tagString = tagString.replace(id + ",", "")
+                await makeStorage("tags", tagString)
+                manage_tags()
+
+            })
+            outerDiv.append(tagDiv)
+            outerDiv.append(tagDelete)
+            $("#manage_tags_place").append(outerDiv)
+        }
+        $('#manage_tags').on('shown.bs.modal', function() {
+            $('#newTagName').trigger('focus');
+        });
+    }
     $("#saveTagChangesModal").off()
     $("#newTagName").off()
     $("#newTagName").on("keyup", function(event) {
@@ -908,25 +1097,33 @@ function addTag(){
             event.preventDefault()
           // Cancel the default action, if needed
           // Trigger the button element with a click
-            $("#saveTagChangesModal").trigger("click")
+            $("#addNewTagButton").trigger("click")
         }
     });
-    $("#saveTagChangesModal").on("click", async function() {
+    $("#addNewTagButton").on("click", async function() {
         console.log("waddup")
         let tagName = $("#newTagName")[0].value
         let tags = await stored("tags")
         let tagArray = tags.split(",")
         tagArray.pop()
+        if (tagName.charAt(tagName.length -1) == " "){
+            tagName = tagName.slice(0,-1)
+        }
         for (var i=0; i < tagArray.length; i++){
             if (tagArray[i].toUpperCase() == tagName.toUpperCase()){
                 return
             }
         }
-        tags = tags + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
-        await makeStorage("tags", tags)
-        $("#tagMenu").empty()
-        console.log("Success")
-        await renderTags()
+        
+        if (tagName != " "){
+            tags = tags + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
+            await makeStorage("tags", tags)
+            $("#tagMenu").empty()
+            console.log("Success")
+            await renderTags()
+            manage_tags()
+        }
+        
         
     })
 
@@ -945,33 +1142,57 @@ async function renderTags(){
     if (textColour){
         $("#dropdownButton").css("color", "#ffffff")
     }
+    $("#tagMenu").empty()
     $("#dropdownButton").css("background-color", bookmarkColourList[0])
     let tags = await stored("tags")
     tags = tags.split(",")
     tags.pop()
-    for(var i=0; i < tags.length; i++){
-        let drop = $("<a>", {
-            "class": "dropdown-item btn-m hober dropdown-item-tag",
-            "text": tags[i],
-            "id": tags[i]
+    if (tags.length){
+        for(var i=0; i < tags.length; i++){
+            let div = $("<div>", {
+                class : "d-flex"
+            })
+            let drop = $("<a>", {
+                "class": "dropdown-item btn-m hober dropdown-item-tag",
+                "text": tags[i],
+                "id": tags[i]
+            })
+            let icon = $("<i>", {
+                id : "pin_tag_" + tags[i],
+                class : "material-icons ml-1 mt-1",
+                style : "color: #555;",
+                text : "push_pin"
+            })
+            icon.on("click", async (e) => {
+                let id = e.target.id
+                id = "t_" + id.replace("pin_tag_", "")
+                let allPinned = await stored("pinnedItems")
+                allPinned.push(id)
+                makeStorage("pinnedItems", allPinned)
+                console.log(id)
+            })
+            div.append(icon)
+            div.append(drop)
+            $("#tagMenu").append(div)
+        }
+        let divider = $("<div>",{
+            "class": "dropdown-divider"
         })
-        $("#tagMenu").append(drop)
+        $("#tagMenu").append(divider)
+
     }
-    let divider = $("<div>",{
-        "class": "dropdown-divider"
-    })
-    let addNew = $("<div>",{
+    
+    let manageTags = $("<div>",{
         "id": "dropdownAdd",
         "class": "dropdown-item btn-m hober",
         "style": "width: 160px",
-        "text": "Add tags"
+        "text": "Manage tags"
     })
     // document.getElementById("myForm").reset()
-    addNew.on("click", function (){
-        addTag()
+    manageTags.on("click", async function (){
+        await manage_tags()
     })
-    $("#tagMenu").append(divider)
-    $("#tagMenu").append(addNew)
+    $("#tagMenu").append(manageTags)
 
     $(".dropdown-item-tag").on("click", function (){
         console.log(this.id)
@@ -1218,6 +1439,24 @@ var makeStorage = function (id, text){
     return new Promise(function (resolve, reject){
         chrome.storage.local.set({[id]: text})
         resolve(text)
+    })
+}
+
+var deleteBookmark = function (id){
+    return new Promise(function(resolve,reject){
+        chrome.bookmarks.remove(id, () => {
+            console.log("you removed ", id)
+            resolve(id)
+        })
+    })
+}
+
+var deleteFolder = function (id){
+    return new Promise(function(resolve,reject){
+        chrome.bookmarks.removeTree(id, () => {
+            console.log("you removed ", id)
+            resolve(id)
+        })
     })
 }
 
@@ -1469,6 +1708,8 @@ function printBookmark(object, parent){
         case "https://calendar.google.com/":
             sendMessage = "https://calendar.google.com/googlecalendar/images/favicons_fttmIIlBXU2Ldf6JaL09WmFY3NDc1zq1/v3/calendar_19.ico"
             break;
+        case "https://docs.google.com/":
+            sendMessage = "https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico"
         default:
             break;
     }
@@ -1570,7 +1811,7 @@ async function onLoadApp(){
         popularList = removeDuplicates(popularList)
         let counter = 0
         let endIt = false
-        while ($("#bookmarks").height() < ($("#bod").height()/2.2) || endIt){
+        while ($("#bookmarks").height() < ($("#bod").height()/2.5) || endIt){
             for(var i=0; i < 5; i++){
                 let index = counter * 5 + i
                 console.log(popularList[index])
@@ -1604,18 +1845,47 @@ async function onLoadApp(){
         outerDiv.append(expandIcon)
         $("#bookmarks").append(outerDiv)
         //$("#bookmarks").append(expandIcon)
+        console.log("hello?")
         expandIcon.on("click", function(){
             expandIcon.remove()
             onFocusOrFilter()
-            let children = maxPerPage
-            for(var i=children; 100 > i;i++){
-                let object = findIt(data, popularList[i])
-                printBookmark(object)
-            }
-            // for(var i=children; popularList.length > i;i++){
-            //     let object = findIt(data, popularList[i])
-            //     printBookmark(object)
+            let startPoint = maxPerPage
+            // for(var x=0; x < Math.ceil(popularList.length/100); x++){
+            //     console.log("it is being done")
+            //     for(var i=startPoint; 100 + (x* 100) > i;i++){
+            //         if (i < popularList.length){
+            //             let object = findIt(data, popularList[i])
+            //             printBookmark(object)
+            //         }
+
+            //     }
+            //     startPoint += 100
             // }
+
+            for(var i=startPoint; 100 + startPoint > i;i++){
+                if (i < popularList.length){
+                    let object = findIt(data, popularList[i])
+                    printBookmark(object)
+                }
+            }
+            startPoint += 100
+            $("#bookmarks").on("scroll", () => {
+                let totLength = document.getElementById("bookmarks").scrollHeight
+                let scrolledLength = $("#bookmarks").height() + $("#bookmarks").scrollTop()
+                if (scrolledLength + 200 > totLength){
+                    console.log("$$$$$")
+                    for(var i=startPoint; 100 + startPoint > i;i++){
+                        if (i < popularList.length){
+                            let object = findIt(data, popularList[i])
+                            printBookmark(object)
+                        }
+                        else{
+                            $("#bookmarks").off("scroll")
+                        }
+                    }
+                    startPoint += 100
+                }
+            })
             hasBeenClicked = true
         })
         expandIcon.hover(function(){

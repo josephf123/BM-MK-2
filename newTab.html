@@ -62,12 +62,14 @@
     box-shadow: black;
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
     background-color: #F5F5F5;
+
   }
 
   ::-webkit-scrollbar
   {
-    width: 25px;
+    width: 15px;
     background-color: #F5F5F5;
+    display: none;
 
   }
 
@@ -76,7 +78,7 @@
     box-shadow: black;
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
     background-color: #555;
-  }
+  } 
 
   .dropdownButton {
       width: 15%;
@@ -157,9 +159,24 @@
       <input class="form-control" id="searchButton" type="text" placeholder="Search Bookmarks" aria-label="Search" style="border-radius: 1.5em; font-size: xx-large;opacity: 0.7;margin-left: 1px; width: 68%;" autocomplete="off">
         <button id="dropdownButton" type="button" class="btn dropdown-toggle btn-m mx-3 mt-2 py-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 160px;height: 80%; font-size: x-large;font-weight: 300; border-radius: 1.5em;">Filter</button>
         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink" style="border-radius: 1.5em;">
-          <li><a class="dropdown-item dropdown-sort" href="#" style="width: 160px; border-radius: 1.5em;" id="Default">Default</a></li>
-          <li><a class="dropdown-item dropdown-sort" href="#" id="Popular">Popular</a></li>
-          <li><a class="dropdown-item dropdown-sort" href="#" id="newestFirst">Recently added</a></li>
+          <li>
+            <div class="d-flex">            
+              <i id="pin_default" class="material-icons ml-1 mt-1" style="color: #555;">push_pin</i>
+              <a class="dropdown-item dropdown-sort" href="#" style="width: 160px; border-radius: 1.5em;" id="Default">Default</a>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex"> 
+              <i id="pin_popular" class="material-icons ml-1 mt-1" style="color: #555;">push_pin</i>
+              <a class="dropdown-item dropdown-sort" href="#" id="Popular">Popular</a>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex"> 
+              <i id="pin_recent" class="material-icons ml-1 mt-1" style="color: #555;">push_pin</i>
+              <a class="dropdown-item dropdown-sort" href="#" id="newestFirst">Recently added</a>
+            </div>
+          </li>
           <li class="dropdown-submenu"><a id="dropdownTag"class="dropdown-item dropdown-toggle" href="#" >Tags</a>
             <ul class="dropdown-menu tagMenu" id="tagMenu" style="overflow: auto; border-radius: 1.5em;">
             </ul>
@@ -169,21 +186,24 @@
             </ul>
           </li>
         </ul>
-        <div class="modal fade" id="newTag" tabindex="-1" role="dialog" aria-labelledby="allTagsModalTitle" aria-hidden="true">
+        <div class="modal fade" id="manage_tags" tabindex="-1" role="dialog" aria-labelledby="allTagsModalTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                  <h5 id="modalTagTitle" class="modal-title">Add new tag</h5>
+                  <h5 id="modalTagTitle" class="modal-title">Manage tags</h5>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
                 </div>
                 <div class="modal-body" id="modal-tag-information">
-                    <input type="text" class="form-control" id="newTagName" placeholder="Tag name" autocomplete="off">
+                  <div id="manage_tags_place" class="pb-1"></div>
+                  <div class="d-flex">
+                    <input type="text" class="form-control" style="width: 100%;" id="newTagName" placeholder="Tag name" autocomplete="off">
+                    <button id="addNewTagButton" class="btn btn-success ml-1">Enter</button>
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="submit" class="btn btn-primary" id="saveTagChangesModal" data-dismiss="modal">Save</button>
                 </div>
             </div>
           </div>
@@ -204,6 +224,18 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="confirmationMessage" tabindex="-1" role="dialog" aria-labelledby="messages" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Confirmation</h5>
+            </div>
+            <div class="modal-body" id="modal-confirm-body">
+                <div id="confirmBody"></div>
+            </div>
+        </div>
+      </div>
+    </div>
     <div class="modal fade" id="informationModal" tabindex="-1" role="dialog" aria-labelledby="messages" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -215,13 +247,15 @@
             <div class="modal-body" id="infoModal">
             </div>
             <div class="modal-footer">
-              <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+              <button type="button" class="btn btn-danger" id="removeBookmarkModal" data-dismiss="modal" style="position:sticky;right: 100%;">Delete Bookmark</button>
+              <button type="button" class="btn btn-danger" id="removeFolderModal" data-dismiss="modal" style="position:sticky;right: 100%;">Delete Folder</button>
               <button type="button" class="btn btn-primary" id="saveChangesInfoModal" data-dismiss="modal">Save & Close</button>
             </div>
         </div>
       </div>
     </div>
     <div id="bookmarks" style="position: relative; top: 20%; margin-left: 2%; overflow-x: hidden;">
+    <!-- <div id="bookmarks" style="position: relative; width:80%;top: 30%; margin: auto; overflow-x: hidden; background-color: white; border-radius: 2em; padding-left: 4%;"> -->
 
     </div>
 
