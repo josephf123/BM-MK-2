@@ -322,9 +322,6 @@ document.addEventListener("DOMContentLoaded", async() => {
             initialExpandingHome()
         }
     })
-    console.log("testing")
-
-
     
 })
 //For the bookmarks so when you hover over them they go transparent
