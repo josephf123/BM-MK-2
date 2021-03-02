@@ -199,7 +199,8 @@ document.addEventListener("DOMContentLoaded", async() => {
     console.log(avgCol)
     //avgCol = pSBC(-0.7, "#" + invert)
     //avgCol = avgCol.slice(1)
-    $("#bod").css("background-color", backgroundColour)
+    $("#bod").css("background-color", hexCol)
+    $("#bookmarks").css("background-color", backgroundColour)
     //await findImgUrl()
     let hexCol1 = "#" + hexCol
     let hexCol2 = pSBC(-0.2, hexCol1)
@@ -219,6 +220,8 @@ document.addEventListener("DOMContentLoaded", async() => {
     console.log("testt")
     await renderTags()
     onSearchBarFocus()
+    
+
     $(".icon").on("hover", function () {
         console.log("testing")
     })
@@ -319,6 +322,8 @@ document.addEventListener("DOMContentLoaded", async() => {
             initialExpandingHome()
         }
     })
+    console.log("testing")
+
 
     
 })
@@ -1853,7 +1858,7 @@ async function onLoadApp(){
             style: "font-size: 52px; color: " + bookmarkColourList[0],
             id: "expandIcon"
         })
-        outerDiv.append(expandIcon)
+        // outerDiv.append(expandIcon)
         $("#bookmarks").append(outerDiv)
         //$("#bookmarks").append(expandIcon)
         console.log("hello?")
