@@ -31,7 +31,7 @@ const pSBC=(p,c0,c1,l)=>{
 	if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
 	else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
 }
-let data, popularList, textColour, avgCol, imgUrl, img, bookmarkColourList;
+let data, popularList, textColour, backgroundCol, imgUrl, img, bookmarkColourList;
 
 let currentState = "popular"
 
@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     }
     let backgroundColour = dataColours.slice(0,6)
     let hexCol = dataColours.slice(7)
-    avgCol = backgroundColour
+    backgroundCol = backgroundColour
     // let invert = "93C0A4"
     console.log(hexCol)
     console.log(backgroundColour)
@@ -196,11 +196,12 @@ document.addEventListener("DOMContentLoaded", async() => {
     //     hexCol = invert
     //     invert = temp
     // }
-    console.log(avgCol)
+    console.log(backgroundCol)
     //avgCol = pSBC(-0.7, "#" + invert)
     //avgCol = avgCol.slice(1)
     $("#bod").css("background-color", hexCol)
     $("#bookmarks").css("background-color", backgroundColour)
+    // $("#middleLine").css("background-color", backgroundColour)
     //await findImgUrl()
     let hexCol1 = "#" + hexCol
     let hexCol2 = pSBC(-0.2, hexCol1)
@@ -322,19 +323,111 @@ document.addEventListener("DOMContentLoaded", async() => {
             initialExpandingHome()
         }
     })
+    addFilteringButtons()
     
 })
+async function addFilteringButtons(){
+    let blackOrWhiteText = pickBlackOrWhite(backgroundCol)
+    let textColourForFilter;
+    if (blackOrWhiteText){
+        textColourForFilter = "black"
+    }
+    else{
+        textColourForFilter = "white"
+    }
+    let popularButton = $("<div>", {
+        class: "flex-fill",
+        style: "border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Popular"
+    })
+    let defaultButton = $("<div>", {
+        class: "flex-fill",
+        style: "border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Default"
+    })
+    let newButton = $("<div>", {
+        class: "flex-fill",
+        style: "border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "New"
+    })
+    let tagButton = $("<div>", {
+        class: "flex-fill",
+        style: "border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Tags"
+    })
+    let folderButton = $("<div>", {
+        class: "flex-fill",
+        style: "border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Folders"
+    })
+    let bigDiv = $("<div>", {
+        class: "row flex-fill",
+        style: "margin-left: 1%; margin-right: 1%; padding-top: 2px; padding-bottom: 2px; overflow-x: auto"
+    })
+    let biggerDiv = $("<div>", {
+        class: "row",
+        style: "margin-left: 5%; margin-right: 5%; padding-top: 2px; padding-bottom: 2px"
+    })
+    let settingsCog = $("<i>", {
+        text: "settings",
+        class: "material-icons mt-1",
+        style: "font-size: 30px"
+    })
+    let swapIcon = $("<i>", {
+        text: "cached",
+        class: "material-icons mt-1",
+        style: "font-size: 30px"
+
+    })
+    let whichIsFocused = await stored("onLoad")
+    if (whichIsFocused == "popular"){
+        popularButton.addClass("focused")
+    }
+    else if (whichIsFocused == "default"){
+        defaultButton.addClass("focused")
+    }
+    else{
+
+    }
+    settingsCog.css("cursor", "pointer")
+    swapIcon.css("cursor", "pointer")
+    popularButton.css("cursor", "pointer")
+    defaultButton.css("cursor", "pointer")
+    newButton.css("cursor", "pointer")
+    tagButton.css("cursor", "pointer")
+    folderButton.css("cursor", "pointer")
+
+    let middleLineHeight = $("#middleLine").css("height")
+    bigDiv.css("height", middleLineHeight)
+    biggerDiv.append(swapIcon)
+    bigDiv.append(popularButton)
+    bigDiv.append(defaultButton)
+    bigDiv.append(newButton)
+    bigDiv.append(tagButton)
+    bigDiv.append(folderButton)
+    biggerDiv.append(bigDiv)
+    biggerDiv.append(settingsCog)
+    $("#middleLine").append(biggerDiv)
+
+    let allTags = [defaultButton, popularButton, newButton, tagButton, folderButton]
+    let lighterCol = pSBC(0.03, "#" + backgroundCol)
+    buttonHovering(allTags, "#" + backgroundCol, lighterCol)
+
+
+}
+
 //For the bookmarks so when you hover over them they go transparent
-function buttonHovering(array, colour, exclusive){
+function buttonHovering(array, colour, lighterColor, exclusive){
     for(let i=0; i < array.length;i++){
         console.log(colour)
-        $(array[i]).css("border", "1px solid " + colour)
-        if (arguments.length == 3 && arguments[2] == true){
+        $(array[i]).css("border", "2px solid " + colour)
+        console.log("does this work")
+        if (arguments.length == 4 && arguments[3] == true){
             $(array[i]).addClass("focused")
-            changeFocus(array[i], colour)
+            changeFocus(array[i], colour, lighterColor)
         }
         else {
-            changeFocus(array[i], colour)
+            changeFocus(array[i], colour, lighterColor)
             $(array[i]).on("click", function(){
                 for(var k=0; k < array.length;k++){
                     if (k == i){
@@ -345,11 +438,67 @@ function buttonHovering(array, colour, exclusive){
                     }
                 }
                 for(var j=0; j < array.length; j++){
-                    changeFocus(array[j], colour)
+                    changeFocus(array[j], colour, lighterColor)
                 }
             })
         }
-        
+    }
+}
+
+function changeFocus(obj, col, lighterColor){
+    if ($(obj).hasClass("focused")){
+        $(obj).css("background-color", col)
+        if (pickBlackOrWhite(col)){
+            $(obj).css("color", "white")
+        }
+        else{
+            $(obj).css("color", "black")
+        }
+        $(obj).hover(function(){
+            console.log(lighterColor)
+            $(obj).css("background-color", lighterColor)
+            if (pickBlackOrWhite(bookmarkColourList[0])){
+                $(obj).css("color", "white")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        }, function(){
+            $(obj).css("background-color", col)
+            if (pickBlackOrWhite(col)){
+                $(obj).css("color", "white")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        })
+    }
+    else{
+        console.log("what what what ")
+        $(obj).css("background-color", "transparent")
+        if (pickBlackOrWhite(bookmarkColourList[0])){
+            $(obj).css("color", "white")
+        }
+        else{
+            $(obj).css("color", "black")
+        }
+        $(obj).hover(function(){
+            $(obj).css("background-color", col)
+            if (pickBlackOrWhite(col)){
+                $(obj).css("color", "white")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        }, function(){
+            $(obj).css("background-color", "transparent")
+            if (pickBlackOrWhite(bookmarkColourList[0])){
+                $(obj).css("color", "white")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        })
     }
 
 }
@@ -1530,9 +1679,9 @@ function printFolder(object){
     let folderDiv = document.createElement("div")
     folderDiv.className = "folder btn col-2 m-3 btn-sm"
     folderDiv.id = object.id
-    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + avgCol
+    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
     if (arguments.length == 2 && arguments[1] == true){
-        folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%;border-radius: 1.5em; background-color:" + avgCol
+        folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%;border-radius: 1.5em; background-color:" + backgroundCol
     }
     let bookmarkRowDivision = document.createElement("div")
     bookmarkRowDivision.className = "d-flex flex-row margin"
