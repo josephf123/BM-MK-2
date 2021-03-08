@@ -33,7 +33,7 @@ const pSBC=(p,c0,c1,l)=>{
 }
 let data, popularList, textColour, backgroundCol, imgUrl, img, bookmarkColourList;
 
-let currentState = "popular"
+let currentState = "popularButtonSort"
 
 let hasBeenClicked = false
 
@@ -92,7 +92,7 @@ let randomColours = ["D17A22","095256","BC5D2E","FF7733","F7B538","17BEBB","61CC
 chrome.runtime.onInstalled.addListener(async function(details) {
     console.log("Hoowee")
     console.log(details.reason)
-    await makeStorage("tags", "Work,Entertainment,For Later,")
+    await makeStorage("tags", ["Work","Entertainment","For Later"])
     //For now just make it so it is only colours but later I will add photos
     await makeStorage("colConfig", "s")
     // This will be colour order, either col-col, col-random, random-col or random-random
@@ -240,7 +240,6 @@ document.addEventListener("DOMContentLoaded", async() => {
         console.log(e.target.value)
         searchFunction(e.target.value)
     })
-    sortBookmarks()
     await renderFolders()
     $(".dropdown-item-folder").on("click", function (){
         displayWithFolder(this.id)
@@ -265,18 +264,16 @@ document.addEventListener("DOMContentLoaded", async() => {
     })
     $("#dropdownTag").on("click", async function(){
         let tags = await stored("tags")
-        let tagArray = tags.split(",")
-        tagArray.pop()
         $("#bookmarks").empty()
         onFocusOrFilter()
-        for(var i=0; i < tagArray.length; i++){
+        for(var i=0; i < tags.length; i++){
             console.log(tagArray[i])
             let array = []
-            await find(data, tagArray[i], array)
+            await find(data, tags[i], array)
             let folderStructure = {
                 "id": "Tag" + i,
                 "children": array,
-                "title": tagArray[i],
+                "title": tags[i],
                 "parentId": 0
             }
             printFolder(folderStructure, true)
@@ -285,46 +282,14 @@ document.addEventListener("DOMContentLoaded", async() => {
         }
        
     })
-    $("#homeButton").on("click", async function(){
-        let currentHomeState = await stored("home")
-        $("#bookmarks").empty()
-        onFocusOrFilter()
-        if (currentHomeState == "default"){
-            currentState = "default"
-            for(var i=0; i < data.length; i++){
-                if (data[i].children){  
-                    printFolder(data[i])
-                    
-                }
-                else if (!data[i].children){
-                    printBookmark(data[i])
-                }
-            }
-            initializeFolderOpen()
-        }
-        else if (currentHomeState == "popular"){
-            currentState = "popular"
-            for(var i=0; i < popularList.length;i++){
-                let object = findIt(data, popularList[i])
-                printBookmark(object)
-            }
-        }
-        
-        
-    })
-    $("#homeButton").hover(function(){
-        $(this).css("color", "white")
-        $(this).css("cursor", "pointer")
-    }, function(){
-        $(this).css("color", "black")
-    })
     $("#bookmarks").on("click", () => {
         if (!hasBeenClicked){
             initialExpandingHome()
         }
     })
     addFilteringButtons()
-    
+    sortBookmarks()
+
 })
 async function addFilteringButtons(){
     let blackOrWhiteText = pickBlackOrWhite(backgroundCol)
@@ -336,33 +301,57 @@ async function addFilteringButtons(){
         textColourForFilter = "white"
     }
     let popularButton = $("<div>", {
-        class: "flex-fill",
-        style: "border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
-        text: "Popular"
+        class: "flex-fill dropdown-sort",
+        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Popular",
+        id: "popularButtonSort"
     })
     let defaultButton = $("<div>", {
-        class: "flex-fill",
-        style: "border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
-        text: "Default"
+        class: "flex-fill dropdown-sort",
+        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Default",
+        id: "defaultButtonSort"
     })
     let newButton = $("<div>", {
-        class: "flex-fill",
-        style: "border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
-        text: "New"
+        class: "flex-fill dropdown-sort",
+        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "New",
+        id: "newButtonSort"
+    })
+    let tagButtonEncapsulate = $("<div>", {
+        class: "dropdown flex-fill",
+        style: "margin-left: 8px; margin-right: 8px; margin-bottom: 5px;"
     })
     let tagButton = $("<div>", {
-        class: "flex-fill",
-        style: "border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
-        text: "Tags"
+        class: "dropdown-toggle",
+        style: "padding-top: 3%; padding-bottom: 3%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Tags",
+    })
+    tagButton.attr("data-toggle", "dropdown")
+
+    let folderButtonEncapsulate = $("<div>", {
+        class: "dropdown flex-fill",
+        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 5px;"
     })
     let folderButton = $("<div>", {
-        class: "flex-fill",
-        style: "border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        class: "dropdown-toggle",
+        style: "padding-top: 3%; padding-bottom: 3%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Folders"
     })
+    folderButton.attr("data-toggle", "dropdown")
+    let allFiltersEncapsulate = $("<div>", {
+        class: "dropdown flex-fill",
+        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 5px;"
+    })
+    let allFilters = $("<div>", {
+        class: "flex-fill dropdown-toggle",
+        style: "padding-top: 3%; padding-bottom: 3%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "All filters"
+    })
+    allFilters.attr("data-toggle", "dropdown")
     let bigDiv = $("<div>", {
         class: "row flex-fill",
-        style: "margin-left: 1%; margin-right: 1%; padding-top: 2px; padding-bottom: 2px; overflow-x: auto"
+        style: "margin-left: 1%; margin-right: 1%; padding-top: 2px; padding-bottom: 2px;"
     })
     let biggerDiv = $("<div>", {
         class: "row",
@@ -382,11 +371,9 @@ async function addFilteringButtons(){
     let whichIsFocused = await stored("onLoad")
     if (whichIsFocused == "popular"){
         popularButton.addClass("focused")
-    }
-    else if (whichIsFocused == "default"){
+    } else if (whichIsFocused == "default"){
         defaultButton.addClass("focused")
-    }
-    else{
+    } else{
 
     }
     settingsCog.css("cursor", "pointer")
@@ -396,6 +383,7 @@ async function addFilteringButtons(){
     newButton.css("cursor", "pointer")
     tagButton.css("cursor", "pointer")
     folderButton.css("cursor", "pointer")
+    allFilters.css("cursor", "pointer")
 
     let middleLineHeight = $("#middleLine").css("height")
     bigDiv.css("height", middleLineHeight)
@@ -403,17 +391,190 @@ async function addFilteringButtons(){
     bigDiv.append(popularButton)
     bigDiv.append(defaultButton)
     bigDiv.append(newButton)
-    bigDiv.append(tagButton)
-    bigDiv.append(folderButton)
+    tagButtonEncapsulate.append(tagButton)
+    let div = $("<div>", {
+        class: "dropdown-menu",
+        style: "border-radius: 20px"
+
+    })
+    let tags = await stored("tags")
+    console.log(tags)
+    for(var i=0; i < tags.length; i++){
+        let a = $("<a>", {
+            class: "dropdown-item",
+            text: tags[i],
+            style: "border-radius: 10px"
+
+        })
+        div.append(a)
+    }
+    //Add divider and then manage tags div
+    tagButtonEncapsulate.append(div)
+    bigDiv.append(tagButtonEncapsulate)
+    let div2 = $("<div>", {
+        class: "dropdown-menu",
+        style: "border-radius: 20px; overflow:auto; max-height: 500px"
+
+    })
+    let array = []
+    findAllFolders(data, array)
+    for(var i=0; i < array.length; i++){
+        let a = $("<a>", {
+            class: "dropdown-item",
+            text: array[i].title,
+            style: "border-radius: 10px"
+
+        })
+        div2.append(a)
+    }
+    folderButtonEncapsulate.append(folderButton)
+    folderButtonEncapsulate.append(div2)
+    bigDiv.append(folderButtonEncapsulate)
+    let div3 = $("<div>", {
+        class: "dropdown-menu",
+        style: "border-radius: 20px"
+
+    })
+    // for(var i=0; i < 4; i++){
+    //     let a = $("<a>", {
+    //         class: "dropdown-item",
+    //         text: "anything",
+    //         style: "border-radius: 10px"
+
+    //     })
+    //     div3.append(a)
+    // }
+    let defLi = $("<li>")
+    let filterDefaultButton = $("<div>",{
+        class: "d-flex"
+    })
+    let defClick = $("<a>", {
+        class: "dropdown-item dropdown-sort",
+        text: "Default",
+        style: "border-radius:1.5em"
+    })
+    filterDefaultButton.append(defClick)
+    defLi.append(filterDefaultButton)
+    div3.append(defLi)
+    let popLi = $("<li>")
+    let filterPopularButton = $("<div>",{
+        class: "d-flex"
+    })
+    let popClick = $("<a>", {
+        class: "dropdown-item dropdown-sort",
+        text: "Popular"
+    })
+    filterPopularButton.append(popClick)
+    popLi.append(filterPopularButton)
+    div3.append(popLi)
+    let newLi = $("<li>")
+    let filterNewButton = $("<div>",{
+        class: "d-flex"
+    })
+    let newClick = $("<a>", {
+        class: "dropdown-item dropdown-sort",
+        text: "New"
+    })
+    filterNewButton.append(newClick)
+    newLi.append(filterNewButton)
+    div3.append(newLi)
+    let tagsLi = $("<li>", {
+        class: "dropdown-submenu"
+    })
+    let tagsClick = $("<a>", {
+        class: "dropdown-item dropdown-toggle",
+        text: "Tags"
+    })
+    let tagsInside = $("<ul>", {
+        class: "dropdown-menu",
+        style: "width: 15em; border-radius: 1.5em; max-height: 400px;"
+    })
+    tagsLi.append(tagsClick)
+    tagsLi.append(tagsInside)
+    div3.append(tagsLi)
+    let folderLi = $("<li>", {
+        class: "dropdown-submenu"
+    })
+
+    let folderClick = $("<a>", {
+        class: "dropdown-item dropdown-toggle",
+        text: "Folder",
+        style: "border-radius:1.5em"
+    })
+    let folderInside = $("<ul>", {
+        class: "dropdown-menu",
+        style: "width: 15em; border-radius: 1.5em; max-height: 400px; overflow:auto"
+    })
+    folderLi.append(folderClick)
+    folderLi.append(folderInside)
+    div3.append(folderLi)
+    for(var i=0; i < tags.length; i++){
+        let a = $("<a>", {
+            class: "dropdown-item",
+            text: tags[i],
+            style: "border-radius: 10px"
+
+        })
+        tagsInside.append(a)
+    }
+    for(var i=0; i < array.length; i++){
+        let title = array[i].title
+        if (title.length > 20){
+            title = title.slice(0,20) + "..."
+        }
+        let a = $("<a>", {
+            class: "dropdown-item",
+            text: title,
+            style: "border-radius: 10px"
+
+        })
+        folderInside.append(a)
+    }
+
+
+
+
+    allFiltersEncapsulate.append(allFilters)
+    allFiltersEncapsulate.append(div3)
+    bigDiv.append(allFiltersEncapsulate)
     biggerDiv.append(bigDiv)
     biggerDiv.append(settingsCog)
     $("#middleLine").append(biggerDiv)
-
-    let allTags = [defaultButton, popularButton, newButton, tagButton, folderButton]
+    
+    let allTags = [defaultButton, popularButton, newButton, tagButton, folderButton, allFilters]
     let lighterCol = pSBC(0.03, "#" + backgroundCol)
     buttonHovering(allTags, "#" + backgroundCol, lighterCol)
 
-
+    popularButton.on("click", () => {
+        currentState = "popularButtonSort"
+        paginateLoadingFilter(popularList)
+    })
+    filterPopularButton.on("click", () => {
+        currentState = "popularButtonSort"
+        paginateLoadingFilter(popularList)
+    })
+    defaultButton.on("click", () => {
+        currentState = "defaultButtonSort"
+        paginateLoadingFilter(data)
+    })
+    filterDefaultButton.on("click", () => {
+        currentState = "defaultButtonSort"
+        paginateLoadingFilter(data)
+    })
+    newButton.on("click", () => {
+        currentState = "newButtonSort"
+        let copyOfData = $.extend( true, [], data );
+        let reversedData = copyOfData.reverse()
+        console.log(copyOfData)
+        paginateLoadingFilter(reversedData)
+    })
+    filterNewButton.on("click", () => {
+        currentState = "newButtonSort"
+        let copyOfData = $.extend( true, [], data );
+        let reversedData = copyOfData.reverse()
+        console.log(copyOfData)
+        paginateLoadingFilter(reversedData)
+    })
 }
 
 //For the bookmarks so when you hover over them they go transparent
@@ -511,26 +672,24 @@ function findAllFolders(d, array){
     }
 }
 
-function tagConvert(tagString){
-    let tagArray = []
-    if (tagString != undefined || tagString != ""){
-        tagArray = tagString.split(",")
-        tagArray.pop()
-    }
-    else {
-        tagArray = ["No tags"]
-    }
-    return tagArray
-}
+// function tagConvert(tagArr){
+//     let tagArray = []
+//     if (tag)
+//     if (tagArr.length == 0){
+//         tagArray = tagString.split(",")
+//         tagArray.pop()
+//     }
+//     else {
+//         tagArray = ["No tags"]
+//     }
+//     return tagArray
+// }
 
 async function searchTags(searchWord, id){
     let tags = await stored("tags")
-    tags = tagConvert(tags)
-    console.log(tags)
     let storedTags = await stored(id)
-    if (storedTags != undefined){
-        storedTags = storedTags.split(",")
-        storedTags.pop()
+    if (storedTags == undefined){
+        storedTags = []
     }
     console.log(storedTags, "stored tags")
     let acceptedArray = []
@@ -539,17 +698,18 @@ async function searchTags(searchWord, id){
         if ((tags[i].toUpperCase()).includes(searchWord.toUpperCase())){
             console.log(tags[i])
             acceptedArray.push(tags[i])
-            if (storedTags != undefined){
+            if (storedTags != []){
                 for(var j=0; j < storedTags.length; j++){
                     console.log(storedTags[j])
                     console.log(tags[i])
                     if (storedTags[j] == tags[i]){
-                        acceptedArray = acceptedArray.filter(word => word != tags[i])
+                        acceptedArray = acceptedArray.filter(word => word !== tags[i])
                     }
                 }
             }
         }
     }
+    console.log(acceptedArray, "this is accepted array")
     displayTagOptions(acceptedArray, searchWord, id)
     console.log(acceptedArray)
 }
@@ -602,17 +762,19 @@ function displayTagOptions(arr, word, objId){
             let tagName = this.id
             let tags = await stored(objId)
             if (tags == undefined){
-                tags = ""
+                tags = []
             }
             tagName = tagName.charAt(0).toUpperCase() + tagName.slice(1)
-            tags = tags + tagName + ","
+            console.log(tagName)
+            tags.push(tagName)
             console.log(tags)
             await makeStorage(objId, tags)
             console.log("this just worked")
             if ($(this).hasClass("createTag")){
-                let ta = await stored("tags")
-                ta = ta + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
-                await makeStorage("tags", ta)
+                let allTags = await stored("tags")
+                let newTagAdding = tagName.charAt(0).toUpperCase() + tagName.slice(1)
+                allTags.push(newTagAdding)
+                await makeStorage("tags", allTags)
             }
             // $("<div>", {
             //     text: tags[i],
@@ -653,12 +815,11 @@ async function displayIconModal(id){
         $("#removeFolderModal").css("display", "none")
     }
     console.log(tags)
-    if (tags == undefined || tags == ""){
+    if (tags == undefined || tags == [] || tags.length == 0){
         tags = ["No Tags"]
     }
     else{
-        tags = tags.split(",")
-        tags.pop()
+
     }
     console.log(tags)
     $("#infoModal").empty()
@@ -706,8 +867,8 @@ async function displayIconModal(id){
             e.stopPropagation()
             let storedTags = await stored(object.id)
             console.log(object)
-            if (storedTags != ("No Tags," || undefined)){
-                let newTags = storedTags.replace(tagIncluded + ",", "")
+            if (storedTags != ([] || undefined)){
+                let newTags = storedTags.filter(f => f !== tagIncluded)
                 console.log(newTags)
                 console.log(newTags)
                 await makeStorage(object.id, newTags)
@@ -897,7 +1058,6 @@ async function searchFunction(searchWord){
         if (array.length > 0){
             displayedBookmarks = array
         }
-        i
     }
     else if (currentState.slice(0,2) == "F+"){
         console.log("wasa")
@@ -910,7 +1070,7 @@ async function searchFunction(searchWord){
         }
         
     }
-    else if (currentState == "popular"){
+    else if (currentState == "popularButtonSort"){
         let array = []
         for(var i=0; i < popularList.length;i++){
             let object = findIt(data, popularList[i])
@@ -919,7 +1079,7 @@ async function searchFunction(searchWord){
         console.log(array)
         displayedBookmarks = array
     }
-    else if (currentState == "default"){
+    else if (currentState == "defaultButtonSort"){
         displayedBookmarks = data
     }
     // let allBookmarks = $("#bookmarks").children()
@@ -1205,7 +1365,7 @@ async function manage_tags(){
     $("#manage_tags").modal("show")
     $("#addNewTagButton").off()
     let tags = await stored("tags")
-    if (tags == undefined || tags == ""){
+    if (tags == undefined || tags == []){
         console.log("Wawwawa")
         let noTagsMessage = $("<div>", {
             class : "btn btn-warning",
@@ -1215,8 +1375,6 @@ async function manage_tags(){
         $("#manage_tags_place").append(noTagsMessage)
     }
     else {
-        tags = tags.split(",")
-        tags.pop()
         for (var x=0; x < tags.length; x++){
             let outerDiv = $("<div>", {
                 class : "d-flex p-1"
@@ -1236,9 +1394,9 @@ async function manage_tags(){
             tagDelete.on("click", async () => {
                 let id = tagDelete[0].id
                 id = id.replace("deleteTag_", "")
-                let tagString = await stored("tags")
-                tagString = tagString.replace(id + ",", "")
-                await makeStorage("tags", tagString)
+                let tagArray = await stored("tags")
+                tagArray = tagArray.filter(e => e !== id)
+                await makeStorage("tags", tagArray)
                 manage_tags()
 
             })
@@ -1265,9 +1423,7 @@ async function manage_tags(){
     $("#addNewTagButton").on("click", async function() {
         console.log("waddup")
         let tagName = $("#newTagName")[0].value
-        let tags = await stored("tags")
-        let tagArray = tags.split(",")
-        tagArray.pop()
+        let tagArray = await stored("tags")
         if (tagName.charAt(tagName.length -1) == " "){
             tagName = tagName.slice(0,-1)
         }
@@ -1277,9 +1433,10 @@ async function manage_tags(){
             }
         }
         
-        if (tagName != " "){
-            tags = tags + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
-            await makeStorage("tags", tags)
+        if (tagName != []){
+            let newTagString = tagName.charAt(0).toUpperCase() + tagName.slice(1)
+            tagArray = tagArray.push(newTagString)
+            await makeStorage("tags", tagArray)
             $("#tagMenu").empty()
             console.log("Success")
             await renderTags()
@@ -1307,8 +1464,6 @@ async function renderTags(){
     $("#tagMenu").empty()
     $("#dropdownButton").css("background-color", bookmarkColourList[0])
     let tags = await stored("tags")
-    tags = tags.split(",")
-    tags.pop()
     if (tags.length){
         for(var i=0; i < tags.length; i++){
             let div = $("<div>", {
@@ -1426,20 +1581,20 @@ function clickClose(obj) {
     }
 }
 
-
-
-
 function sortBookmarks(){
+    console.log("WTR")
+
     let first = true
-    let curState = $("#dropdownButton").text()
+    let curState = "popularButtonSort"
     $(".dropdown-sort").on("click", async function() {
+        console.log("WTR")
         onFocusOrFilter()
-        let changeState = this.innerHTML
+        let changeState = this.id
         console.log(changeState)
         if (first || curState != changeState){
             first = false
-            if (changeState == "Default"){
-                currentState = "default"
+            if (changeState == "defaultButtonSort"){
+                currentState = "defaultButtonSort"
                 hasBeenClicked = true
                 $("#bookmarks").empty()
                 for(var i=0; i < data.length; i++){
@@ -1454,8 +1609,8 @@ function sortBookmarks(){
                 initializeFolderOpen()
 
             }
-            else if (changeState == "Popular"){
-                currentState = "popular"
+            else if (changeState == "popularButtonSort"){
+                currentState = "popularButtonSort"
                 hasBeenClicked = true
                 $("#bookmarks").empty()
                 for(var i=0; i < popularList.length;i++){
@@ -1463,8 +1618,8 @@ function sortBookmarks(){
                     printBookmark(object)
                 }
             }
-            else if (changeState == "Recently added"){
-                currentState = "Recently added"
+            else if (changeState == "newButtonSort"){
+                currentState = "newButtonSort"
                 hasBeenClicked = true
                 $("#bookmarks").empty()
                 for(var i=data.length -1; i >= 0; i--){
@@ -2024,13 +2179,29 @@ async function onLoadApp(){
 }
 
 function initialExpandingHome(){
-    $("#expandIcon").remove()
+    paginateLoadingFilter(popularList)
+}
+
+function paginateLoadingFilter(filterArray){
+    $("#bookmarks").off("scroll")
     onFocusOrFilter()
-    let startPoint = maxPerPage
+    let startPoint = 0
+    $("#bookmarks").empty()
+    let isObject = true
+    if (typeof(filterArray[0]) == "string"){
+        isObject = false
+    }
     for(var i=startPoint; 100 + startPoint > i;i++){
-        if (i < popularList.length){
-            let object = findIt(data, popularList[i])
-            printBookmark(object)
+        if (i < filterArray.length){
+            if (isObject){
+                let object = filterArray[i]
+                printBookmark(object)
+            }
+            else{
+                let object = findIt(data, filterArray[i])
+                printBookmark(object)
+            }
+            
         }
     }
     startPoint += 100
@@ -2040,9 +2211,16 @@ function initialExpandingHome(){
         if (scrolledLength + 200 > totLength){
             console.log("$$$$$")
             for(var i=startPoint; 100 + startPoint > i;i++){
-                if (i < popularList.length){
-                    let object = findIt(data, popularList[i])
-                    printBookmark(object)
+                if (i < filterArray.length){
+                    if (isObject){
+                        let object = filterArray[i]
+                        printBookmark(object)
+                    }
+                    else{
+                        let object = findIt(data, filterArray[i])
+                        printBookmark(object)
+                    }
+                    
                 }
                 else{
                     $("#bookmarks").off("scroll")
@@ -2051,7 +2229,6 @@ function initialExpandingHome(){
             startPoint += 100
         }
     })
-    hasBeenClicked = true
 }
 
 
