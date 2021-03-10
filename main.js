@@ -262,26 +262,6 @@ document.addEventListener("DOMContentLoaded", async() => {
             onClickOpen(array[i])
         }
     })
-    $("#dropdownTag").on("click", async function(){
-        let tags = await stored("tags")
-        $("#bookmarks").empty()
-        onFocusOrFilter()
-        for(var i=0; i < tags.length; i++){
-            console.log(tagArray[i])
-            let array = []
-            await find(data, tags[i], array)
-            let folderStructure = {
-                "id": "Tag" + i,
-                "children": array,
-                "title": tags[i],
-                "parentId": 0
-            }
-            printFolder(folderStructure, true)
-            console.log("heyo")
-            onClickOpen(folderStructure)
-        }
-       
-    })
     $("#bookmarks").on("click", () => {
         if (!hasBeenClicked){
             initialExpandingHome()
@@ -298,7 +278,7 @@ async function addFilteringButtons(){
         textColourForFilter = "black"
     }
     else{
-        textColourForFilter = "white"
+        textColourForFilter = "#D3D3D3"
     }
     let popularButton = $("<div>", {
         class: "flex-fill dropdown-sort",
@@ -324,7 +304,7 @@ async function addFilteringButtons(){
     })
     let tagButton = $("<div>", {
         class: "dropdown-toggle",
-        style: "padding-top: 3%; padding-bottom: 3%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Tags",
     })
     tagButton.attr("data-toggle", "dropdown")
@@ -335,7 +315,7 @@ async function addFilteringButtons(){
     })
     let folderButton = $("<div>", {
         class: "dropdown-toggle",
-        style: "padding-top: 3%; padding-bottom: 3%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Folders"
     })
     folderButton.attr("data-toggle", "dropdown")
@@ -345,10 +325,11 @@ async function addFilteringButtons(){
     })
     let allFilters = $("<div>", {
         class: "flex-fill dropdown-toggle",
-        style: "padding-top: 3%; padding-bottom: 3%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "All filters"
     })
     allFilters.attr("data-toggle", "dropdown")
+    allFiltersEncapsulate.css("height", $("#middleLine").css("height"))
     let bigDiv = $("<div>", {
         class: "row flex-fill",
         style: "margin-left: 1%; margin-right: 1%; padding-top: 2px; padding-bottom: 2px;"
@@ -400,33 +381,61 @@ async function addFilteringButtons(){
     let tags = await stored("tags")
     console.log(tags)
     for(var i=0; i < tags.length; i++){
+        let aligningDiv = $("<div>", {
+            class: "row"
+        })
         let a = $("<a>", {
-            class: "dropdown-item",
+            class: "dropdown-item tag-select-filter",
             text: tags[i],
-            style: "border-radius: 10px"
+            style: "border-radius: 1.5em; width: 70%; position: relative; left: 15px",
+            id: "tagFilter" + tags[i]
 
         })
-        div.append(a)
+        let tagPush = $("<i>", {
+            class: "material-icons ml-3 mt-1",
+            text: "push_pin"
+        })
+        aligningDiv.append(a)
+        aligningDiv.append(tagPush)
+        div.append(aligningDiv)
     }
+
+    
     //Add divider and then manage tags div
     tagButtonEncapsulate.append(div)
     bigDiv.append(tagButtonEncapsulate)
     let div2 = $("<div>", {
         class: "dropdown-menu",
-        style: "border-radius: 20px; overflow:auto; max-height: 500px"
+        style: "border-radius: 20px; max-height: 500px; min-width: 230px"
 
     })
+    let innerFolderDivWidth;
     let array = []
     findAllFolders(data, array)
     for(var i=0; i < array.length; i++){
+        let aligningDiv = $("<div>", {
+            class: "row"
+        })
+        let title = array[i].title
+        if (title.length > 20){
+            title = title.slice(0,20) + "..."
+        }
         let a = $("<a>", {
-            class: "dropdown-item",
-            text: array[i].title,
-            style: "border-radius: 10px"
+            class: "dropdown-item folder-select-filter",
+            text: title,
+            style: "border-radius: 1.5em; width: 70%; position: relative; left: 15px",
+            id: "folderFilter" + array[i].id
 
         })
-        div2.append(a)
+        let tagPush = $("<i>", {
+            class: "material-icons ml-4 mt-1 mr-auto",
+            text: "push_pin"
+        })
+        aligningDiv.append(a)
+        aligningDiv.append(tagPush)
+        div2.append(aligningDiv)
     }
+
     folderButtonEncapsulate.append(folderButton)
     folderButtonEncapsulate.append(div2)
     bigDiv.append(folderButtonEncapsulate)
@@ -435,18 +444,13 @@ async function addFilteringButtons(){
         style: "border-radius: 20px"
 
     })
-    // for(var i=0; i < 4; i++){
-    //     let a = $("<a>", {
-    //         class: "dropdown-item",
-    //         text: "anything",
-    //         style: "border-radius: 10px"
-
-    //     })
-    //     div3.append(a)
-    // }
     let defLi = $("<li>")
     let filterDefaultButton = $("<div>",{
         class: "d-flex"
+    })
+    let defPush = $("<i>", {
+        class: "material-icons",
+        text: "push_pin"
     })
     let defClick = $("<a>", {
         class: "dropdown-item dropdown-sort",
@@ -454,68 +458,109 @@ async function addFilteringButtons(){
         style: "border-radius:1.5em"
     })
     filterDefaultButton.append(defClick)
+    filterDefaultButton.append(defPush)
     defLi.append(filterDefaultButton)
     div3.append(defLi)
     let popLi = $("<li>")
     let filterPopularButton = $("<div>",{
         class: "d-flex"
     })
+    let popPush = $("<i>", {
+        class: "material-icons",
+        text: "push_pin"
+    })
     let popClick = $("<a>", {
         class: "dropdown-item dropdown-sort",
         text: "Popular"
     })
     filterPopularButton.append(popClick)
+    filterPopularButton.append(popPush)
     popLi.append(filterPopularButton)
     div3.append(popLi)
     let newLi = $("<li>")
     let filterNewButton = $("<div>",{
         class: "d-flex"
     })
+    let newPush = $("<i>", {
+        class: "material-icons",
+        text: "push_pin"
+    })
     let newClick = $("<a>", {
         class: "dropdown-item dropdown-sort",
         text: "New"
     })
     filterNewButton.append(newClick)
+    filterNewButton.append(newPush)
     newLi.append(filterNewButton)
     div3.append(newLi)
     let tagsLi = $("<li>", {
         class: "dropdown-submenu"
     })
+    let tagFilterDiv = $("<div>", {
+        class: "row",
+        style: "border-radius: 2.5em"
+    })
+    let tagPush = $("<i>", {
+        class: "material-icons mt-1 ml-4",
+        text: "push_pin"
+    })
     let tagsClick = $("<a>", {
         class: "dropdown-item dropdown-toggle",
-        text: "Tags"
+        text: "Tags",
+        style: "width: 65%; position:relative; left: 15px; border-radius:2.5em; "
     })
     let tagsInside = $("<ul>", {
         class: "dropdown-menu",
         style: "width: 15em; border-radius: 1.5em; max-height: 400px;"
     })
-    tagsLi.append(tagsClick)
+    tagFilterDiv.append(tagsClick)
+    tagFilterDiv.append(tagPush)
+    tagsLi.append(tagFilterDiv)
     tagsLi.append(tagsInside)
     div3.append(tagsLi)
     let folderLi = $("<li>", {
         class: "dropdown-submenu"
     })
-
+    let folderFilterDiv = $("<div>", {
+        class: "row",
+        style: "border-radius: 2.5em"
+    })
+    let folderPush = $("<i>", {
+        class: "material-icons mt-1 ml-4",
+        text: "push_pin"
+    })
     let folderClick = $("<a>", {
         class: "dropdown-item dropdown-toggle",
         text: "Folder",
-        style: "border-radius:1.5em"
+        style: "border-radius:2.5em; width: 65%; position:relative; left: 15px;"
     })
     let folderInside = $("<ul>", {
         class: "dropdown-menu",
         style: "width: 15em; border-radius: 1.5em; max-height: 400px; overflow:auto"
     })
-    folderLi.append(folderClick)
+    folderFilterDiv.append(folderClick)
+    folderFilterDiv.append(folderPush)
+    folderLi.append(folderFilterDiv)
     folderLi.append(folderInside)
     div3.append(folderLi)
     for(var i=0; i < tags.length; i++){
+        let aligningDiv = $("<div>", {
+            class: "row"
+        })
         let a = $("<a>", {
-            class: "dropdown-item",
+            class: "dropdown-item tag-select-filter",
             text: tags[i],
-            style: "border-radius: 10px"
+            style: "border-radius: 1.5em; width: 70%; position: relative; left: 15px",
+            id: "tagAllFilter" + tags[i]
 
         })
-        tagsInside.append(a)
+        let tagPush = $("<i>", {
+            class: "material-icons ml-3 mt-1",
+            text: "push_pin"
+        })
+        aligningDiv.append(a)
+        aligningDiv.append(tagPush)
+        tagsInside.append(aligningDiv)
     }
     for(var i=0; i < array.length; i++){
         let title = array[i].title
@@ -523,9 +568,10 @@ async function addFilteringButtons(){
             title = title.slice(0,20) + "..."
         }
         let a = $("<a>", {
-            class: "dropdown-item",
+            class: "dropdown-item folder-select-filter",
             text: title,
-            style: "border-radius: 10px"
+            style: "border-radius: 10px",
+            id: "folderAllFilter" + array[i].id
 
         })
         folderInside.append(a)
@@ -544,6 +590,94 @@ async function addFilteringButtons(){
     let allTags = [defaultButton, popularButton, newButton, tagButton, folderButton, allFilters]
     let lighterCol = pSBC(0.03, "#" + backgroundCol)
     buttonHovering(allTags, "#" + backgroundCol, lighterCol)
+
+    swapIcon.on("click", async () => {
+        let dataColours;
+        let colConfig = await stored("colConfig")
+        if (colConfig == "s"){
+            dataColours = await stored("colourOrder")
+            let backCol = dataColours.slice(0,6)
+            let frontCol = dataColours.slice(7)
+            await makeStorage("colourOrder", frontCol + "-" + backCol)
+            location.reload()
+        }
+        else if (colConfig == "r"){
+            location.reload()
+
+        }
+
+
+    })
+    settingsCog.on("click", async () => {
+        window.location.href = "options.html"
+    })
+
+    $(".tag-select-filter").on("click", async (e) => {
+        let id = e.target.id
+        if (id.slice(0,9) == "tagFilter"){
+            id = id.slice(9,)
+        }
+        else if (id.slice(0,12) == "tagAllFilter"){
+            id = id.slice(12,)
+        }
+        let array = []
+        await findTagArray(data, id, array)
+        console.log(array)
+        if (array.length != 0){
+            currentState = "T+" + id
+            hasBeenClicked = true
+            onFocusOrFilter()
+            $("#bookmarks").off("scroll")
+            $("#bookmarks").empty()
+            for(var i=0; i < array.length; i++){
+                if (array[i].children){
+                    printFolder(array[i])
+                    onClickOpen(array[i])
+                }
+                printBookmark(array[i])
+            }
+        }
+        else{
+            $("#errorMessage").modal("show")
+            let string = 'Sorry, there are no bookmarks that are under the tag "' + id + '"'
+            $("#errorBody").text(string)
+        }
+        console.log(array)
+
+    })
+    $(".folder-select-filter").on("click", (e) => {
+        e.preventDefault()
+        let id = e.target.id
+        if (id.slice(0,12) == "folderFilter"){
+            id = id.slice(12,)
+        }
+        else if (id.slice(0,15) == "folderAllFilter"){
+            id = id.slice(15,)
+        }
+        let object = findIt(data, id)
+        let objectChildren = object.children
+        if (objectChildren.length > 0){
+            currentState = "F+" + id
+            hasBeenClicked = true
+            onFocusOrFilter()
+            $("#bookmarks").off("scroll")
+            $("#bookmarks").empty()
+            for (var i=0; i < objectChildren.length; i++){
+                if (objectChildren[i].children){
+                    printFolder(objectChildren[i])
+                    onClickOpen(objectChildren[i])
+                }
+                else{
+                    printBookmark(objectChildren[i])
+                }
+            }
+        }
+        else {
+            $("#errorMessage").modal("show")
+            let string = 'Sorry, there are no bookmarks that are in folder "' + object.title + '"'
+            $("#errorBody").text(string)
+        }
+    })
 
     popularButton.on("click", () => {
         currentState = "popularButtonSort"
@@ -610,7 +744,7 @@ function changeFocus(obj, col, lighterColor){
     if ($(obj).hasClass("focused")){
         $(obj).css("background-color", col)
         if (pickBlackOrWhite(col)){
-            $(obj).css("color", "white")
+            $(obj).css("color", "#D3D3D3")
         }
         else{
             $(obj).css("color", "black")
@@ -619,7 +753,7 @@ function changeFocus(obj, col, lighterColor){
             console.log(lighterColor)
             $(obj).css("background-color", lighterColor)
             if (pickBlackOrWhite(bookmarkColourList[0])){
-                $(obj).css("color", "white")
+                $(obj).css("color", "#D3D3D3")
             }
             else{
                 $(obj).css("color", "black")
@@ -627,7 +761,7 @@ function changeFocus(obj, col, lighterColor){
         }, function(){
             $(obj).css("background-color", col)
             if (pickBlackOrWhite(col)){
-                $(obj).css("color", "white")
+                $(obj).css("color", "#D3D3D3")
             }
             else{
                 $(obj).css("color", "black")
@@ -638,7 +772,7 @@ function changeFocus(obj, col, lighterColor){
         console.log("what what what ")
         $(obj).css("background-color", "transparent")
         if (pickBlackOrWhite(bookmarkColourList[0])){
-            $(obj).css("color", "white")
+            $(obj).css("color", "#D3D3D3")
         }
         else{
             $(obj).css("color", "black")
@@ -646,7 +780,7 @@ function changeFocus(obj, col, lighterColor){
         $(obj).hover(function(){
             $(obj).css("background-color", col)
             if (pickBlackOrWhite(col)){
-                $(obj).css("color", "white")
+                $(obj).css("color", "#D3D3D3")
             }
             else{
                 $(obj).css("color", "black")
@@ -654,7 +788,7 @@ function changeFocus(obj, col, lighterColor){
         }, function(){
             $(obj).css("background-color", "transparent")
             if (pickBlackOrWhite(bookmarkColourList[0])){
-                $(obj).css("color", "white")
+                $(obj).css("color", "#D3D3D3")
             }
             else{
                 $(obj).css("color", "black")
@@ -1054,7 +1188,7 @@ async function searchFunction(searchWord){
     if (currentState.slice(0,2) == "T+"){
         let tagName = currentState.slice(2)
         let array = []
-        await find(data, tagName, array)
+        await findTagArray(data, tagName, array)
         if (array.length > 0){
             displayedBookmarks = array
         }
@@ -1147,6 +1281,7 @@ function displayWithFolder(folderName){
     let objectChildren = object.children
     if (objectChildren.length > 0){
         currentState = "F+" + folderName
+        $("#bookmarks").off("scroll")
         hasBeenClicked = true
         onFocusOrFilter()
         $("#bookmarks").empty()
@@ -1171,10 +1306,9 @@ function displayWithFolder(folderName){
 }
 
 
-async function find(data, tagName, array){
+async function findTagArray(data, tagName, array){
     for(var i=0; i< data.length;i++){
         if (await checkIfTag(data[i], tagName)){
-            console.log("123")
             array.push(data[i])
         }
     }
@@ -1182,9 +1316,10 @@ async function find(data, tagName, array){
 
 async function displayWithTag(tagName){
     let array = []
-    await find(data, tagName, array)
+    await findTagArray(data, tagName, array)
     if (array.length != 0){
         currentState = "T+" + tagName
+        $("#bookmarks").off("scroll")
         hasBeenClicked = true
         onFocusOrFilter()
         $("#bookmarks").empty()
@@ -1459,7 +1594,7 @@ function findFolders(data, array){
 
 async function renderTags(){
     if (textColour){
-        $("#dropdownButton").css("color", "#ffffff")
+        $("#dropdownButton").css("color", "#D3D3D3")
     }
     $("#tagMenu").empty()
     $("#dropdownButton").css("background-color", bookmarkColourList[0])
@@ -1596,6 +1731,7 @@ function sortBookmarks(){
             if (changeState == "defaultButtonSort"){
                 currentState = "defaultButtonSort"
                 hasBeenClicked = true
+                $("#bookmarks").off("scroll")
                 $("#bookmarks").empty()
                 for(var i=0; i < data.length; i++){
                     if (data[i].children){  
@@ -1612,6 +1748,7 @@ function sortBookmarks(){
             else if (changeState == "popularButtonSort"){
                 currentState = "popularButtonSort"
                 hasBeenClicked = true
+                $("#bookmarks").off("scroll")
                 $("#bookmarks").empty()
                 for(var i=0; i < popularList.length;i++){
                     let object = findIt(data, popularList[i])
@@ -1621,6 +1758,7 @@ function sortBookmarks(){
             else if (changeState == "newButtonSort"){
                 currentState = "newButtonSort"
                 hasBeenClicked = true
+                $("#bookmarks").off("scroll")
                 $("#bookmarks").empty()
                 for(var i=data.length -1; i >= 0; i--){
                     if (data[i].children){  
@@ -1644,18 +1782,16 @@ function sortBookmarks(){
 
 
 async function checkIfTag(object, tag){
-    let tagString = tag + ","
     let objectTag = await stored(object.id)
     console.log(objectTag)
     if (objectTag != undefined){
         console.log("hazas")
-        if(objectTag.includes(tagString)){
-            return true
+        for(var i=0; i < objectTag.length; i++){
+            if (objectTag[i] == tag){
+                return true
+            }
         }
-        else{
-            return false
-        }
-
+        return false
     }
     else{
         return false
@@ -1982,7 +2118,7 @@ function printBookmark(object, parent){
     bookmarkText.className = "flex-fill"
     if (object.title.length >= 50) {
         if (textColour){
-            bookmarkText.style = "color: #ffffff;width:70%; font-size: 80%"
+            bookmarkText.style = "color: #D3D3D3;width:70%; font-size: 80%"
         }
         else{
             bookmarkText.style = "width:70%; font-size: 80%"
@@ -1990,7 +2126,7 @@ function printBookmark(object, parent){
     }
     else{
         if (textColour){
-            bookmarkText.style = "color: #ffffff; width:70%"
+            bookmarkText.style = "color: #D3D3D3; width:70%"
         }
         else{
             bookmarkText.style = "width:70%;"
@@ -2079,7 +2215,7 @@ function printBookmark(object, parent){
             $(bookmarkText).css("color", "black")
         }
         else{
-            $(bookmarkText).css("color", "white")
+            $(bookmarkText).css("color", "#D3D3D3")
         }
         $(bookmarkIcon).mouseenter(function(){
             $(bookmarkIcon).css("cursor", "pointer")
@@ -2088,12 +2224,12 @@ function printBookmark(object, parent){
         }).mouseleave(function(){
             $(bookmarkIcon).css("cursor", "default")
             $(bookmarkIcon).css("color", "black")
-            $(bookmarkText).css("color", "white")
+            $(bookmarkText).css("color", "#D3D3D3")
 
         })
     }).mouseleave(function(){
         if (textColour){
-            $(bookmarkText).css("color", "white")
+            $(bookmarkText).css("color", "#D3D3D3")
         }
         else{
             $(bookmarkText).css("color", "black")
