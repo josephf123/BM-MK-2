@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', async function(){
         dataCol = arr[randIndex]
     }
     //Make it one of the random ones if on rotate
-    let backCol = dataCol.slice(0,6)
-    let bookCol = dataCol.slice(7)
+    let bookCol = dataCol.slice(0,6)
+    let backCol = dataCol.slice(7)
 
     $("body").css("background-color", "#" + backCol)
 
@@ -101,9 +101,10 @@ document.addEventListener('DOMContentLoaded', async function(){
         window.location.href = "tagManage.html"
     })
     $("#homePage").on("click", function (){
-        console.log("This sucks")
         window.location.href = "newTab.html"
     })
+    $("#homePage").css("cursor", "pointer")
+
     $("#clearTags").on("click", async function (){
         await clearTags(result)
         alertFunction("successfully cleared tags", "success")
