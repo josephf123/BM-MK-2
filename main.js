@@ -105,10 +105,12 @@ chrome.runtime.onInstalled.addListener(async function(details) {
         // When the application loads, either the default or popular shows up
         await makeStorage("onLoad", "popular")
         // All the pinned items on screen
-        await makeStorage("pinnedItems", ["defaultButtonSort", "popularButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+        await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+        $("#updateMessage").modal("show")
     }
     else if (details.reason == "update"){
         showUpdatePins()
+        $("#updateMessage").modal("show")
     }
     
     
@@ -271,7 +273,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     $("#bookmarks").on("click", () => {
         if (!hasBeenClicked){
             initialExpandingHome()
-            // $("#bookmarks").popover("hide")
+            $("#bookmarks").popover("hide")
         }
     })
     await addFilteringButtons()
@@ -291,6 +293,7 @@ function pinFunctionality(element){
         let id = element[0].id
         id = id.slice(0,-3)
         id = id + "ButtonSort"
+        console.log("does this even work?")
         if (element.hasClass("pinned")){
             element.removeClass("pinned")
             console.log(id)
@@ -322,6 +325,8 @@ function buttonDrag(element){
         e.preventDefault()
         let dragFrom = e.originalEvent.dataTransfer.getData('Text')
         let dragTo = e.target.id
+        console.log(dragFrom)
+        console.log(dragTo)
         swapPinnedPositions(dragFrom, dragTo)
         $("#middleLine").empty()
         await addFilteringButtons()
@@ -342,11 +347,14 @@ async function swapPinnedPositions(a,b){
     }
     let aIndex = pinnedTabs.findIndex(x => x == a)
     let bIndex = pinnedTabs.findIndex(x => x == b)
-    let tmp = pinnedTabs[aIndex]
-    pinnedTabs[aIndex] = pinnedTabs[bIndex]
-    pinnedTabs[bIndex] = tmp
-    console.log(pinnedTabs)
-    await makeStorage("pinnedItems", pinnedTabs)
+    if (aIndex != null && bIndex != null){
+        let tmp = pinnedTabs[aIndex]
+        pinnedTabs[aIndex] = pinnedTabs[bIndex]
+        pinnedTabs[bIndex] = tmp
+        console.log(pinnedTabs)
+        await makeStorage("pinnedItems", pinnedTabs)
+    }
+    
 }
 
 async function addFilteringButtons(){
@@ -466,7 +474,7 @@ async function addFilteringButtons(){
         let a = $("<a>", {
             class: "dropdown-item tag-select-filter",
             text: tags[i],
-            style: "border-radius: 1.5em; width: 70%;",
+            style: "border-radius: 1.5em;",
             id: "tagFilter" + tags[i]
 
         })
@@ -488,21 +496,21 @@ async function addFilteringButtons(){
         style: "border-radius: 20px; max-height: 500px; min-width: 270px;overflow-y:scroll"
 
     })
-    let array = []
-    findAllFolders(data, array)
-    for(var i=0; i < array.length; i++){
+    let folderArray = []
+    findAllFolders(data, folderArray)
+    for(var i=0; i < folderArray.length; i++){
         let aligningDiv = $("<div>", {
             class: "row mr-0 ml-0",
         })
-        let title = array[i].title
+        let title = folderArray[i].title
         if (title.length > 25){
             title = title.slice(0,25) + "..."
         }
         let a = $("<a>", {
             class: "dropdown-item folder-select-filter",
             text: title,
-            style: "border-radius: 1.5em; width: 80%;",
-            id: "folderFilter" + array[i].id
+            style: "border-radius: 1.5em;",
+            id: "folderFilter" + folderArray[i].id
 
         })
         // let folderPush = $("<i>", {
@@ -642,16 +650,18 @@ async function addFilteringButtons(){
             id: "tagAllFilter" + tags[i]
 
         })
-        let tagPush = $("<i>", {
-            class: "material-icons ml-3 mt-1 clickableItem",
-            text: "push_pin"
+        let innerTagPush = $("<i>", {
+            class: "material-icons ml-3 mt-1 clickableItem innerTag",
+            text: "push_pin",
+            id: "T_" + tags[i] + "Pin"
         })
         aligningDiv.append(a)
-        aligningDiv.append(tagPush)
+        aligningDiv.append(innerTagPush)
         tagsInside.append(aligningDiv)
+        pinFunctionality(innerTagPush)
     }
-    for(var i=0; i < array.length; i++){
-        let title = array[i].title
+    for(var i=0; i < folderArray.length; i++){
+        let title = folderArray[i].title
         if (title.length > 20){
             title = title.slice(0,20) + "..."
         }
@@ -662,16 +672,18 @@ async function addFilteringButtons(){
             class: "dropdown-item folder-select-filter",
             text: title,
             style: "border-radius: 10px; width:80%",
-            id: "folderAllFilter" + array[i].id
+            id: "folderAllFilter" + folderArray[i].id
 
         })
-        let folderPush = $("<i>", {
-            class: "material-icons ml-3 mt-1 clickableItem",
-            text: "push_pin"
+        let innerFolderPush = $("<i>", {
+            class: "material-icons ml-3 mt-1 clickableItem ",
+            text: "push_pin",
+            id: "F_" + folderArray[i].id + "Pin"
         })
         aligningDiv.append(a)
-        aligningDiv.append(folderPush)
+        aligningDiv.append(innerFolderPush)
         folderInside.append(aligningDiv)
+        pinFunctionality(innerFolderPush)
     }
 
     allFiltersEncapsulate.append(allFilters)
@@ -680,9 +692,12 @@ async function addFilteringButtons(){
     
 
     biggerDiv.append(swapIcon)
-
+    
+    let allPinnedButtons = [defaultButton, popularButton, newButton, tagButton, folderButton, allFilters]
 
     let pinnedTabsOrder = await stored("pinnedItems")
+
+
     for(var i=0; i<pinnedTabsOrder.length; i++){
         console.log("The", i, "th is ", pinnedTabsOrder[i])
         if (pinnedTabsOrder[i] == "defaultButtonSort"){
@@ -707,27 +722,90 @@ async function addFilteringButtons(){
             bigDiv.append(folderButtonEncapsulate)
             foldersPush.addClass("pinned")
         }
-        // for(var x=0; x <tags.length; i++){
-        //     console.log("hello")
-        // }
-        // for(var x=0; x <folders.length; i++){
-        //     console.log("hello")
-        // }
-        
+        else {
+            let startingPart = pinnedTabsOrder[i].slice(0,2)
+            console.log(startingPart)
+            if (startingPart == "T_"){
+                let tagName = pinnedTabsOrder[i].slice(2,)
+                tagName = tagName.slice(0,-10)
+                console.log(tagName)
+                let tagDiv = $("<div>", {
+                    class: "flex-fill dropdown-sort clickableItem tag-select-filter",
+                    style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    id: "T_" + tagName + "ButtonSort",
+                    text: tagName
+                })
+                tagDiv.attr("draggable", "true")
+                buttonDrag(tagDiv)
+                //To make the hovering functionality with colours work
+                allPinnedButtons.push(tagDiv)
+                bigDiv.append(tagDiv)
+            }
+            else if (startingPart == "F_"){
+                let folderId = pinnedTabsOrder[i].slice(2,)
+                folderId = folderId.slice(0,-10)
+                console.log(folderId)
+                let folderObj = findIt(data, folderId)
+                let folderDiv = $("<div>", {
+                    class: "flex-fill dropdown-sort clickableItem folder-select-filter",
+                    style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    id: "F_" + folderId + "ButtonSort",
+                    text: folderObj.title
+                })
+                console.log(folderObj)
+                folderDiv.attr("draggable", "true")
+                buttonDrag(folderDiv)
+                //To make the hovering functionality with colours work
+                allPinnedButtons.push(folderDiv)
+                bigDiv.append(folderDiv)
+                let folderPin = "F_" + folderId + "Pin"
+                $("#"+ folderPin).addClass("pinned")
+            }
+        }
     }
     bigDiv.append(allFiltersEncapsulate)
     biggerDiv.append(bigDiv)
     biggerDiv.append(settingsCog)
-
     
     $("#middleLine").append(biggerDiv)
 
     let allFilterWidth = allFiltersEncapsulate.css("width")
     div3.css("width",allFilterWidth)
     
-    let allTags = [defaultButton, popularButton, newButton, tagButton, folderButton, allFilters]
+    //To add "pinned" to the icon for tags
+    $(".innerTag").each(function (){
+        for(var i=0; i < pinnedTabsOrder.length; i++){
+            let start = pinnedTabsOrder[i].slice(0,2)
+            let checkingTag = $(this)[0].id.slice(0,-3)
+            let otherTag = pinnedTabsOrder[i].slice(0,-10)
+            if (start == "T_"){
+                if (checkingTag == otherTag){
+                    $(this).addClass("pinned")
+                    console.log($(this)[0])
+                }
+            }   
+        }
+    })
+
+    //Add "pinned" to the icon for folders
+    for(var x=0; x<folderArray.length;x++){
+        for(var i=0; i < pinnedTabsOrder.length; i++){
+            let start = pinnedTabsOrder[i].slice(0,2)
+            if (start == "F_"){
+                let checkingFolder = "F_" + folderArray[x].id
+                let otherFolder = pinnedTabsOrder[i].slice(0,-10)
+                if (checkingFolder == otherFolder){
+                    console.log(checkingFolder)
+                    let folderPushString = "#F_" + folderArray[x].id + "Pin"
+                    console.log(folderPushString)
+                    $(folderPushString).addClass("pinned")
+                }
+            }   
+        }
+    }
+
     let lighterCol = pSBC(0.03, "#" + backgroundCol)
-    buttonHovering(allTags, "#" + backgroundCol, lighterCol)
+    buttonHovering(allPinnedButtons, "#" + backgroundCol, lighterCol)
 
     swapIcon.on("click", async () => {
         let dataColours;
@@ -752,27 +830,28 @@ async function addFilteringButtons(){
 
     $(".tag-select-filter").on("click", async (e) => {
         let id = e.target.id
-        if (id.slice(0,9) == "tagFilter"){
-            id = id.slice(9,)
+        if (id.slice(0,2) == "T_"){
+            id = id.slice(2,)
+            id = id.slice(0,-10)
         }
         else if (id.slice(0,12) == "tagAllFilter"){
             id = id.slice(12,)
         }
-        let array = []
-        await findTagArray(data, id, array)
-        console.log(array)
-        if (array.length != 0){
+        let tagArray = []
+        await findTagArray(data, id, tagArray)
+        console.log(tagArray)
+        if (tagArray.length != 0){
             currentState = "T+" + id
             hasBeenClicked = true
             onFocusOrFilter()
             $("#bookmarks").off("scroll")
             $("#bookmarks").empty()
-            for(var i=0; i < array.length; i++){
-                if (array[i].children){
-                    printFolder(array[i])
-                    onClickOpen(array[i])
+            for(var i=0; i < tagArray.length; i++){
+                if (tagArray[i].children){
+                    printFolder(tagArray[i])
+                    onClickOpen(tagArray[i])
                 }
-                printBookmark(array[i])
+                printBookmark(tagArray[i])
             }
         }
         else{
@@ -780,19 +859,22 @@ async function addFilteringButtons(){
             let string = 'Sorry, there are no bookmarks that are under the tag "' + id + '"'
             $("#errorBody").text(string)
         }
-        console.log(array)
+        console.log(tagArray)
 
     })
     $(".folder-select-filter").on("click", (e) => {
         e.preventDefault()
         let id = e.target.id
-        if (id.slice(0,12) == "folderFilter"){
-            id = id.slice(12,)
+        console.log(id, "this is id")
+        if (id.slice(0,2) == "F_"){
+            id = id.slice(2,)
+            id = id.slice(0,-10)
         }
         else if (id.slice(0,15) == "folderAllFilter"){
             id = id.slice(15,)
         }
         let object = findIt(data, id)
+        console.log(object)
         let objectChildren = object.children
         if (objectChildren.length > 0){
             currentState = "F+" + id
@@ -1102,15 +1184,12 @@ async function displayIconModal(id){
     }
     console.log(tags)
     $("#infoModal").empty()
-    let row = $("<div class='row margin py-2' style='margin-left: 0px'></div>")
-    let urlTitle = $("<div style='font-size: 20px;'>URL</div>")
     let url = $("<a>",{
         href: object.url,
         text: object.url,
-        class: "ml-2"
+        class: "d-flex",
+        style: "max-width: 400px; overflow:hidden"
     })
-    urlTitle.appendTo(row)
-    url.appendTo(row)
     $("#infoTitle").text(object.title)
     
     let tagParagraph = $("<p class='margin' style='text-align: center; margin-bottom:0px; font-size: 20px;'>Tags</p>")
@@ -1307,6 +1386,7 @@ async function displayIconModal(id){
     $("#infoModal").append(tagDivision)
     $("#infoModal").append(line)
     $("#infoModal").append(infoTitle)
+    $("#infoTitle").append(url)
     // $("#infoModal").append(infoSubscript)
     $("#infoModal").append(textbox)
     if (object.children){
