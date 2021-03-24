@@ -837,6 +837,9 @@ async function addFilteringButtons(){
         else if (id.slice(0,12) == "tagAllFilter"){
             id = id.slice(12,)
         }
+        else if (id.slice(0,9) == "tagFilter"){
+            id = id.slice(9,)
+        }
         let tagArray = []
         await findTagArray(data, id, tagArray)
         console.log(tagArray)
@@ -872,6 +875,9 @@ async function addFilteringButtons(){
         }
         else if (id.slice(0,15) == "folderAllFilter"){
             id = id.slice(15,)
+        }
+        else if (id.slice(0,12) == "folderFilter"){
+            id = id.slice(12,)
         }
         let object = findIt(data, id)
         console.log(object)
@@ -1143,6 +1149,8 @@ function displayTagOptions(arr, word, objId){
             //     style: "border-radius: 1.5em"
             // })
             await displayIconModal(objId)
+            $("#middleLine").empty()
+            await addFilteringButtons()
             // await renderTags()
         })
     })
