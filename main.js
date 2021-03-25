@@ -276,8 +276,10 @@ document.addEventListener("DOMContentLoaded", async() => {
             $("#bookmarks").popover("hide")
         }
     })
-    await addFilteringButtons()
+    await addFilteringButtons(true)
+    
     // sortBookmarks()
+    // $("#updateMessage").modal("show")
     // $("#bookmarks").popover({title: "Click me!", content: "Clicking in this area (not the bookmarks) expands it out", trigger: "manual"})
     // $("#bookmarks").popover("show")
     
@@ -448,14 +450,7 @@ async function addFilteringButtons(){
         style: "font-size: 30px"
 
     })
-    let whichIsFocused = await stored("onLoad")
-    if (whichIsFocused == "popular"){
-        popularButton.addClass("focused")
-    } else if (whichIsFocused == "default"){
-        defaultButton.addClass("focused")
-    } else{
-
-    }
+    swapIcon.attr("aria-label", "Swap colours")
     let middleLineHeight = $("#middleLine").css("height")
     bigDiv.css("height", middleLineHeight)
     
@@ -688,8 +683,16 @@ async function addFilteringButtons(){
 
     allFiltersEncapsulate.append(allFilters)
     allFiltersEncapsulate.append(div3)
-
+    if (arguments.length == 1){
+        let whichIsFocused = await stored("onLoad")
+        if (whichIsFocused == "popular"){
+            popularButton.addClass("focused")
+        } else if (whichIsFocused == "default"){
+            defaultButton.addClass("focused")
+        } else{
     
+        }
+    }
 
     biggerDiv.append(swapIcon)
     
