@@ -240,6 +240,15 @@ document.addEventListener('DOMContentLoaded', async function(){
         await makeStorage("colourCollection", colCombo)
         location.reload()
     })
+    $("#helpButton").hover(function(){
+        $(this).css("color", "white")
+    }, function(){
+        $(this).css("color", "black")
+    })
+    $("#helpButton").css("cursor", "pointer")
+    $("#helpButton").on("click", function(){
+        $("#helpModal").modal("show")
+    })
 })
 
 

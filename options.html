@@ -37,7 +37,7 @@
       <div class="row ">
         <i id="homePage" class="material-icons" style="font-size: 80px; margin-left: 15px;margin-bottom: 10px;">arrow_back</i>
         <h1 class="d-flex" style="font-size: xxx-large;text-align: center; font-weight: 700; margin: auto;">Options page</h1>
-
+        <icon id="helpButton" class="material-icons mr-5 mt-2" >help</icon>
       </div>
       <div class="row">
         <div id="colourButton" class="btn flex-fill m-2 p-2 focused" style="text-align: center;">Colours</div>
@@ -130,6 +130,23 @@
         </div>
       </div>
 
+    </div>
+    <div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="messages" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+              <h5 id="updateTitle" class="modal-title">Help</h5>
+            </div>
+            <div class="modal-body" id="updateBodyModal">
+              <p class="m-2">This is a short video about how to use some of the features of the app</p>
+                <div id="updateBody" style="display: flex;justify-content: center;" >
+                  <iframe style="margin: auto;" width="560" height="315" src="https://www.youtube.com/embed/hmxc3VtYO4I" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>                </div>
+              </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+      </div>
     </div>
 <!-- 
 
