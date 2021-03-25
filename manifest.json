@@ -1,6 +1,6 @@
 {
   "name": "Bookmark Manager",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "Displays and organises your bookmarks",
   "permissions": ["storage", "bookmarks", "history"],
   "icons": {

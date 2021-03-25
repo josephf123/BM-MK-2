@@ -106,11 +106,12 @@ chrome.runtime.onInstalled.addListener(async function(details) {
         await makeStorage("onLoad", "popular")
         // All the pinned items on screen
         await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
-        $("#updateMessage").modal("show")
+        // $("#updateMessage").modal("show")
     }
     else if (details.reason == "update"){
-        showUpdatePins()
-        $("#updateMessage").modal("show")
+        await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+        // showUpdatePins()
+        // $("#updateMessage").modal("show")
     }
     
     
