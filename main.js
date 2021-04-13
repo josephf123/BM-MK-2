@@ -1451,6 +1451,11 @@ async function searchFunction(searchWord){
     else if (currentState == "defaultButtonSort"){
         displayedBookmarks = data
     }
+    else if (currentState == "newButtonSort"){
+        let copyOfData = $.extend( true, [], data );
+        let reversedData = copyOfData.reverse()
+        displayedBookmarks = reversedData
+    }
     // let allBookmarks = $("#bookmarks").children()
     // console.log(allBookmarks)
     let searchArray = []
@@ -2550,7 +2555,9 @@ async function onLoadApp(){
 }
 
 function initialExpandingHome(){
-    paginateLoadingFilter(popularList)
+    if (currentState == "popularButtonSort"){
+        paginateLoadingFilter(popularList)
+    }
 }
 
 function paginateLoadingFilter(filterArray){
