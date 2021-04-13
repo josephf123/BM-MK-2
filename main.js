@@ -1006,7 +1006,7 @@ function changeFocus(obj, col, lighterColor){
         })
     }
     else{
-        console.log("what what what ")
+        console.log("what what what ")         
         $(obj).css("background-color", "transparent")
         if (pickBlackOrWhite(bookmarkColourList[0])){
             $(obj).css("color", "#D3D3D3")
@@ -1374,11 +1374,11 @@ async function displayIconModal(id){
     })
     if (object.children){
         var openChildrenDiv = $("<div>", {
-            id: "this",
-            class: "btn btn-success mx-2 my-3",
+            class: "btn mx-2 my-3 clickableItem",
             text: "Open all bookmarks inside the folder"
     
         })
+        openChildrenDiv.css("background-color", bookmarkColourList[0])
         openChildrenDiv.on("click", function(){
             for(var i=0; i < object.children.length; i++){
                 chrome.tabs.create({"url": object.children[i].url, "active": false})
@@ -2056,13 +2056,9 @@ function pickBlackOrWhite(colour){
 }
 
 function onSearchBarFocus(){
-    
     $("#searchButton").focus(() => {
         initialExpandingHome()
-        
     })
-    
-    
 }
 
 function onFocusOrFilter(){
@@ -2331,7 +2327,7 @@ function printBookmark(object, parent){
 
     // }
 
-    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; border-radius: 1.5em"
+    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; border-radius: 1.5em; height:120px;"
 
 
     let bookmarkClickable = document.createElement("a")
@@ -2342,31 +2338,52 @@ function printBookmark(object, parent){
     bookmarkClickable.addEventListener("click", function(e){
         e.stopImmediatePropagation()
     });
-    
-
     let bookmarkRowDivision = document.createElement("div")
-    bookmarkRowDivision.className = "d-flex flex-row-reverse margin"
-    bookmarkRowDivision.style = "overflow-wrap: anywhere;"
+    bookmarkRowDivision.className = "d-flex justify-content-between flex-row-reverse"
+    // bookmarkRowDivision.style = "overflow-wrap: anywhere;"
+
+    let bookmarkRowDivisionText = document.createElement("div")
+    bookmarkRowDivisionText.className = "d-flex flex-grow-1 margin"
+    bookmarkRowDivisionText.style = "overflow-wrap: anywhere;"
 
     let bookmarkText = document.createElement("p")
-    bookmarkText.innerHTML = object.title
-    bookmarkText.className = "flex-fill"
-    if (object.title.length >= 50) {
-        if (textColour){
-            bookmarkText.style = "color: #D3D3D3;width:70%; font-size: 80%"
-        }
-        else{
-            bookmarkText.style = "width:70%; font-size: 80%"
-        }
+    let bookmarkTitle = object.title
+    bookmarkText.className = "flex-fill flex-grow-1"
+    let bookmarkTextStyleString = "margin-bottom:0px;"
+    if (bookmarkTitle.length > 20 && bookmarkTitle.length < 40){
+        bookmarkTextStyleString += "margin-top: 0px;"
+        console.log("tgb")
+    }
+    else if (bookmarkTitle.length > 40){
+        bookmarkTitle = bookmarkTitle.slice(0,40) + "..."
+        bookmarkTextStyleString += "font-size: 80%; margin-top: 0px;"
     }
     else{
-        if (textColour){
-            bookmarkText.style = "color: #D3D3D3; width:70%"
-        }
-        else{
-            bookmarkText.style = "width:70%;"
-        }
+        bookmarkTextStyleString += "margin-top: 8px; font-size: 110%;"
     }
+    bookmarkText.innerHTML = bookmarkTitle
+
+    if (textColour){
+        bookmarkTextStyleString += "color: #D3D3D3;"
+    }
+    console.log(bookmarkTextStyleString)
+    bookmarkText.style = bookmarkTextStyleString
+    // if (object.title.length >= 50) {
+    //     if (textColour){
+    //         bookmarkText.style = "color: #D3D3D3;width:70%; font-size: 80%"
+    //     }
+    //     else{
+    //         bookmarkText.style = "width:70%; font-size: 80%"
+    //     }
+    // }
+    // else{
+    //     if (textColour){
+    //         bookmarkText.style = "color: #D3D3D3; width:70%"
+    //     }
+    //     else{
+    //         bookmarkText.style = "width:70%;"
+    //     }
+    // }
     let domain = findDomain(object.url)
     console.log(domain)
     let favicon = document.createElement("img")
@@ -2411,7 +2428,7 @@ function printBookmark(object, parent){
     bookmarkIcon.classList.add("d-inline-flex");
     bookmarkIcon.classList.add("material-icons");
     bookmarkIcon.classList.add("icon");
-    bookmarkIcon.classList.add("mt-2");
+    bookmarkIcon.classList.add("mt-1");
     bookmarkIcon.classList.add("mr-1");
     bookmarkIcon.classList.add("item-info");
     // $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-2 mr-1 item-info")
@@ -2474,8 +2491,9 @@ function printBookmark(object, parent){
     fragment.appendChild(bookmarkClickable)
     bookmarkClickable.appendChild(bookmarkDiv)
     bookmarkDiv.appendChild(bookmarkRowDivision)
+    bookmarkDiv.appendChild(bookmarkRowDivisionText)
     bookmarkRowDivision.appendChild(bookmarkIcon)
-    bookmarkRowDivision.appendChild(bookmarkText)
+    bookmarkRowDivisionText.appendChild(bookmarkText)
     bookmarkRowDivision.appendChild(favicon)
 
     
@@ -2550,7 +2568,7 @@ async function onLoadApp(){
 }
 
 function initialExpandingHome(){
-    paginateLoadingFilter(popularList)
+        paginateLoadingFilter(popularList)
 }
 
 function paginateLoadingFilter(filterArray){
