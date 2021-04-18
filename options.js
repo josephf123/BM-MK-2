@@ -154,6 +154,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     $("#rotateColour").on("click", async function(){
         await makeStorage("colConfig", "r")
         colourConfig = "r"
+        $("#selectAll").trigger("click")
         checkForDisabled()
         colourSpecify()
     })
