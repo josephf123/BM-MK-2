@@ -25,7 +25,7 @@ let allChecked = false
 let currentState = "colour"
 let currentHomeState;
 let colourOptions = [
-    "114B5F-03A0B5", "317773-E2D1F9", "48639C-82A0BC", "095256-D17A22","364156-D66853", "8AAAE5-FFFFFF", "A23B72-247BA0","067BC2-F18F01","644536-B2675E",
+    "114B5F-03A0B5", "317773-E2D1F9", "48639C-82A0BC", "095256-D17A22","364156-D66853", "A23B72-247BA0","067BC2-F18F01","644536-B2675E",
     "095256-E1612A", "446E80-A23B72", "8F3985-A675A1",
     "5158BB-F18F01","067BC2-685470", "BC5D2E-FBCA9A", "2274A5-FF7733", "446E80-B1DDCA", "0277BD-00695C",
     "247BA0-CA596E", "50635B-BDA63F", "247222-93C0A4", "247BA0-93C0A4","1D2F6F-FAC748",
@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', async function(){
         dataCol = arr[randIndex]
     }
     //Make it one of the random ones if on rotate
-    let backCol = dataCol.slice(0,6)
-    let bookCol = dataCol.slice(7)
+    let bookCol = dataCol.slice(0,6)
+    let backCol = dataCol.slice(7)
 
     $("body").css("background-color", "#" + backCol)
 
@@ -101,9 +101,10 @@ document.addEventListener('DOMContentLoaded', async function(){
         window.location.href = "tagManage.html"
     })
     $("#homePage").on("click", function (){
-        console.log("This sucks")
         window.location.href = "newTab.html"
     })
+    $("#homePage").css("cursor", "pointer")
+
     $("#clearTags").on("click", async function (){
         await clearTags(result)
         alertFunction("successfully cleared tags", "success")
@@ -238,6 +239,15 @@ document.addEventListener('DOMContentLoaded', async function(){
         await makeStorage("colourOrder", colCombo)
         await makeStorage("colourCollection", colCombo)
         location.reload()
+    })
+    $("#helpButton").hover(function(){
+        $(this).css("color", "white")
+    }, function(){
+        $(this).css("color", "black")
+    })
+    $("#helpButton").css("cursor", "pointer")
+    $("#helpButton").on("click", function(){
+        $("#helpModal").modal("show")
     })
 })
 

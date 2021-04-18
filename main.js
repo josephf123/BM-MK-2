@@ -31,9 +31,9 @@ const pSBC=(p,c0,c1,l)=>{
 	if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
 	else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
 }
-let data, popularList, textColour, avgCol, imgUrl, img, bookmarkColourList;
+let data, popularList, textColour, backgroundCol, imgUrl, img, bookmarkColourList;
 
-let currentState = "popular"
+let currentState = "popularButtonSort"
 
 let hasBeenClicked = false
 
@@ -92,19 +92,34 @@ let randomColours = ["D17A22","095256","BC5D2E","FF7733","F7B538","17BEBB","61CC
 chrome.runtime.onInstalled.addListener(async function(details) {
     console.log("Hoowee")
     console.log(details.reason)
-    await makeStorage("tags", "Work,Entertainment,For Later,")
-    //For now just make it so it is only colours but later I will add photos
-    await makeStorage("colConfig", "s")
-    // This will be colour order, either col-col, col-random, random-col or random-random
-    await makeStorage("colourOrder", "114B5F-03A0B5")
+
     
-    await makeStorage("colourCollection", "114B5F-03A0B5")
-    // When the home button is pressed, will it go to default of popular
-    await makeStorage("home", "popular")
-    // When the application loads, either the default or popular shows up
-    await makeStorage("onLoad", "popular")
-    // All the pinned items on screen
-    await makeStorage("pinnedItems", [])
+    if (details.reason == "install"){
+        await makeStorage("tags", ["Work","Entertainment","For Later"])
+        //For now just make it so it is only colours but later I will add photos
+        await makeStorage("colConfig", "s")
+        // This will be colour order, either col-col, col-random, random-col or random-random
+        await makeStorage("colourOrder", "114B5F-03A0B5")
+        
+        await makeStorage("colourCollection", "114B5F-03A0B5")
+        // When the home button is pressed, will it go to default of popular
+        await makeStorage("home", "popular")
+        // When the application loads, either the default or popular shows up
+        await makeStorage("onLoad", "popular")
+        // All the pinned items on screen
+        // await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+        // $("#updateMessage").modal("show")
+    }
+    else if (details.reason == "update"){
+        
+        // showUpdatePins()
+        // $("#updateMessage").modal("show")
+    }
+    //If the user doesn't have the data for pinnedItems, it will create one
+    let checkPinnedStatus = await stored("pinnedItems")
+    if (checkPinnedStatus == undefined) {
+        await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+    }
     
     
 });
@@ -187,7 +202,7 @@ document.addEventListener("DOMContentLoaded", async() => {
     }
     let backgroundColour = dataColours.slice(0,6)
     let hexCol = dataColours.slice(7)
-    avgCol = backgroundColour
+    backgroundCol = backgroundColour
     // let invert = "93C0A4"
     console.log(hexCol)
     console.log(backgroundColour)
@@ -196,10 +211,12 @@ document.addEventListener("DOMContentLoaded", async() => {
     //     hexCol = invert
     //     invert = temp
     // }
-    console.log(avgCol)
+    console.log(backgroundCol)
     //avgCol = pSBC(-0.7, "#" + invert)
     //avgCol = avgCol.slice(1)
-    $("#bod").css("background-color", backgroundColour)
+    $("#bod").css("background-color", hexCol)
+    $("#bookmarks").css("background-color", backgroundColour)
+    // $("#middleLine").css("background-color", backgroundColour)
     //await findImgUrl()
     let hexCol1 = "#" + hexCol
     let hexCol2 = pSBC(-0.2, hexCol1)
@@ -217,8 +234,10 @@ document.addEventListener("DOMContentLoaded", async() => {
     console.log(data)
     await onLoadApp()
     console.log("testt")
-    await renderTags()
+    // await renderTags()
     onSearchBarFocus()
+    
+
     $(".icon").on("hover", function () {
         console.log("testing")
     })
@@ -236,8 +255,7 @@ document.addEventListener("DOMContentLoaded", async() => {
         console.log(e.target.value)
         searchFunction(e.target.value)
     })
-    sortBookmarks()
-    await renderFolders()
+    // await renderFolders()
     $(".dropdown-item-folder").on("click", function (){
         displayWithFolder(this.id)
     })
@@ -259,75 +277,695 @@ document.addEventListener("DOMContentLoaded", async() => {
             onClickOpen(array[i])
         }
     })
-    $("#dropdownTag").on("click", async function(){
-        let tags = await stored("tags")
-        let tagArray = tags.split(",")
-        tagArray.pop()
-        $("#bookmarks").empty()
-        onFocusOrFilter()
-        for(var i=0; i < tagArray.length; i++){
-            console.log(tagArray[i])
-            let array = []
-            await find(data, tagArray[i], array)
-            let folderStructure = {
-                "id": "Tag" + i,
-                "children": array,
-                "title": tagArray[i],
-                "parentId": 0
-            }
-            printFolder(folderStructure, true)
-            console.log("heyo")
-            onClickOpen(folderStructure)
+    $("#bookmarks").on("click", () => {
+        if (!hasBeenClicked){
+            initialExpandingHome()
+            $("#bookmarks").popover("hide")
         }
-       
     })
-    $("#homeButton").on("click", async function(){
-        let currentHomeState = await stored("home")
-        $("#bookmarks").empty()
-        onFocusOrFilter()
-        if (currentHomeState == "default"){
-            currentState = "default"
-            for(var i=0; i < data.length; i++){
-                if (data[i].children){  
-                    printFolder(data[i])
-                    
-                }
-                else if (!data[i].children){
-                    printBookmark(data[i])
-                }
-            }
-            initializeFolderOpen()
+    await addFilteringButtons(true)
+    
+    // sortBookmarks()
+    // $("#updateMessage").modal("show")
+    // $("#bookmarks").popover({title: "Click me!", content: "Clicking in this area (not the bookmarks) expands it out", trigger: "manual"})
+    // $("#bookmarks").popover("show")
+    
+    
+
+
+})
+
+function pinFunctionality(element){
+    element.on("click", async (e) =>{
+        e.stopImmediatePropagation()
+        let pinnedTabs = await stored("pinnedItems")
+        let id = element[0].id
+        id = id.slice(0,-3)
+        id = id + "ButtonSort"
+        console.log("does this even work?")
+        if (element.hasClass("pinned")){
+            element.removeClass("pinned")
+            console.log(id)
+            pinnedTabs = pinnedTabs.filter(item => item != id)
+            console.log(pinnedTabs)
         }
-        else if (currentHomeState == "popular"){
-            currentState = "popular"
-            for(var i=0; i < popularList.length;i++){
-                let object = findIt(data, popularList[i])
-                printBookmark(object)
-            }
+        else{
+            element.addClass("pinned")
+            pinnedTabs.push(id)
         }
-        
-        
+        await makeStorage("pinnedItems", pinnedTabs)
+        $("#middleLine").empty()
+        await addFilteringButtons()
+    })  
+}
+
+function buttonDrag(element){
+    element.on("dragstart", function(e) {
+        element.css("opacity", "0.4")
+        e.originalEvent.dataTransfer.setData('Text',element[0].id)
     })
-    $("#homeButton").hover(function(){
-        $(this).css("color", "white")
-        $(this).css("cursor", "pointer")
-    }, function(){
-        $(this).css("color", "black")
+    element.on("dragend", function(e) {
+        element.css("opacity", "1")
     })
+    element.on("dragover", (e) => {
+        e.preventDefault()
+    })
+    element.on("drop", async (e) => {
+        e.preventDefault()
+        let dragFrom = e.originalEvent.dataTransfer.getData('Text')
+        let dragTo = e.target.id
+        console.log(dragFrom)
+        console.log(dragTo)
+        swapPinnedPositions(dragFrom, dragTo)
+        $("#middleLine").empty()
+        await addFilteringButtons()
+    })
+}
+
+function showUpdatePins(){
+    console.log("Hello?")
+}
+
+async function swapPinnedPositions(a,b){
+    let pinnedTabs = await stored("pinnedItems")
+    console.log(pinnedTabs)
+    console.log(a)
+    console.log(b)
+    if (a == "" || b == ""){
+        return
+    }
+    let aIndex = pinnedTabs.findIndex(x => x == a)
+    let bIndex = pinnedTabs.findIndex(x => x == b)
+    if (aIndex != null && bIndex != null){
+        let tmp = pinnedTabs[aIndex]
+        pinnedTabs[aIndex] = pinnedTabs[bIndex]
+        pinnedTabs[bIndex] = tmp
+        console.log(pinnedTabs)
+        await makeStorage("pinnedItems", pinnedTabs)
+    }
+    
+}
+
+async function addFilteringButtons(){
+    let blackOrWhiteText = pickBlackOrWhite(backgroundCol)
+    let textColourForFilter;
+    if (blackOrWhiteText){
+        textColourForFilter = "black"
+    }
+    else{
+        textColourForFilter = "#D3D3D3"
+    }
+    let popularButton = $("<div>", {
+        class: "flex-fill dropdown-sort clickableItem",
+        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Popular",
+        id: "popularButtonSort"
+    })
+    popularButton.attr("draggable", "true")
+    buttonDrag(popularButton)
+    let defaultButton = $("<div>", {
+        class: "flex-fill dropdown-sort clickableItem",
+        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Default",
+        id: "defaultButtonSort"
+    })
+    defaultButton.attr("draggable", "true")
+    buttonDrag(defaultButton)
+    let newButton = $("<div>", {
+        class: "flex-fill dropdown-sort clickableItem",
+        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "New",
+        id: "newButtonSort"
+    })
+    newButton.attr("draggable", "true")
+    buttonDrag(newButton)
+    let tagButtonEncapsulate = $("<div>", {
+        class: "dropdown flex-fill",
+        style: "margin-left: 8px; margin-right: 8px; margin-bottom: 5px;"
+    })
+    let tagButton = $("<div>", {
+        class: "dropdown-toggle clickableItem",
+        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Tags",
+        id: "tagsButtonSort"
+    })
+    tagButton.attr("data-toggle", "dropdown")
+    tagButton.attr("draggable", "true")
+    buttonDrag(tagButton)
+    let folderButtonEncapsulate = $("<div>", {
+        class: "dropdown flex-fill",
+        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 5px;"
+    })
+    let folderButton = $("<div>", {
+        class: "dropdown-toggle clickableItem",
+        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "Folders",
+        id: "foldersButtonSort"
+    })
+    folderButton.attr("data-toggle", "dropdown")
+    folderButton.attr("draggable", "true")
+    buttonDrag(folderButton)
+    let allFiltersEncapsulate = $("<div>", {
+        class: "dropdown flex-fill",
+        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 5px;"
+    })
+    let allFilters = $("<div>", {
+        class: "flex-fill dropdown-toggle clickableItem",
+        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        text: "All filters",
+        id: "all FiltersButtonSort"
+    })
+    allFilters.attr("data-toggle", "dropdown")
+    allFilters.attr("draggable", "true")
+    allFiltersEncapsulate.css("height", $("#middleLine").css("height"))
+    let bigDiv = $("<div>", {
+        class: "row flex-fill",
+        style: "margin-left: 1%; margin-right: 1%; padding-top: 2px; padding-bottom: 2px;"
+    })
+    let biggerDiv = $("<div>", {
+        class: "row",
+        style: "margin-left: 5%; margin-right: 5%; padding-top: 2px; padding-bottom: 2px"
+    })
+    let settingsCog = $("<i>", {
+        text: "settings",
+        class: "material-icons mt-1 clickableItem",
+        style: "font-size: 30px"
+    })
+    let swapIcon = $("<i>", {
+        text: "cached",
+        class: "material-icons mt-1 clickableItem",
+        style: "font-size: 30px"
+
+    })
+    swapIcon.attr("aria-label", "Swap colours")
+    let middleLineHeight = $("#middleLine").css("height")
+    bigDiv.css("height", middleLineHeight)
+    
+    tagButtonEncapsulate.append(tagButton)
+    let div = $("<div>", {
+        class: "dropdown-menu",
+        style: "border-radius: 20px"
+
+    })
+    let tags = await stored("tags")
+    console.log(tags)
+    for(var i=0; i < tags.length; i++){
+        let aligningDiv = $("<div>", {
+            class: "row mr-0 ml-0"
+        })
+        let a = $("<a>", {
+            class: "dropdown-item tag-select-filter",
+            text: tags[i],
+            style: "border-radius: 1.5em;",
+            id: "tagFilter" + tags[i]
+
+        })
+        // let tagPush = $("<i>", {
+        //     class: "material-icons ml-3 mt-1 mr-1",
+        //     text: "push_pin"
+        // })
+        aligningDiv.append(a)
+        // aligningDiv.append(tagPush)
+        div.append(aligningDiv)
+    }
 
     
-})
-//For the bookmarks so when you hover over them they go transparent
-function buttonHovering(array, colour, exclusive){
-    for(let i=0; i < array.length;i++){
-        console.log(colour)
-        $(array[i]).css("border", "1px solid " + colour)
-        if (arguments.length == 3 && arguments[2] == true){
-            $(array[i]).addClass("focused")
-            changeFocus(array[i], colour)
+    //Add divider and then manage tags div
+    tagButtonEncapsulate.append(div)
+    
+    let div2 = $("<div>", {
+        class: "dropdown-menu",
+        style: "border-radius: 20px; max-height: 500px; min-width: 270px;overflow-y:scroll"
+
+    })
+    let folderArray = []
+    findAllFolders(data, folderArray)
+    for(var i=0; i < folderArray.length; i++){
+        let aligningDiv = $("<div>", {
+            class: "row mr-0 ml-0",
+        })
+        let title = folderArray[i].title
+        if (title.length > 25){
+            title = title.slice(0,25) + "..."
+        }
+        let a = $("<a>", {
+            class: "dropdown-item folder-select-filter",
+            text: title,
+            style: "border-radius: 1.5em;",
+            id: "folderFilter" + folderArray[i].id
+
+        })
+        // let folderPush = $("<i>", {
+        //     class: "material-icons ml-3 mt-1 mr-1 mr-auto",
+        //     text: "push_pin"
+        // })
+        aligningDiv.append(a)
+        // aligningDiv.append(folderPush)
+        div2.append(aligningDiv)
+    }
+
+    folderButtonEncapsulate.append(folderButton)
+    folderButtonEncapsulate.append(div2)
+    
+    let div3 = $("<div>", {
+        class: "dropdown-menu",
+        style: "border-radius: 20px; min-width: 160px"
+
+    })
+    let defLi = $("<li>")
+    let filterDefaultButton = $("<div>",{
+        class: "d-flex"
+    })
+    let defPush = $("<i>", {
+        class: "material-icons mr-1 clickableItem pins",
+        text: "push_pin",
+        id: "defaultPin"
+    })
+    pinFunctionality(defPush)
+    let defClick = $("<a>", {
+        class: "dropdown-item dropdown-sort",
+        text: "Default",
+        style: "border-radius:1.5em"
+    })
+    filterDefaultButton.append(defClick)
+    filterDefaultButton.append(defPush)
+    defLi.append(filterDefaultButton)
+    div3.append(defLi)
+    let popLi = $("<li>")
+    let filterPopularButton = $("<div>",{
+        class: "d-flex"
+    })
+    let popPush = $("<i>", {
+        class: "material-icons mr-1 clickableItem pins",
+        text: "push_pin",
+        id: "popularPin"
+    })
+    pinFunctionality(popPush)
+    let popClick = $("<a>", {
+        class: "dropdown-item dropdown-sort",
+        text: "Popular"
+    })
+    filterPopularButton.append(popClick)
+    filterPopularButton.append(popPush)
+    popLi.append(filterPopularButton)
+    div3.append(popLi)
+    let newLi = $("<li>")
+    let filterNewButton = $("<div>",{
+        class: "d-flex"
+    })
+    let newPush = $("<i>", {
+        class: "material-icons mr-1 clickableItem pins",
+        text: "push_pin",
+        id: "newPin"
+    })
+    pinFunctionality(newPush)
+    let newClick = $("<a>", {
+        class: "dropdown-item dropdown-sort",
+        text: "New"
+    })
+    filterNewButton.append(newClick)
+    filterNewButton.append(newPush)
+    newLi.append(filterNewButton)
+    div3.append(newLi)
+    let tagsLi = $("<li>", {
+        class: "dropdown-submenu"
+    })
+    let tagFilterDiv = $("<div>", {
+        class: "d-flex",
+        style: "border-radius: 2.5em"
+    })
+    let tagPush = $("<i>", {
+        class: "material-icons mt-1 ml-4 mr-1 clickableItem pins",
+        text: "push_pin",
+        id: "tagsPin"
+    })
+    pinFunctionality(tagPush)
+    let tagsClick = $("<a>", {
+        class: "dropdown-item dropdown-toggle",
+        text: "Tags",
+        style: "border-radius:2.5em; "
+    })
+    let tagsInside = $("<ul>", {
+        class: "dropdown-menu",
+        style: "width: 15em; border-radius: 1.5em; max-height: 400px;"
+    })
+    tagFilterDiv.append(tagsClick)
+    tagFilterDiv.append(tagPush)
+    tagsLi.append(tagFilterDiv)
+    tagsLi.append(tagsInside)
+    div3.append(tagsLi)
+    let foldersLi = $("<li>", {
+        class: "dropdown-submenu"
+    })
+    let foldersFilterDiv = $("<div>", {
+        class: "d-flex",
+        style: "border-radius: 2.5em"
+    })
+    let foldersPush = $("<i>", {
+        class: "material-icons mt-1 ml-4 mr-1 clickableItem pins",
+        text: "push_pin",
+        id: "foldersPin"
+    })
+    pinFunctionality(foldersPush)
+    let foldersClick = $("<a>", {
+        class: "dropdown-item dropdown-toggle",
+        text: "Folder",
+        style: "border-radius:2.5em;"
+    })
+    let folderInside = $("<ul>", {
+        class: "dropdown-menu",
+        style: "width: 15em; border-radius: 1.5em; max-height: 400px;overflow-y:scroll;overflow-x:hide"
+    })
+    foldersFilterDiv.append(foldersClick)
+    foldersFilterDiv.append(foldersPush)
+    foldersLi.append(foldersFilterDiv)
+    foldersLi.append(folderInside)
+    div3.append(foldersLi)
+    for(var i=0; i < tags.length; i++){
+        let aligningDiv = $("<div>", {
+            class: "row "
+        })
+        let a = $("<a>", {
+            class: "dropdown-item tag-select-filter",
+            text: tags[i],
+            style: "border-radius: 1.5em; width: 70%; position: relative; left: 15px",
+            id: "tagAllFilter" + tags[i]
+
+        })
+        let innerTagPush = $("<i>", {
+            class: "material-icons ml-3 mt-1 clickableItem innerTag",
+            text: "push_pin",
+            id: "T_" + tags[i] + "Pin"
+        })
+        aligningDiv.append(a)
+        aligningDiv.append(innerTagPush)
+        tagsInside.append(aligningDiv)
+        pinFunctionality(innerTagPush)
+    }
+    for(var i=0; i < folderArray.length; i++){
+        let title = folderArray[i].title
+        if (title.length > 20){
+            title = title.slice(0,20) + "..."
+        }
+        let aligningDiv = $("<div>", {
+            class: "row mr-0 ml-0"
+        })
+        let a = $("<a>", {
+            class: "dropdown-item folder-select-filter",
+            text: title,
+            style: "border-radius: 10px; width:80%",
+            id: "folderAllFilter" + folderArray[i].id
+
+        })
+        let innerFolderPush = $("<i>", {
+            class: "material-icons ml-3 mt-1 clickableItem ",
+            text: "push_pin",
+            id: "F_" + folderArray[i].id + "Pin"
+        })
+        aligningDiv.append(a)
+        aligningDiv.append(innerFolderPush)
+        folderInside.append(aligningDiv)
+        pinFunctionality(innerFolderPush)
+    }
+
+    allFiltersEncapsulate.append(allFilters)
+    allFiltersEncapsulate.append(div3)
+    if (arguments.length == 1){
+        let whichIsFocused = await stored("onLoad")
+        if (whichIsFocused == "popular"){
+            popularButton.addClass("focused")
+        } else if (whichIsFocused == "default"){
+            defaultButton.addClass("focused")
+        } else{
+    
+        }
+    }
+
+    biggerDiv.append(swapIcon)
+    
+    let allPinnedButtons = [defaultButton, popularButton, newButton, tagButton, folderButton, allFilters]
+
+    let pinnedTabsOrder = await stored("pinnedItems")
+
+
+    for(var i=0; i<pinnedTabsOrder.length; i++){
+        console.log("The", i, "th is ", pinnedTabsOrder[i])
+        if (pinnedTabsOrder[i] == "defaultButtonSort"){
+            bigDiv.append(defaultButton)
+            defPush.addClass("pinned")
+        }
+        else if (pinnedTabsOrder[i] == "popularButtonSort"){
+            bigDiv.append(popularButton)
+            popPush.addClass("pinned")
+        }
+        else if (pinnedTabsOrder[i] == "newButtonSort"){
+            bigDiv.append(newButton)
+            newPush.addClass("pinned")
+
+        }
+        else if (pinnedTabsOrder[i] == "tagsButtonSort"){
+            bigDiv.append(tagButtonEncapsulate)
+            tagPush.addClass("pinned")
+
+        }
+        else if (pinnedTabsOrder[i] == "foldersButtonSort"){
+            bigDiv.append(folderButtonEncapsulate)
+            foldersPush.addClass("pinned")
         }
         else {
-            changeFocus(array[i], colour)
+            let startingPart = pinnedTabsOrder[i].slice(0,2)
+            console.log(startingPart)
+            if (startingPart == "T_"){
+                let tagName = pinnedTabsOrder[i].slice(2,)
+                tagName = tagName.slice(0,-10)
+                console.log(tagName)
+                let tagDiv = $("<div>", {
+                    class: "flex-fill dropdown-sort clickableItem tag-select-filter",
+                    style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    id: "T_" + tagName + "ButtonSort",
+                    text: tagName
+                })
+                tagDiv.attr("draggable", "true")
+                buttonDrag(tagDiv)
+                //To make the hovering functionality with colours work
+                allPinnedButtons.push(tagDiv)
+                bigDiv.append(tagDiv)
+            }
+            else if (startingPart == "F_"){
+                let folderId = pinnedTabsOrder[i].slice(2,)
+                folderId = folderId.slice(0,-10)
+                console.log(folderId)
+                let folderObj = findIt(data, folderId)
+                let folderDiv = $("<div>", {
+                    class: "flex-fill dropdown-sort clickableItem folder-select-filter",
+                    style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    id: "F_" + folderId + "ButtonSort",
+                    text: folderObj.title
+                })
+                console.log(folderObj)
+                folderDiv.attr("draggable", "true")
+                buttonDrag(folderDiv)
+                //To make the hovering functionality with colours work
+                allPinnedButtons.push(folderDiv)
+                bigDiv.append(folderDiv)
+                let folderPin = "F_" + folderId + "Pin"
+                $("#"+ folderPin).addClass("pinned")
+            }
+        }
+    }
+    bigDiv.append(allFiltersEncapsulate)
+    biggerDiv.append(bigDiv)
+    biggerDiv.append(settingsCog)
+    
+    $("#middleLine").append(biggerDiv)
+
+    let allFilterWidth = allFiltersEncapsulate.css("width")
+    div3.css("width",allFilterWidth)
+    
+    //To add "pinned" to the icon for tags
+    $(".innerTag").each(function (){
+        for(var i=0; i < pinnedTabsOrder.length; i++){
+            let start = pinnedTabsOrder[i].slice(0,2)
+            let checkingTag = $(this)[0].id.slice(0,-3)
+            let otherTag = pinnedTabsOrder[i].slice(0,-10)
+            if (start == "T_"){
+                if (checkingTag == otherTag){
+                    $(this).addClass("pinned")
+                    console.log($(this)[0])
+                }
+            }   
+        }
+    })
+
+    //Add "pinned" to the icon for folders
+    for(var x=0; x<folderArray.length;x++){
+        for(var i=0; i < pinnedTabsOrder.length; i++){
+            let start = pinnedTabsOrder[i].slice(0,2)
+            if (start == "F_"){
+                let checkingFolder = "F_" + folderArray[x].id
+                let otherFolder = pinnedTabsOrder[i].slice(0,-10)
+                if (checkingFolder == otherFolder){
+                    console.log(checkingFolder)
+                    let folderPushString = "#F_" + folderArray[x].id + "Pin"
+                    console.log(folderPushString)
+                    $(folderPushString).addClass("pinned")
+                }
+            }   
+        }
+    }
+
+    let lighterCol = pSBC(0.03, "#" + backgroundCol)
+    buttonHovering(allPinnedButtons, "#" + backgroundCol, lighterCol)
+
+    swapIcon.on("click", async () => {
+        let dataColours;
+        let colConfig = await stored("colConfig")
+        if (colConfig == "s"){
+            dataColours = await stored("colourOrder")
+            let backCol = dataColours.slice(0,6)
+            let frontCol = dataColours.slice(7)
+            await makeStorage("colourOrder", frontCol + "-" + backCol)
+            location.reload()
+        }
+        else if (colConfig == "r"){
+            location.reload()
+
+        }
+
+
+    })
+    settingsCog.on("click", async () => {
+        window.location.href = "options.html"
+    })
+
+    $(".tag-select-filter").on("click", async (e) => {
+        let id = e.target.id
+        if (id.slice(0,2) == "T_"){
+            id = id.slice(2,)
+            id = id.slice(0,-10)
+        }
+        else if (id.slice(0,12) == "tagAllFilter"){
+            id = id.slice(12,)
+        }
+        else if (id.slice(0,9) == "tagFilter"){
+            id = id.slice(9,)
+        }
+        let tagArray = []
+        await findTagArray(data, id, tagArray)
+        console.log(tagArray)
+        if (tagArray.length != 0){
+            currentState = "T+" + id
+            hasBeenClicked = true
+            onFocusOrFilter()
+            $("#bookmarks").off("scroll")
+            $("#bookmarks").empty()
+            for(var i=0; i < tagArray.length; i++){
+                if (tagArray[i].children){
+                    printFolder(tagArray[i])
+                    onClickOpen(tagArray[i])
+                }
+                printBookmark(tagArray[i])
+            }
+        }
+        else{
+            $("#errorMessage").modal("show")
+            let string = 'Sorry, there are no bookmarks that are under the tag "' + id + '"'
+            $("#errorBody").text(string)
+        }
+        console.log(tagArray)
+
+    })
+    $(".folder-select-filter").on("click", (e) => {
+        e.preventDefault()
+        let id = e.target.id
+        console.log(id, "this is id")
+        if (id.slice(0,2) == "F_"){
+            id = id.slice(2,)
+            id = id.slice(0,-10)
+        }
+        else if (id.slice(0,15) == "folderAllFilter"){
+            id = id.slice(15,)
+        }
+        else if (id.slice(0,12) == "folderFilter"){
+            id = id.slice(12,)
+        }
+        let object = findIt(data, id)
+        console.log(object)
+        let objectChildren = object.children
+        if (objectChildren.length > 0){
+            currentState = "F+" + id
+            hasBeenClicked = true
+            onFocusOrFilter()
+            $("#bookmarks").off("scroll")
+            $("#bookmarks").empty()
+            for (var i=0; i < objectChildren.length; i++){
+                if (objectChildren[i].children){
+                    printFolder(objectChildren[i])
+                    onClickOpen(objectChildren[i])
+                }
+                else{
+                    printBookmark(objectChildren[i])
+                }
+            }
+        }
+        else {
+            $("#errorMessage").modal("show")
+            let string = 'Sorry, there are no bookmarks that are in folder "' + object.title + '"'
+            $("#errorBody").text(string)
+        }
+    })
+
+    popularButton.on("click", () => {
+        currentState = "popularButtonSort"
+        hasBeenClicked = true
+        console.log("This should only happen once")
+        paginateLoadingFilter(popularList)
+    })
+    filterPopularButton.on("click", () => {
+        currentState = "popularButtonSort"
+        hasBeenClicked = true
+        paginateLoadingFilter(popularList)
+    })
+    defaultButton.on("click", () => {
+        currentState = "defaultButtonSort"
+        hasBeenClicked = true
+        paginateLoadingFilter(data)
+    })
+    filterDefaultButton.on("click", () => {
+        currentState = "defaultButtonSort"
+        hasBeenClicked = true
+        paginateLoadingFilter(data)
+    })
+    newButton.on("click", () => {
+        currentState = "newButtonSort"
+        hasBeenClicked = true
+        let copyOfData = $.extend( true, [], data );
+        let reversedData = copyOfData.reverse()
+        console.log(copyOfData)
+        paginateLoadingFilter(reversedData)
+    })
+    filterNewButton.on("click", () => {
+        currentState = "newButtonSort"
+        hasBeenClicked = true
+        let copyOfData = $.extend( true, [], data );
+        let reversedData = copyOfData.reverse()
+        console.log(copyOfData)
+        paginateLoadingFilter(reversedData)
+    })
+}
+
+//For the bookmarks so when you hover over them they go transparent
+function buttonHovering(array, colour, lighterColor, exclusive){
+    for(let i=0; i < array.length;i++){
+        console.log(colour)
+        $(array[i]).css("border", "2px solid " + colour)
+        console.log("does this work")
+        if (arguments.length == 4 && arguments[3] == true){
+            $(array[i]).addClass("focused")
+            changeFocus(array[i], colour, lighterColor)
+        }
+        else {
+            changeFocus(array[i], colour, lighterColor)
             $(array[i]).on("click", function(){
                 for(var k=0; k < array.length;k++){
                     if (k == i){
@@ -338,11 +976,67 @@ function buttonHovering(array, colour, exclusive){
                     }
                 }
                 for(var j=0; j < array.length; j++){
-                    changeFocus(array[j], colour)
+                    changeFocus(array[j], colour, lighterColor)
                 }
             })
         }
-        
+    }
+}
+
+function changeFocus(obj, col, lighterColor){
+    if ($(obj).hasClass("focused")){
+        $(obj).css("background-color", col)
+        if (pickBlackOrWhite(col)){
+            $(obj).css("color", "#D3D3D3")
+        }
+        else{
+            $(obj).css("color", "black")
+        }
+        $(obj).hover(function(){
+            console.log(lighterColor)
+            $(obj).css("background-color", lighterColor)
+            if (pickBlackOrWhite(bookmarkColourList[0])){
+                $(obj).css("color", "#D3D3D3")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        }, function(){
+            $(obj).css("background-color", col)
+            if (pickBlackOrWhite(col)){
+                $(obj).css("color", "#D3D3D3")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        })
+    }
+    else{
+        console.log("what what what ")         
+        $(obj).css("background-color", "transparent")
+        if (pickBlackOrWhite(bookmarkColourList[0])){
+            $(obj).css("color", "#D3D3D3")
+        }
+        else{
+            $(obj).css("color", "black")
+        }
+        $(obj).hover(function(){
+            $(obj).css("background-color", col)
+            if (pickBlackOrWhite(col)){
+                $(obj).css("color", "#D3D3D3")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        }, function(){
+            $(obj).css("background-color", "transparent")
+            if (pickBlackOrWhite(bookmarkColourList[0])){
+                $(obj).css("color", "#D3D3D3")
+            }
+            else{
+                $(obj).css("color", "black")
+            }
+        })
     }
 
 }
@@ -355,26 +1049,24 @@ function findAllFolders(d, array){
     }
 }
 
-function tagConvert(tagString){
-    let tagArray = []
-    if (tagString != undefined || tagString != ""){
-        tagArray = tagString.split(",")
-        tagArray.pop()
-    }
-    else {
-        tagArray = ["No tags"]
-    }
-    return tagArray
-}
+// function tagConvert(tagArr){
+//     let tagArray = []
+//     if (tag)
+//     if (tagArr.length == 0){
+//         tagArray = tagString.split(",")
+//         tagArray.pop()
+//     }
+//     else {
+//         tagArray = ["No tags"]
+//     }
+//     return tagArray
+// }
 
 async function searchTags(searchWord, id){
     let tags = await stored("tags")
-    tags = tagConvert(tags)
-    console.log(tags)
     let storedTags = await stored(id)
-    if (storedTags != undefined){
-        storedTags = storedTags.split(",")
-        storedTags.pop()
+    if (storedTags == undefined){
+        storedTags = []
     }
     console.log(storedTags, "stored tags")
     let acceptedArray = []
@@ -383,17 +1075,18 @@ async function searchTags(searchWord, id){
         if ((tags[i].toUpperCase()).includes(searchWord.toUpperCase())){
             console.log(tags[i])
             acceptedArray.push(tags[i])
-            if (storedTags != undefined){
+            if (storedTags != []){
                 for(var j=0; j < storedTags.length; j++){
                     console.log(storedTags[j])
                     console.log(tags[i])
                     if (storedTags[j] == tags[i]){
-                        acceptedArray = acceptedArray.filter(word => word != tags[i])
+                        acceptedArray = acceptedArray.filter(word => word !== tags[i])
                     }
                 }
             }
         }
     }
+    console.log(acceptedArray, "this is accepted array")
     displayTagOptions(acceptedArray, searchWord, id)
     console.log(acceptedArray)
 }
@@ -446,17 +1139,19 @@ function displayTagOptions(arr, word, objId){
             let tagName = this.id
             let tags = await stored(objId)
             if (tags == undefined){
-                tags = ""
+                tags = []
             }
             tagName = tagName.charAt(0).toUpperCase() + tagName.slice(1)
-            tags = tags + tagName + ","
+            console.log(tagName)
+            tags.push(tagName)
             console.log(tags)
             await makeStorage(objId, tags)
             console.log("this just worked")
             if ($(this).hasClass("createTag")){
-                let ta = await stored("tags")
-                ta = ta + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
-                await makeStorage("tags", ta)
+                let allTags = await stored("tags")
+                let newTagAdding = tagName.charAt(0).toUpperCase() + tagName.slice(1)
+                allTags.push(newTagAdding)
+                await makeStorage("tags", allTags)
             }
             // $("<div>", {
             //     text: tags[i],
@@ -464,7 +1159,9 @@ function displayTagOptions(arr, word, objId){
             //     style: "border-radius: 1.5em"
             // })
             await displayIconModal(objId)
-            await renderTags()
+            $("#middleLine").empty()
+            await addFilteringButtons()
+            // await renderTags()
         })
     })
     $("#inputTags").on("focusout", function(e){
@@ -497,24 +1194,20 @@ async function displayIconModal(id){
         $("#removeFolderModal").css("display", "none")
     }
     console.log(tags)
-    if (tags == undefined || tags == ""){
+    if (tags == undefined || tags == [] || tags.length == 0){
         tags = ["No Tags"]
     }
     else{
-        tags = tags.split(",")
-        tags.pop()
+
     }
     console.log(tags)
     $("#infoModal").empty()
-    let row = $("<div class='row margin py-2' style='margin-left: 0px'></div>")
-    let urlTitle = $("<div style='font-size: 20px;'>URL</div>")
     let url = $("<a>",{
         href: object.url,
         text: object.url,
-        class: "ml-2"
+        class: "d-flex",
+        style: "max-width: 400px; overflow:hidden"
     })
-    urlTitle.appendTo(row)
-    url.appendTo(row)
     $("#infoTitle").text(object.title)
     
     let tagParagraph = $("<p class='margin' style='text-align: center; margin-bottom:0px; font-size: 20px;'>Tags</p>")
@@ -550,8 +1243,8 @@ async function displayIconModal(id){
             e.stopPropagation()
             let storedTags = await stored(object.id)
             console.log(object)
-            if (storedTags != ("No Tags," || undefined)){
-                let newTags = storedTags.replace(tagIncluded + ",", "")
+            if (storedTags != ([] || undefined)){
+                let newTags = storedTags.filter(f => f !== tagIncluded)
                 console.log(newTags)
                 console.log(newTags)
                 await makeStorage(object.id, newTags)
@@ -603,17 +1296,15 @@ async function displayIconModal(id){
             "text": "Are you sure you want to delete this bookmark. Once deleted, it can't be retrieved."
         })
         let confirmButton = $("<div>", {
-            class : "btn btn-danger",
+            class : "btn btn-danger clickableItem",
             text : "Delete",
             style : "position:sticky;left:100%"
 
         })
         let cancelButton = $("<div>", {
-            class : "btn btn-secondary",
+            class : "btn btn-secondary clickableItem",
             text : "Cancel"
         })
-        cancelButton.css("cursor", "pointer")
-        confirmButton.css("cursor", "pointer")
 
 
         cancelButton.on("click", async () => {
@@ -689,11 +1380,11 @@ async function displayIconModal(id){
     })
     if (object.children){
         var openChildrenDiv = $("<div>", {
-            id: "this",
-            class: "btn btn-success mx-2 my-3",
+            class: "btn mx-2 my-3 clickableItem",
             text: "Open all bookmarks inside the folder"
     
         })
+        openChildrenDiv.css("background-color", bookmarkColourList[0])
         openChildrenDiv.on("click", function(){
             for(var i=0; i < object.children.length; i++){
                 chrome.tabs.create({"url": object.children[i].url, "active": false})
@@ -713,6 +1404,7 @@ async function displayIconModal(id){
     $("#infoModal").append(tagDivision)
     $("#infoModal").append(line)
     $("#infoModal").append(infoTitle)
+    $("#infoTitle").append(url)
     // $("#infoModal").append(infoSubscript)
     $("#infoModal").append(textbox)
     if (object.children){
@@ -737,11 +1429,10 @@ async function searchFunction(searchWord){
     if (currentState.slice(0,2) == "T+"){
         let tagName = currentState.slice(2)
         let array = []
-        await find(data, tagName, array)
+        await findTagArray(data, tagName, array)
         if (array.length > 0){
             displayedBookmarks = array
         }
-        i
     }
     else if (currentState.slice(0,2) == "F+"){
         console.log("wasa")
@@ -754,7 +1445,7 @@ async function searchFunction(searchWord){
         }
         
     }
-    else if (currentState == "popular"){
+    else if (currentState == "popularButtonSort"){
         let array = []
         for(var i=0; i < popularList.length;i++){
             let object = findIt(data, popularList[i])
@@ -763,8 +1454,13 @@ async function searchFunction(searchWord){
         console.log(array)
         displayedBookmarks = array
     }
-    else if (currentState == "default"){
+    else if (currentState == "defaultButtonSort"){
         displayedBookmarks = data
+    }
+    else if (currentState == "newButtonSort"){
+        let copyOfData = $.extend( true, [], data );
+        let reversedData = copyOfData.reverse()
+        displayedBookmarks = reversedData
     }
     // let allBookmarks = $("#bookmarks").children()
     // console.log(allBookmarks)
@@ -831,6 +1527,7 @@ function displayWithFolder(folderName){
     let objectChildren = object.children
     if (objectChildren.length > 0){
         currentState = "F+" + folderName
+        $("#bookmarks").off("scroll")
         hasBeenClicked = true
         onFocusOrFilter()
         $("#bookmarks").empty()
@@ -855,10 +1552,9 @@ function displayWithFolder(folderName){
 }
 
 
-async function find(data, tagName, array){
+async function findTagArray(data, tagName, array){
     for(var i=0; i< data.length;i++){
         if (await checkIfTag(data[i], tagName)){
-            console.log("123")
             array.push(data[i])
         }
     }
@@ -866,9 +1562,10 @@ async function find(data, tagName, array){
 
 async function displayWithTag(tagName){
     let array = []
-    await find(data, tagName, array)
+    await findTagArray(data, tagName, array)
     if (array.length != 0){
         currentState = "T+" + tagName
+        $("#bookmarks").off("scroll")
         hasBeenClicked = true
         onFocusOrFilter()
         $("#bookmarks").empty()
@@ -890,112 +1587,118 @@ async function displayWithTag(tagName){
     console.log(array)
 }
 
-async function renderFolders(){
-    if (arguments.length == 1){
-        console.log("This is running")
-        let final = await stored("newFolder")
-        let title = final.title
-        if (title.length >= 15){
-            title = title.slice(0,11) + "..."
-        }
-        console.log(title.length)
-        let drop = $("<a>", {
-            "class": "dropdown-item btn-m hober dropdown-item-folder",
-            "text": title,
-            "id": "f" + final.id
-        })
-        drop.insertBefore($("#folderDivider"))
-    }
-    else{
-        let isNew = false
-        let folderArray = []
-        let $folder = $("#folderMenu")[0].children
-        data = await search
-        findFolders(data, folderArray)
-        console.log("this is folders")
-        console.log(folderArray)
-        for(var i=0; i < folderArray.length; i++){
-            let title = folderArray[i].title
-            if (title.length >= 15){
-                title = title.slice(0,11) + "..."
-            }
-            console.log(title.length)
-            let div = $("<div>", {
-                class : "d-flex"
-            })
-            let drop = $("<a>", {
-                "class": "dropdown-item btn-m hober dropdown-item-folder",
-                "text": title,
-                "id": "f" + folderArray[i].id
-            })
-            let icon = $("<i>", {
-                id : "pin_folder_" + folderArray[i].id,
-                class : "material-icons ml-1 mt-1",
-                style : "color: #555;",
-                text : "push_pin"
-            })
-            icon.on("click", async (e) => {
-                let id = e.target.id
-                id = "f_" + id.replace("pin_folder_","")
-                console.log(id)
-                let allPinned = await stored("pinnedItems")
-                allPinned.push(id)
-                makeStorage("pinnedItems", allPinned)
-            })
+// async function renderFolders(){
+//     if (arguments.length == 1){
+//         console.log("This is running")
+//         let final = await stored("newFolder")
+//         let title = final.title
+//         if (title.length >= 15){
+//             title = title.slice(0,11) + "..."
+//         }
+//         console.log(title.length)
+//         let drop = $("<a>", {
+//             "class": "dropdown-item btn-m hober dropdown-item-folder",
+//             "text": title,
+//             "id": "f" + final.id
+//         })
+//         drop.insertBefore($("#folderDivider"))
+//     }
+//     else{
+//         let isNew = false
+//         let folderArray = []
+//         let $folder;
+//         if ($("#folderMenu")[0]){
+//             $folder = $("#folderMenu")[0].children
+//         }
+//         else{
+//             $folder = []
+//         }
+//         data = await search
+//         findFolders(data, folderArray)
+//         console.log("this is folders")
+//         console.log(folderArray)
+//         for(var i=0; i < folderArray.length; i++){
+//             let title = folderArray[i].title
+//             if (title.length >= 15){
+//                 title = title.slice(0,11) + "..."
+//             }
+//             console.log(title.length)
+//             let div = $("<div>", {
+//                 class : "d-flex"
+//             })
+//             let drop = $("<a>", {
+//                 "class": "dropdown-item btn-m hober dropdown-item-folder",
+//                 "text": title,
+//                 "id": "f" + folderArray[i].id
+//             })
+//             let icon = $("<i>", {
+//                 id : "pin_folder_" + folderArray[i].id,
+//                 class : "material-icons ml-1 mt-1",
+//                 style : "color: #555;",
+//                 text : "push_pin"
+//             })
+//             icon.on("click", async (e) => {
+//                 let id = e.target.id
+//                 id = "f_" + id.replace("pin_folder_","")
+//                 console.log(id)
+//                 let allPinned = await stored("pinnedItems")
+//                 allPinned.push(id)
+//                 makeStorage("pinnedItems", allPinned)
+//             })
 
-            div.append(icon)
-            div.append(drop)
-            $("#folderMenu").append(div)
-        }
-        console.log(isNew)
-        let check = await stored("newFolder")
-        console.log(check)
-        console.log("WWWOAWEOWAEAWE")
-        if (check != undefined){
-            for(var j=0; j < $folder.length; j++){
-                let folderId = $folder[j].id.slice(1)
-                console.log("this is folder id")
-                console.log(folderId)
-                if (check.id == folderId){
-                    isNew = true
-                    console.log("WWWOAWEOWAEAWE")
-                }
-            }
-        }
-        if (!isNew && check != undefined){
-            let final = await stored("newFolder")
-            let title = final.title
-            if (title.length >= 15){
-                title = title.slice(0,11) + "..."
-            }
-            console.log(title.length)
-            let drop = $("<a>", {
-                "class": "dropdown-item btn-m hober dropdown-item-folder",
-                "text": title,
-                "id": "f" + final.id
-            })
-            $("#folderMenu").append(drop)
-        }
+//             div.append(icon)
+//             div.append(drop)
+//             $("#folderMenu").append(div)
+//         }
+//         console.log(isNew)
+//         let check = await stored("newFolder")
+//         console.log(check)
+//         console.log("WWWOAWEOWAEAWE")
+//         if (check != undefined){
+//             for(var j=0; j < $folder.length; j++){
+//                 let folderId = $folder[j].id.slice(1)
+//                 console.log("this is folder id")
+//                 console.log(folderId)
+//                 if (check.id == folderId){
+//                     isNew = true
+//                     console.log("WWWOAWEOWAEAWE")
+//                 }
+//             }
+//         }
+//         if (!isNew && check != undefined){
+//             let final = await stored("newFolder")
+//             let title = final.title
+//             if (title.length >= 15){
+//                 title = title.slice(0,11) + "..."
+//             }
+//             console.log(title.length)
+//             let drop = $("<a>", {
+//                 "class": "dropdown-item btn-m hober dropdown-item-folder",
+//                 "text": title,
+//                 "id": "f" + final.id
+//             })
+//             $("#folderMenu").append(drop)
+//         }
         
     
-        let divider = $("<div>",{
-            "class": "dropdown-divider",
-            "id": "folderDivider"
-        })
-        let addNew = $("<div>",{
-            "id": "dropdownAdd",
-            "class": "dropdown-item btn-m hober",
-            "style": "width: 160px",
-            "text": "Add folder"
-        })
-        $("#folderMenu").append(divider)
-        $("#folderMenu").append(addNew)
-        addNew.on("click", function (){
-            addFolder()
-        })
-    }
+//         let divider = $("<div>",{
+//             "class": "dropdown-divider",
+//             "id": "folderDivider"
+//         })
+//         let addNew = $("<div>",{
+//             "id": "dropdownAdd",
+//             "class": "dropdown-item btn-m hober",
+//             "style": "width: 160px",
+//             "text": "Add folder"
+//         })
+//         $("#folderMenu").append(divider)
+//         $("#folderMenu").append(addNew)
+//         addNew.on("click", function (){
+//             addFolder()
+//         })
+//     }
     
-}
+// }
 
 let destroy = function (id){
     return new Promise(function (resolve){
@@ -1006,128 +1709,125 @@ let destroy = function (id){
     })
 }
 
-async function addFolder(){
-    $('#newTagName').val('');
-    $("#newTag").modal("show")
-    $('#newTag').on('shown.bs.modal', function() {
-        $('#newTagName').trigger('focus');
-    });
-    $("#saveTagChangesModal").off()
-    $("#newTagName").off()
-    $("#newTagName").on("keyup", function(event) {
-        console.log("sakfkjsd")
-        // Number 13 is the "Enter" key on the keyboard
-        if (event.keyCode === 13) {
-            event.preventDefault()
-          // Cancel the default action, if needed
-          // Trigger the button element with a click
-            $("#saveTagChangesModal").trigger("click")
-        }
+// async function addFolder(){
+//     $('#newTagName').val('');
+//     $("#newTag").modal("show")
+//     $('#newTag').on('shown.bs.modal', function() {
+//         $('#newTagName').trigger('focus');
+//     });
+//     $("#saveTagChangesModal").off()
+//     $("#newTagName").off()
+//     $("#newTagName").on("keyup", function(event) {
+//         console.log("sakfkjsd")
+//         // Number 13 is the "Enter" key on the keyboard
+//         if (event.keyCode === 13) {
+//             event.preventDefault()
+//           // Cancel the default action, if needed
+//           // Trigger the button element with a click
+//             $("#saveTagChangesModal").trigger("click")
+//         }
         
-    });
-    $("#saveTagChangesModal").on("click", async function() {
-        console.log("treyvaughn")
-        let tagName = $("#newTagName")[0].value
-        await create(tagName, "1")
-        //$("#folderMenu").empty()
-        console.log("Success")
-        renderFolders(true)
+//     });
+//     $("#saveTagChangesModal").on("click", async function() {
+//         console.log("treyvaughn")
+//         let tagName = $("#newTagName")[0].value
+//         await create(tagName, "1")
+//         //$("#folderMenu").empty()
+//         console.log("Success")
+//         renderFolders(true)
         
-    })
-}
+//     })
+// }
 
-async function manage_tags(){
-    console.log("gafds")
-    $("#manage_tags_place").empty()
-    $('#newTagName').val('');
-    $("#manage_tags").modal("show")
-    $("#addNewTagButton").off()
-    let tags = await stored("tags")
-    if (tags == undefined || tags == ""){
-        console.log("Wawwawa")
-        let noTagsMessage = $("<div>", {
-            class : "btn btn-warning",
-            text : "You currently have no tags. Make some!",
-            style : "width: 100%"
-        })
-        $("#manage_tags_place").append(noTagsMessage)
-    }
-    else {
-        tags = tags.split(",")
-        tags.pop()
-        for (var x=0; x < tags.length; x++){
-            let outerDiv = $("<div>", {
-                class : "d-flex p-1"
-            })
-            let tagDiv = $("<div>", {
-                class : "btn",
-                text : tags[x],
-                style: "width:100%; border: 1px solid #dee2e6"
-            })
-            let tagDelete = $("<i>", {
-                class : "material-icons",
-                text : "delete",
-                style: "font-size: 30px;",
-                id: "deleteTag_" + tags[x]
-            })
-            tagDelete.css("cursor", "pointer")
-            tagDelete.on("click", async () => {
-                let id = tagDelete[0].id
-                id = id.replace("deleteTag_", "")
-                let tagString = await stored("tags")
-                tagString = tagString.replace(id + ",", "")
-                await makeStorage("tags", tagString)
-                manage_tags()
+// async function manage_tags(){
+//     console.log("gafds")
+//     $("#manage_tags_place").empty()
+//     $('#newTagName').val('');
+//     $("#manage_tags").modal("show")
+//     $("#addNewTagButton").off()
+//     let tags = await stored("tags")
+//     if (tags == undefined || tags == []){
+//         console.log("Wawwawa")
+//         let noTagsMessage = $("<div>", {
+//             class : "btn btn-warning",
+//             text : "You currently have no tags. Make some!",
+//             style : "width: 100%"
+//         })
+//         $("#manage_tags_place").append(noTagsMessage)
+//     }
+//     else {
+//         for (var x=0; x < tags.length; x++){
+//             let outerDiv = $("<div>", {
+//                 class : "d-flex p-1"
+//             })
+//             let tagDiv = $("<div>", {
+//                 class : "btn",
+//                 text : tags[x],
+//                 style: "width:100%; border: 1px solid #dee2e6"
+//             })
+//             let tagDelete = $("<i>", {
+//                 class : "material-icons",
+//                 text : "delete",
+//                 style: "font-size: 30px;",
+//                 id: "deleteTag_" + tags[x]
+//             })
+//             tagDelete.css("cursor", "pointer")
+//             tagDelete.on("click", async () => {
+//                 let id = tagDelete[0].id
+//                 id = id.replace("deleteTag_", "")
+//                 let tagArray = await stored("tags")
+//                 tagArray = tagArray.filter(e => e !== id)
+//                 await makeStorage("tags", tagArray)
+//                 manage_tags()
 
-            })
-            outerDiv.append(tagDiv)
-            outerDiv.append(tagDelete)
-            $("#manage_tags_place").append(outerDiv)
-        }
-        $('#manage_tags').on('shown.bs.modal', function() {
-            $('#newTagName').trigger('focus');
-        });
-    }
-    $("#saveTagChangesModal").off()
-    $("#newTagName").off()
-    $("#newTagName").on("keyup", function(event) {
-        console.log("sakfkjsd")
-        // Number 13 is the "Enter" key on the keyboard
-        if (event.keyCode === 13) {
-            event.preventDefault()
-          // Cancel the default action, if needed
-          // Trigger the button element with a click
-            $("#addNewTagButton").trigger("click")
-        }
-    });
-    $("#addNewTagButton").on("click", async function() {
-        console.log("waddup")
-        let tagName = $("#newTagName")[0].value
-        let tags = await stored("tags")
-        let tagArray = tags.split(",")
-        tagArray.pop()
-        if (tagName.charAt(tagName.length -1) == " "){
-            tagName = tagName.slice(0,-1)
-        }
-        for (var i=0; i < tagArray.length; i++){
-            if (tagArray[i].toUpperCase() == tagName.toUpperCase()){
-                return
-            }
-        }
+//             })
+//             outerDiv.append(tagDiv)
+//             outerDiv.append(tagDelete)
+//             $("#manage_tags_place").append(outerDiv)
+//         }
+//         $('#manage_tags').on('shown.bs.modal', function() {
+//             $('#newTagName').trigger('focus');
+//         });
+//     }
+//     $("#saveTagChangesModal").off()
+//     $("#newTagName").off()
+//     $("#newTagName").on("keyup", function(event) {
+//         console.log("sakfkjsd")
+//         // Number 13 is the "Enter" key on the keyboard
+//         if (event.keyCode === 13) {
+//             event.preventDefault()
+//           // Cancel the default action, if needed
+//           // Trigger the button element with a click
+//             $("#addNewTagButton").trigger("click")
+//         }
+//     });
+//     $("#addNewTagButton").on("click", async function() {
+//         console.log("waddup")
+//         let tagName = $("#newTagName")[0].value
+//         let tagArray = await stored("tags")
+//         if (tagName.charAt(tagName.length -1) == " "){
+//             tagName = tagName.slice(0,-1)
+//         }
+//         for (var i=0; i < tagArray.length; i++){
+//             if (tagArray[i].toUpperCase() == tagName.toUpperCase()){
+//                 return
+//             }
+//         }
         
-        if (tagName != " "){
-            tags = tags + tagName.charAt(0).toUpperCase() + tagName.slice(1) +","
-            await makeStorage("tags", tags)
-            $("#tagMenu").empty()
-            console.log("Success")
-            await renderTags()
-            manage_tags()
-        }
+//         if (tagName != []){
+//             let newTagString = tagName.charAt(0).toUpperCase() + tagName.slice(1)
+//             tagArray = tagArray.push(newTagString)
+//             await makeStorage("tags", tagArray)
+//             $("#tagMenu").empty()
+//             console.log("Success")
+//             await renderTags()
+//             manage_tags()
+//         }
         
         
-    })
+//     })
 
-}
+// }
 
 function findFolders(data, array){
     for(var i=0; i < data.length; i++){
@@ -1138,71 +1838,69 @@ function findFolders(data, array){
     }
 }
 
-async function renderTags(){
-    if (textColour){
-        $("#dropdownButton").css("color", "#ffffff")
-    }
-    $("#tagMenu").empty()
-    $("#dropdownButton").css("background-color", bookmarkColourList[0])
-    let tags = await stored("tags")
-    tags = tags.split(",")
-    tags.pop()
-    if (tags.length){
-        for(var i=0; i < tags.length; i++){
-            let div = $("<div>", {
-                class : "d-flex"
-            })
-            let drop = $("<a>", {
-                "class": "dropdown-item btn-m hober dropdown-item-tag",
-                "text": tags[i],
-                "id": tags[i]
-            })
-            let icon = $("<i>", {
-                id : "pin_tag_" + tags[i],
-                class : "material-icons ml-1 mt-1",
-                style : "color: #555;",
-                text : "push_pin"
-            })
-            icon.on("click", async (e) => {
-                let id = e.target.id
-                id = "t_" + id.replace("pin_tag_", "")
-                let allPinned = await stored("pinnedItems")
-                allPinned.push(id)
-                makeStorage("pinnedItems", allPinned)
-                console.log(id)
-            })
-            div.append(icon)
-            div.append(drop)
-            $("#tagMenu").append(div)
-        }
-        let divider = $("<div>",{
-            "class": "dropdown-divider"
-        })
-        $("#tagMenu").append(divider)
+// async function renderTags(){
+//     if (textColour){
+//         $("#dropdownButton").css("color", "#D3D3D3")
+//     }
+//     $("#tagMenu").empty()
+//     $("#dropdownButton").css("background-color", bookmarkColourList[0])
+//     let tags = await stored("tags")
+//     if (tags.length){
+//         for(var i=0; i < tags.length; i++){
+//             let div = $("<div>", {
+//                 class : "d-flex"
+//             })
+//             let drop = $("<a>", {
+//                 "class": "dropdown-item btn-m hober dropdown-item-tag",
+//                 "text": tags[i],
+//                 "id": tags[i]
+//             })
+//             let icon = $("<i>", {
+//                 id : "pin_tag_" + tags[i],
+//                 class : "material-icons ml-1 mt-1",
+//                 style : "color: #555;",
+//                 text : "push_pin"
+//             })
+//             icon.on("click", async (e) => {
+//                 let id = e.target.id
+//                 id = "t_" + id.replace("pin_tag_", "")
+//                 let allPinned = await stored("pinnedItems")
+//                 allPinned.push(id)
+//                 makeStorage("pinnedItems", allPinned)
+//                 console.log(id)
+//             })
+//             div.append(icon)
+//             div.append(drop)
+//             $("#tagMenu").append(div)
+//         }
+//         let divider = $("<div>",{
+//             "class": "dropdown-divider"
+//         })
+//         $("#tagMenu").append(divider)
 
-    }
+//     }
     
-    let manageTags = $("<div>",{
-        "id": "dropdownAdd",
-        "class": "dropdown-item btn-m hober",
-        "style": "width: 160px",
-        "text": "Manage tags"
-    })
-    // document.getElementById("myForm").reset()
-    manageTags.on("click", async function (){
-        await manage_tags()
-    })
-    $("#tagMenu").append(manageTags)
+//     let manageTags = $("<div>",{
+//         "id": "dropdownAdd",
+//         "class": "dropdown-item btn-m hober",
+//         "style": "width: 160px",
+//         "text": "Manage tags"
+//     })
+//     // document.getElementById("myForm").reset()
+//     manageTags.on("click", async function (){
+//         await manage_tags()
+//     })
+//     $("#tagMenu").append(manageTags)
 
-    $(".dropdown-item-tag").on("click", function (){
-        console.log(this.id)
-        displayWithTag(this.id)
-    })
-    if (tags.length > 6){
-        $("#tagMenu").css("height", "300px")
-    }
-    console.log(tags)
-}
+//     $(".dropdown-item-tag").on("click", function (){
+//         console.log(this.id)
+//         displayWithTag(this.id)
+//     })
+//     if (tags.length > 6){
+//         $("#tagMenu").css("height", "300px")
+//     }
+//     console.log(tags)
+// }
 
 
 function initializeFolderOpen(){
@@ -1264,81 +1962,82 @@ function clickClose(obj) {
     }
 }
 
+// function sortBookmarks(){
+//     console.log("WTR")
 
-
-
-function sortBookmarks(){
-    let first = true
-    let curState = $("#dropdownButton").text()
-    $(".dropdown-sort").on("click", async function() {
-        onFocusOrFilter()
-        let changeState = this.innerHTML
-        console.log(changeState)
-        if (first || curState != changeState){
-            first = false
-            if (changeState == "Default"){
-                currentState = "default"
-                hasBeenClicked = true
-                $("#bookmarks").empty()
-                for(var i=0; i < data.length; i++){
-                    if (data[i].children){  
-                        printFolder(data[i])
+//     let first = true
+//     let curState = "popularButtonSort"
+//     $(".dropdown-sort").on("click", async function() {
+//         console.log("WTR")
+//         onFocusOrFilter()
+//         let changeState = this.id
+//         console.log(changeState)
+//         if (first || curState != changeState){
+//             first = false
+//             if (changeState == "defaultButtonSort"){
+//                 currentState = "defaultButtonSort"
+//                 hasBeenClicked = true
+//                 $("#bookmarks").off("scroll")
+//                 $("#bookmarks").empty()
+//                 for(var i=0; i < data.length; i++){
+//                     if (data[i].children){  
+//                         printFolder(data[i])
                         
-                    }
-                    else if (!data[i].children){
-                        printBookmark(data[i])
-                    }
-                }
-                initializeFolderOpen()
+//                     }
+//                     else if (!data[i].children){
+//                         printBookmark(data[i])
+//                     }
+//                 }
+//                 initializeFolderOpen()
 
-            }
-            else if (changeState == "Popular"){
-                currentState = "popular"
-                hasBeenClicked = true
-                $("#bookmarks").empty()
-                for(var i=0; i < popularList.length;i++){
-                    let object = findIt(data, popularList[i])
-                    printBookmark(object)
-                }
-            }
-            else if (changeState == "Recently added"){
-                currentState = "Recently added"
-                hasBeenClicked = true
-                $("#bookmarks").empty()
-                for(var i=data.length -1; i >= 0; i--){
-                    if (data[i].children){  
-                        printFolder(data[i])
+//             }
+//             else if (changeState == "popularButtonSort"){
+//                 currentState = "popularButtonSort"
+//                 hasBeenClicked = true
+//                 $("#bookmarks").off("scroll")
+//                 $("#bookmarks").empty()
+//                 for(var i=0; i < popularList.length;i++){
+//                     let object = findIt(data, popularList[i])
+//                     printBookmark(object)
+//                 }
+//             }
+//             else if (changeState == "newButtonSort"){
+//                 currentState = "newButtonSort"
+//                 hasBeenClicked = true
+//                 $("#bookmarks").off("scroll")
+//                 $("#bookmarks").empty()
+//                 for(var i=data.length -1; i >= 0; i--){
+//                     if (data[i].children){  
+//                         printFolder(data[i])
                         
-                    }
-                    else if (!data[i].children){
-                        printBookmark(data[i])
-                    }
-                }
-                initializeFolderOpen()
-            }
-            else{
-                console.log("nope")
-            }
-        }
+//                     }
+//                     else if (!data[i].children){
+//                         printBookmark(data[i])
+//                     }
+//                 }
+//                 initializeFolderOpen()
+//             }
+//             else{
+//                 console.log("nope")
+//             }
+//         }
         
 
-    })
-}
+//     })
+// }
 
 
 async function checkIfTag(object, tag){
-    let tagString = tag + ","
     let objectTag = await stored(object.id)
     console.log(objectTag)
     if (objectTag != undefined){
         console.log("hazas")
-        if(objectTag.includes(tagString)){
-            return true
+        for(var i=0; i < objectTag.length; i++){
+            if (objectTag[i] == tag){
+                return true
+            }
         }
-        else{
-            return false
-        }
-
+        return false
     }
     else{
         return false
@@ -1368,22 +2067,9 @@ function pickBlackOrWhite(colour){
 }
 
 function onSearchBarFocus(){
-    
     $("#searchButton").focus(() => {
-        onFocusOrFilter()
-        $("#expandIcon").remove()
-        if (!hasBeenClicked){
-            hasBeenClicked = true
-            let children = maxPerPage
-            for(var i=children; popularList.length > i;i++){
-                let object = findIt(data, popularList[i])
-                printBookmark(object)
-            }
-        }
-        
+        initialExpandingHome()
     })
-    
-    
 }
 
 function onFocusOrFilter(){
@@ -1392,7 +2078,10 @@ function onFocusOrFilter(){
     $("#dropdownAdd").css("width", menuLength)
     $("#bookmarks").addClass("divFocus")
     $("#bookmarks").css("height", "65%")
+    $("#bookmarks").css("width", "90%")
     $("#bookmarks").scrollTop(0)
+    $("#middleLine").addClass("middleLine")
+
 }
 
 
@@ -1523,9 +2212,9 @@ function printFolder(object){
     let folderDiv = document.createElement("div")
     folderDiv.className = "folder btn col-2 m-3 btn-sm"
     folderDiv.id = object.id
-    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + avgCol
+    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
     if (arguments.length == 2 && arguments[1] == true){
-        folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%;border-radius: 1.5em; background-color:" + avgCol
+        folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%;border-radius: 1.5em; background-color:" + backgroundCol
     }
     let bookmarkRowDivision = document.createElement("div")
     bookmarkRowDivision.className = "d-flex flex-row margin"
@@ -1649,37 +2338,63 @@ function printBookmark(object, parent){
 
     // }
 
-    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; border-radius: 1.5em"
+    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; border-radius: 1.5em; height:120px;"
 
 
     let bookmarkClickable = document.createElement("a")
     bookmarkClickable.href = object.url
     bookmarkClickable.class = "m-3 clickable"
     bookmarkClickable.id = "a" + object.id
-
+    
+    bookmarkClickable.addEventListener("click", function(e){
+        e.stopImmediatePropagation()
+    });
     let bookmarkRowDivision = document.createElement("div")
-    bookmarkRowDivision.className = "d-flex flex-row-reverse margin"
-    bookmarkRowDivision.style = "overflow-wrap: anywhere;"
+    bookmarkRowDivision.className = "d-flex justify-content-between flex-row-reverse"
+    // bookmarkRowDivision.style = "overflow-wrap: anywhere;"
+
+    let bookmarkRowDivisionText = document.createElement("div")
+    bookmarkRowDivisionText.className = "d-flex flex-grow-1 margin"
+    bookmarkRowDivisionText.style = "overflow-wrap: anywhere;"
 
     let bookmarkText = document.createElement("p")
-    bookmarkText.innerHTML = object.title
-    bookmarkText.className = "flex-fill"
-    if (object.title.length >= 50) {
-        if (textColour){
-            bookmarkText.style = "color: #ffffff;width:70%; font-size: 80%"
-        }
-        else{
-            bookmarkText.style = "width:70%; font-size: 80%"
-        }
+    let bookmarkTitle = object.title
+    bookmarkText.className = "flex-fill flex-grow-1"
+    let bookmarkTextStyleString = "margin-bottom:0px;"
+    if (bookmarkTitle.length > 20 && bookmarkTitle.length < 40){
+        bookmarkTextStyleString += "margin-top: 0px;"
+        console.log("tgb")
+    }
+    else if (bookmarkTitle.length > 40){
+        bookmarkTitle = bookmarkTitle.slice(0,40) + "..."
+        bookmarkTextStyleString += "font-size: 80%; margin-top: 0px;"
     }
     else{
-        if (textColour){
-            bookmarkText.style = "color: #ffffff; width:70%"
-        }
-        else{
-            bookmarkText.style = "width:70%;"
-        }
+        bookmarkTextStyleString += "margin-top: 8px; font-size: 110%;"
     }
+    bookmarkText.innerHTML = bookmarkTitle
+
+    if (textColour){
+        bookmarkTextStyleString += "color: #D3D3D3;"
+    }
+    console.log(bookmarkTextStyleString)
+    bookmarkText.style = bookmarkTextStyleString
+    // if (object.title.length >= 50) {
+    //     if (textColour){
+    //         bookmarkText.style = "color: #D3D3D3;width:70%; font-size: 80%"
+    //     }
+    //     else{
+    //         bookmarkText.style = "width:70%; font-size: 80%"
+    //     }
+    // }
+    // else{
+    //     if (textColour){
+    //         bookmarkText.style = "color: #D3D3D3; width:70%"
+    //     }
+    //     else{
+    //         bookmarkText.style = "width:70%;"
+    //     }
+    // }
     let domain = findDomain(object.url)
     console.log(domain)
     let favicon = document.createElement("img")
@@ -1724,13 +2439,14 @@ function printBookmark(object, parent){
     bookmarkIcon.classList.add("d-inline-flex");
     bookmarkIcon.classList.add("material-icons");
     bookmarkIcon.classList.add("icon");
-    bookmarkIcon.classList.add("mt-2");
+    bookmarkIcon.classList.add("mt-1");
     bookmarkIcon.classList.add("mr-1");
     bookmarkIcon.classList.add("item-info");
     // $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-2 mr-1 item-info")
     bookmarkIcon.id = "i" + object.id
     bookmarkIcon.addEventListener("click", function(e){
         e.preventDefault()
+        e.stopImmediatePropagation()
         displayIconModal(object.id)
     });
     // $(bookmarkIcon).on("click", function (e){
@@ -1762,7 +2478,7 @@ function printBookmark(object, parent){
             $(bookmarkText).css("color", "black")
         }
         else{
-            $(bookmarkText).css("color", "white")
+            $(bookmarkText).css("color", "#D3D3D3")
         }
         $(bookmarkIcon).mouseenter(function(){
             $(bookmarkIcon).css("cursor", "pointer")
@@ -1771,12 +2487,12 @@ function printBookmark(object, parent){
         }).mouseleave(function(){
             $(bookmarkIcon).css("cursor", "default")
             $(bookmarkIcon).css("color", "black")
-            $(bookmarkText).css("color", "white")
+            $(bookmarkText).css("color", "#D3D3D3")
 
         })
     }).mouseleave(function(){
         if (textColour){
-            $(bookmarkText).css("color", "white")
+            $(bookmarkText).css("color", "#D3D3D3")
         }
         else{
             $(bookmarkText).css("color", "black")
@@ -1786,8 +2502,9 @@ function printBookmark(object, parent){
     fragment.appendChild(bookmarkClickable)
     bookmarkClickable.appendChild(bookmarkDiv)
     bookmarkDiv.appendChild(bookmarkRowDivision)
+    bookmarkDiv.appendChild(bookmarkRowDivisionText)
     bookmarkRowDivision.appendChild(bookmarkIcon)
-    bookmarkRowDivision.appendChild(bookmarkText)
+    bookmarkRowDivisionText.appendChild(bookmarkText)
     bookmarkRowDivision.appendChild(favicon)
 
     
@@ -1811,7 +2528,7 @@ async function onLoadApp(){
         popularList = removeDuplicates(popularList)
         let counter = 0
         let endIt = false
-        while ($("#bookmarks").height() < ($("#bod").height()/2.5) || endIt){
+        while ($("#bookmarks").height() < ($("#bod").height()/2) || endIt){
             for(var i=0; i < 5; i++){
                 let index = counter * 5 + i
                 console.log(popularList[index])
@@ -1842,51 +2559,12 @@ async function onLoadApp(){
             style: "font-size: 52px; color: " + bookmarkColourList[0],
             id: "expandIcon"
         })
-        outerDiv.append(expandIcon)
+        // outerDiv.append(expandIcon)
         $("#bookmarks").append(outerDiv)
         //$("#bookmarks").append(expandIcon)
         console.log("hello?")
         expandIcon.on("click", function(){
-            expandIcon.remove()
-            onFocusOrFilter()
-            let startPoint = maxPerPage
-            // for(var x=0; x < Math.ceil(popularList.length/100); x++){
-            //     console.log("it is being done")
-            //     for(var i=startPoint; 100 + (x* 100) > i;i++){
-            //         if (i < popularList.length){
-            //             let object = findIt(data, popularList[i])
-            //             printBookmark(object)
-            //         }
-
-            //     }
-            //     startPoint += 100
-            // }
-
-            for(var i=startPoint; 100 + startPoint > i;i++){
-                if (i < popularList.length){
-                    let object = findIt(data, popularList[i])
-                    printBookmark(object)
-                }
-            }
-            startPoint += 100
-            $("#bookmarks").on("scroll", () => {
-                let totLength = document.getElementById("bookmarks").scrollHeight
-                let scrolledLength = $("#bookmarks").height() + $("#bookmarks").scrollTop()
-                if (scrolledLength + 200 > totLength){
-                    console.log("$$$$$")
-                    for(var i=startPoint; 100 + startPoint > i;i++){
-                        if (i < popularList.length){
-                            let object = findIt(data, popularList[i])
-                            printBookmark(object)
-                        }
-                        else{
-                            $("#bookmarks").off("scroll")
-                        }
-                    }
-                    startPoint += 100
-                }
-            })
-            hasBeenClicked = true
+            initialExpandingHome()
         })
         expandIcon.hover(function(){
             expandIcon.css("cursor", "pointer")
@@ -1900,6 +2578,68 @@ async function onLoadApp(){
     }
 }
 
+function initialExpandingHome(){
+    if (currentState == "popularButtonSort"){
+        paginateLoadingFilter(popularList)
+    }
+}
+
+
+function paginateLoadingFilter(filterArray){
+    $("#bookmarks").off("scroll")
+    onFocusOrFilter()
+    let startPoint = 0
+    $("#bookmarks").empty()
+    let isObject = true
+    if (typeof(filterArray[0]) == "string"){
+        isObject = false
+    }
+    console.log("object val is", isObject)
+    for(var i=startPoint; 100 + startPoint > i;i++){
+        if (i < filterArray.length){
+            if (isObject){
+                if (filterArray[i].children){
+                    printFolder(filterArray[i])
+                    onClickOpen(filterArray[i])
+                }
+                else{
+                    printBookmark(filterArray[i])
+                }
+                
+            }
+            else{
+                let object = findIt(data, filterArray[i])
+                printBookmark(object)
+            }
+            
+        }
+    }
+    startPoint += 100
+    $("#bookmarks").on("scroll", () => {
+        let totLength = document.getElementById("bookmarks").scrollHeight
+        let scrolledLength = $("#bookmarks").height() + $("#bookmarks").scrollTop()
+        if (scrolledLength + 200 > totLength){
+            console.log("$$$$$")
+            for(var i=startPoint; 100 + startPoint > i;i++){
+                if (i < filterArray.length){
+                    if (isObject){
+                        let object = filterArray[i]
+                        printBookmark(object)
+                    }
+                    else{
+                        let object = findIt(data, filterArray[i])
+                        printBookmark(object)
+                    }
+                    
+                }
+                else{
+                    $("#bookmarks").off("scroll")
+                }
+            }
+            startPoint += 100
+        }
+    })
+}
 
 
 async function renderPop(data){
