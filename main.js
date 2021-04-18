@@ -92,6 +92,8 @@ let randomColours = ["D17A22","095256","BC5D2E","FF7733","F7B538","17BEBB","61CC
 chrome.runtime.onInstalled.addListener(async function(details) {
     console.log("Hoowee")
     console.log(details.reason)
+
+    
     if (details.reason == "install"){
         await makeStorage("tags", ["Work","Entertainment","For Later"])
         //For now just make it so it is only colours but later I will add photos
@@ -105,15 +107,19 @@ chrome.runtime.onInstalled.addListener(async function(details) {
         // When the application loads, either the default or popular shows up
         await makeStorage("onLoad", "popular")
         // All the pinned items on screen
-        await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+        // await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
         // $("#updateMessage").modal("show")
     }
     else if (details.reason == "update"){
-        await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+        
         // showUpdatePins()
         // $("#updateMessage").modal("show")
     }
-    
+    //If the user doesn't have the data for pinnedItems, it will create one
+    let checkPinnedStatus = await stored("pinnedItems")
+    if (checkPinnedStatus == undefined) {
+        await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
+    }
     
     
 });
