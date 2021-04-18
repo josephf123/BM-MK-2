@@ -80,28 +80,27 @@ let maxPerPage = 0;
 //     return source
 // }
 
-let randomColours = ["D17A22","095256","BC5D2E","FF7733","F7B538","17BEBB","61CC3D","59CD90","067BC2","E1612A","F25F5C",
-                    "247BA0","446E80","D62828","F77F00","FCBF49","FDC6B5","fbca9a","5158BB","2E86AB","A23B72","F18F01",
-                    "C73E1D","2274A5","32936F","95D9C3","388697", "685470", "B1DDCA", "A9B3CE", "C0596E", "4E6474"]
 
-
-//Change main colour
-//114B5F-03A0B5
 
 
 chrome.runtime.onInstalled.addListener(async function(details) {
     console.log("Hoowee")
     console.log(details.reason)
-
-    
+    let colourOptions = [
+        "114B5F-03A0B5", "317773-E2D1F9", "48639C-82A0BC", "095256-D17A22","364156-D66853", "A23B72-247BA0","067BC2-F18F01","644536-B2675E",
+        "095256-E1612A", "446E80-A23B72", "8F3985-A675A1",
+        "5158BB-F18F01","067BC2-685470", "BC5D2E-FBCA9A", "2274A5-FF7733", "446E80-B1DDCA", "0277BD-00695C",
+        "247BA0-CA596E", "50635B-BDA63F", "247222-93C0A4", "247BA0-93C0A4","1D2F6F-FAC748",
+        "685470-BC5D2E",  "095256-F25F5C", "C0596E-F18F01", "4E6474-61CC3D",  "067BC2-B1DDCA",                                    
+    ]
     if (details.reason == "install"){
         await makeStorage("tags", ["Work","Entertainment","For Later"])
         //For now just make it so it is only colours but later I will add photos
-        await makeStorage("colConfig", "s")
+        await makeStorage("colConfig", "r")
         // This will be colour order, either col-col, col-random, random-col or random-random
         await makeStorage("colourOrder", "114B5F-03A0B5")
         
-        await makeStorage("colourCollection", "114B5F-03A0B5")
+        await makeStorage("colourCollection", colourOptions)
         // When the home button is pressed, will it go to default of popular
         await makeStorage("home", "popular")
         // When the application loads, either the default or popular shows up
@@ -110,11 +109,11 @@ chrome.runtime.onInstalled.addListener(async function(details) {
         // await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
         // $("#updateMessage").modal("show")
     }
-    else if (details.reason == "update"){
+    // else if (details.reason == "update"){
         
-        // showUpdatePins()
-        // $("#updateMessage").modal("show")
-    }
+    //     // showUpdatePins()
+    //     // $("#updateMessage").modal("show")
+    // }
     //If the user doesn't have the data for pinnedItems, it will create one
     let checkPinnedStatus = await stored("pinnedItems")
     if (checkPinnedStatus == undefined) {
@@ -172,7 +171,6 @@ async function sendPageAndColour(){
     
     
 
-let randomNum1 = Math.round(Math.random() * (randomColours.length - 1))
 //let hexCol = "247BA0"
 //"AB4E68"
 // randomColours[randomNum1]
@@ -294,6 +292,35 @@ document.addEventListener("DOMContentLoaded", async() => {
 
 
 })
+function printOpenAllChildren(obj) {
+    /////////////////////////////////
+    // Copy and pasted from printFolder
+    let fragment = document.createDocumentFragment();
+    let folderDiv = document.createElement("div")
+    folderDiv.className = "folder btn col-2 m-3 btn-sm"
+    folderDiv.id = obj.id
+    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(obj, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
+    let bookmarkRowDivision = document.createElement("div")
+    bookmarkRowDivision.className = "d-flex flex-row margin"
+    bookmarkRowDivision.style = "overflow-wrap: anywhere;"
+
+    let bookmarkText = document.createElement("p")
+    bookmarkText.innerHTML = "Open all inside the folder" 
+    bookmarkText.class = "d-inline-flex"
+    fragment.appendChild(folderDiv)
+    folderDiv.appendChild(bookmarkRowDivision)
+    bookmarkRowDivision.appendChild(bookmarkText)
+
+    //////////////
+
+    folderDiv.addEventListener("click", function(){
+        for(var i=0; i < obj.children.length; i++){
+            chrome.tabs.create({"url": obj.children[i].url, "active": false})
+        }
+    })
+    document.getElementById("bookmarks").appendChild(fragment)
+}
+
 
 function pinFunctionality(element){
     element.on("click", async (e) =>{
@@ -502,7 +529,7 @@ async function addFilteringButtons(){
     findAllFolders(data, folderArray)
     for(var i=0; i < folderArray.length; i++){
         let aligningDiv = $("<div>", {
-            class: "row mr-0 ml-0",
+            class: "row mr-0 ml-0 clickableItem",
         })
         let title = folderArray[i].title
         if (title.length > 25){
@@ -907,6 +934,7 @@ async function addFilteringButtons(){
                     printBookmark(objectChildren[i])
                 }
             }
+            printOpenAllChildren(object)
         }
         else {
             $("#errorMessage").modal("show")
@@ -2236,7 +2264,7 @@ function printFolder(object){
         bookmarkIcon.innerHTML = "info"
         $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-1 item-info ml-auto")
         $(bookmarkIcon).on("click", function (e){
-            event.stopPropagation()
+            e.stopPropagation()
             displayIconModal(object.id)
     
         })
