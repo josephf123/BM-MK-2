@@ -404,7 +404,7 @@ async function addFilteringButtons(){
     }
     let popularButton = $("<div>", {
         class: "flex-fill dropdown-sort clickableItem",
-        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Popular",
         id: "popularButtonSort"
     })
@@ -412,7 +412,7 @@ async function addFilteringButtons(){
     buttonDrag(popularButton)
     let defaultButton = $("<div>", {
         class: "flex-fill dropdown-sort clickableItem",
-        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Default",
         id: "defaultButtonSort"
     })
@@ -420,7 +420,7 @@ async function addFilteringButtons(){
     buttonDrag(defaultButton)
     let newButton = $("<div>", {
         class: "flex-fill dropdown-sort clickableItem",
-        style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "New",
         id: "newButtonSort"
     })
@@ -428,42 +428,45 @@ async function addFilteringButtons(){
     buttonDrag(newButton)
     let tagButtonEncapsulate = $("<div>", {
         class: "dropdown flex-fill",
-        style: "margin-left: 8px; margin-right: 8px; margin-bottom: 5px;"
+        style: "margin-left: 8px; margin-right: 8px; margin-bottom: 10px;"
     })
     let tagButton = $("<div>", {
         class: "dropdown-toggle clickableItem",
-        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top:3px; height: 100%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Tags",
         id: "tagsButtonSort"
     })
     tagButton.attr("data-toggle", "dropdown")
     tagButton.attr("draggable", "true")
+    
     buttonDrag(tagButton)
     let folderButtonEncapsulate = $("<div>", {
         class: "dropdown flex-fill",
-        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 5px;"
+        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 10px;"
     })
     let folderButton = $("<div>", {
         class: "dropdown-toggle clickableItem",
-        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; height:100%; border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Folders",
         id: "foldersButtonSort"
     })
     folderButton.attr("data-toggle", "dropdown")
     folderButton.attr("draggable", "true")
+    
     buttonDrag(folderButton)
     let allFiltersEncapsulate = $("<div>", {
         class: "dropdown flex-fill",
-        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 5px;"
+        style: "margin-left: 8px; margin-right: 8px;  margin-bottom: 10px;"
     })
     let allFilters = $("<div>", {
         class: "flex-fill dropdown-toggle clickableItem",
-        style: "padding-top: 3px; padding-bottom: 3px;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; height: 100%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "All filters",
         id: "all FiltersButtonSort"
     })
     allFilters.attr("data-toggle", "dropdown")
     allFilters.attr("draggable", "true")
+    
     allFiltersEncapsulate.css("height", $("#middleLine").css("height"))
     let bigDiv = $("<div>", {
         class: "row flex-fill",
@@ -487,6 +490,8 @@ async function addFilteringButtons(){
     swapIcon.attr("aria-label", "Swap colours")
     let middleLineHeight = $("#middleLine").css("height")
     bigDiv.css("height", middleLineHeight)
+
+
     
     tagButtonEncapsulate.append(tagButton)
     let div = $("<div>", {
@@ -501,7 +506,7 @@ async function addFilteringButtons(){
             class: "row mr-0 ml-0"
         })
         let a = $("<a>", {
-            class: "dropdown-item tag-select-filter",
+            class: "dropdown-item tag-select-filter clickableItem",
             text: tags[i],
             style: "border-radius: 1.5em;",
             id: "tagFilter" + tags[i]
@@ -768,7 +773,7 @@ async function addFilteringButtons(){
                 console.log(tagName)
                 let tagDiv = $("<div>", {
                     class: "flex-fill dropdown-sort clickableItem tag-select-filter",
-                    style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
                     id: "T_" + tagName + "ButtonSort",
                     text: tagName
                 })
@@ -785,7 +790,7 @@ async function addFilteringButtons(){
                 let folderObj = findIt(data, folderId)
                 let folderDiv = $("<div>", {
                     class: "flex-fill dropdown-sort clickableItem folder-select-filter",
-                    style: "padding-top: 3px; margin-bottom: 8px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
                     id: "F_" + folderId + "ButtonSort",
                     text: folderObj.title
                 })
