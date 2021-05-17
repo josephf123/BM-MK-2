@@ -31,7 +31,7 @@ const pSBC=(p,c0,c1,l)=>{
 	if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
 	else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
 }
-let data, popularList, textColour, backgroundCol, imgUrl, img, bookmarkColourList;
+let data, popularList, textColour, backgroundCol,foregroundCol, imgUrl, img, bookmarkColourList;
 
 let currentState = "popularButtonSort"
 
@@ -119,6 +119,10 @@ chrome.runtime.onInstalled.addListener(async function(details) {
     if (checkPinnedStatus == undefined) {
         await makeStorage("pinnedItems", ["popularButtonSort", "defaultButtonSort", "newButtonSort", "tagsButtonSort", "foldersButtonSort", "allFiltersButtonSort"])
     }
+    let colourArrayStatus = await stored("colourArray")
+    if (colourArrayStatus == undefined) {
+        await makeStorage("colourArray", colourOptions)
+    }
     
     
 });
@@ -200,7 +204,8 @@ document.addEventListener("DOMContentLoaded", async() => {
     }
     let backgroundColour = dataColours.slice(0,6)
     let hexCol = dataColours.slice(7)
-    backgroundCol = backgroundColour
+    backgroundCol = backgroundColour;
+    foregroundCol = hexCol;
     // let invert = "93C0A4"
     console.log(hexCol)
     console.log(backgroundColour)
@@ -896,7 +901,9 @@ async function addFilteringButtons(){
                     printFolder(tagArray[i])
                     onClickOpen(tagArray[i])
                 }
-                printBookmark(tagArray[i])
+                else {
+                    printBookmark(tagArray[i])
+                }
             }
         }
         else{
@@ -1221,11 +1228,14 @@ async function displayIconModal(id){
     if (object.children){
         $("#removeBookmarkModal").css("display", "none")
         $("#removeFolderModal").css("display", "")
+        $("#removeFolderModal").css("background-color", foregroundCol)
     }
     else{
-        $("#removeBookmarkModal").css("display", "")
         $("#removeFolderModal").css("display", "none")
+        $("#removeBookmarkModal").css("display", "")
+        $("#removeBookmarkModal").css("background-color", foregroundCol)
     }
+    $("#saveChangesInfoModal").css("background-color", backgroundCol)
     console.log(tags)
     if (tags == undefined || tags == [] || tags.length == 0){
         tags = ["No Tags"]
@@ -1247,8 +1257,8 @@ async function displayIconModal(id){
     let div = $("<div id='containsTags'class='ml-2'>")
     for(var i=0;i < tags.length; i++){
         let tag = $("<div>", {
-            class: "btn m-2 d-inline-flex btn-primary",
-            style: "border-radius: 1.5em",
+            class: "btn m-2 d-inline-flex",
+            style: "border-radius: 1.5em; background-color: " + backgroundCol,
             id: "clickToNavigate_" + tags[[i]]
         })
         let tagIncluded = tags[i]
@@ -1412,9 +1422,13 @@ async function displayIconModal(id){
         id: "m" + id
     })
     if (object.children){
+        var biggerDivOpenChild = $("<div>", {
+            class: "d-flex"
+        })
         var openChildrenDiv = $("<div>", {
-            class: "btn mx-2 my-3 clickableItem",
-            text: "Open all bookmarks inside the folder"
+            class: "btn clickableItem",
+            text: "Open all bookmarks inside the folder",
+            style: "width: 90%; margin: auto"
     
         })
         openChildrenDiv.css("background-color", bookmarkColourList[0])
@@ -1425,8 +1439,6 @@ async function displayIconModal(id){
         })
     }
     let tagDivision = $("<div style='border-width: 0px 0px 0px 0px; border-style: solid; border-color: #03a0bf;min-height: 200px;'></div>")
-
-    let line = $("<div style='background-color: #dee2e6; height: 1px;' class='my-2'></div>")
     // $("#infoModal").append(row)
     tagDivision.append(tagParagraph)
     tagDivision.append(addTagSearch)
@@ -1435,13 +1447,14 @@ async function displayIconModal(id){
     // $("#infoModal").append(addTagSearch)
     // $("#infoModal").append(div)
     $("#infoModal").append(tagDivision)
-    $("#infoModal").append(line)
-    $("#infoModal").append(infoTitle)
+    // $("#infoModal").append(line)
+    // $("#infoModal").append(infoTitle)
     $("#infoTitle").append(url)
     // $("#infoModal").append(infoSubscript)
-    $("#infoModal").append(textbox)
+    // $("#infoModal").append(textbox)
     if (object.children){
-        $("#infoModal").append(openChildrenDiv)
+        $("#infoModal").append(biggerDivOpenChild)
+        biggerDivOpenChild.append(openChildrenDiv)
     }
     $("#informationModal").modal('show')
     // $('#informationModal').on('shown.bs.modal', function() {
