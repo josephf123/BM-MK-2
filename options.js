@@ -24,13 +24,14 @@ let colourConfig;
 let allChecked = false
 let currentState = "colour"
 let currentHomeState;
-let colourOptions = [
-    "114B5F-03A0B5", "317773-E2D1F9", "48639C-82A0BC", "095256-D17A22","364156-D66853", "A23B72-247BA0","067BC2-F18F01","644536-B2675E",
-    "095256-E1612A", "446E80-A23B72", "8F3985-A675A1",
-    "5158BB-F18F01","067BC2-685470", "BC5D2E-FBCA9A", "2274A5-FF7733", "446E80-B1DDCA", "0277BD-00695C",
-    "247BA0-CA596E", "50635B-BDA63F", "247222-93C0A4", "247BA0-93C0A4","1D2F6F-FAC748",
-    "685470-BC5D2E",  "095256-F25F5C", "C0596E-F18F01", "4E6474-61CC3D",  "067BC2-B1DDCA",                                    
-]
+let colourOptions;
+// let colourOptions = [
+//     "114B5F-03A0B5", "317773-E2D1F9", "48639C-82A0BC", "095256-D17A22","364156-D66853", "A23B72-247BA0","067BC2-F18F01","644536-B2675E",
+//     "095256-E1612A", "446E80-A23B72", "8F3985-A675A1",
+//     "5158BB-F18F01","067BC2-685470", "BC5D2E-FBCA9A", "2274A5-FF7733", "446E80-B1DDCA", "0277BD-00695C",
+//     "247BA0-CA596E", "50635B-BDA63F", "247222-93C0A4", "247BA0-93C0A4","1D2F6F-FAC748",
+//     "685470-BC5D2E",  "095256-F25F5C", "C0596E-F18F01", "4E6474-61CC3D",  "067BC2-B1DDCA",                                    
+// ]
 let currentBackCol;
 let currentBookCol;
 
@@ -46,6 +47,8 @@ var search = new Promise(function (resolve, reject) {
 
 
 document.addEventListener('DOMContentLoaded', async function(){
+    colourOptions = await stored("colourArray");
+    console.log(colourOptions)
     currentHomeState = await stored("home")
     await search
     colourConfig = await stored("colConfig")
@@ -77,20 +80,24 @@ document.addEventListener('DOMContentLoaded', async function(){
         dataCol = arr[randIndex]
     }
     //Make it one of the random ones if on rotate
-    let bookCol = dataCol.slice(0,6)
-    let backCol = dataCol.slice(7)
-
-    $("body").css("background-color", "#" + backCol)
+    let backCol = dataCol.slice(0,6)
+    let bookCol = dataCol.slice(7)
+    
+    $("body").css("background-color", "#" + bookCol)
 
     showPreview()
 
     if (colourConfig == "r"){
-        $("#backgroundColour").val("Rotating") 
-        $("#bookmarkColour").val("Rotating") 
+        //No need to show the colour selection if it is on rotate colours
+        $("#selectOwn").css("display", "none")
+
+
+        // $("#backgroundColour").val("#FFFFFF") 
+        // $("#bookmarkColour").val("#FFFFFF") 
     }
     else{
-        $("#backgroundColour").val(backCol) 
-        $("#bookmarkColour").val(bookCol) 
+        $("#backgroundColour").val("#" + backCol) 
+        $("#bookmarkColour").val("#" + bookCol) 
     }
 
     $("#colourPicker").css("border", "1.5px solid #" + bookCol)
@@ -116,6 +123,9 @@ document.addEventListener('DOMContentLoaded', async function(){
     $("#confirmButton").on("click", async function (){
         let bookmarkColour = $("#bookmarkColour")[0].value
         let backgroundColour = $("#backgroundColour")[0].value
+        bookmarkColour = bookmarkColour.slice(1)
+        backgroundColour = backgroundColour.slice(1)
+        console.log(bookmarkColour, backgroundColour)
         if (isHexColor(backgroundColour) && isHexColor(bookmarkColour)){
             if (backgroundColour == bookmarkColour){
                 alertFunction("Error: Have two different colours for the background and bookmarks", "error")
@@ -124,6 +134,8 @@ document.addEventListener('DOMContentLoaded', async function(){
                 let string = backgroundColour + "-" + bookmarkColour
                 await makeStorage("colourOrder", string)
                 await makeStorage("colourCollection", string)
+                colourOptions.unshift(string)
+                await makeStorage("colourArray", colourOptions)
                 alertFunction("Successfully saved colours", "success")
                 location.reload()
             }
@@ -157,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async function(){
         $("#selectAll").trigger("click")
         checkForDisabled()
         colourSpecify()
+        location.reload()
     })
     $("#singleColour").on("click", async function(){
         await makeStorage("colConfig", "s")
@@ -221,13 +234,13 @@ document.addEventListener('DOMContentLoaded', async function(){
     showMoreOptions()
     checkWhenLoad()
     let conButtons = ["#colourButton", "#memoryButton", "#configurationButton"]
-    buttonHovering(conButtons, "#" + bookCol)
+    buttonHovering(conButtons, "#" + backCol)
     let chosingButtons = ["#singleColour", "#rotateColour"]
-    buttonHovering(chosingButtons, "#" + bookCol)
+    buttonHovering(chosingButtons, "#" + backCol)
     let homeButtons = ["#defaultHomeAction", "#popularHomeAction"]
-    buttonHovering(homeButtons, "#" + bookCol)
+    buttonHovering(homeButtons, "#" + backCol)
     let memoryButtons = ["#clearTags", "#clearInfo"]
-    buttonHovering(memoryButtons, "#" + bookCol, true)
+    buttonHovering(memoryButtons, "#" + backCol, true)
 
     $("#flipCol").on("click", async function(){
         let dataCol = await stored("colourOrder")
@@ -250,6 +263,15 @@ document.addEventListener('DOMContentLoaded', async function(){
     $("#helpButton").on("click", function(){
         $("#helpModal").modal("show")
     })
+
+    $('#backgroundColour').on('input', function() { 
+        $("#demoBackground").css("background-color", $(this).val())
+    });
+    $('#bookmarkColour').on('input', function() { 
+        $(".demoBookmark").css("background-color", $(this).val())
+    });
+
+    
 })
 
 
@@ -284,20 +306,24 @@ function changeButtonColour(colour){
 
 function checkForDisabled(){
     for(var i=0; i < colourOptions.length; i++){
-        document.getElementById("$" + i).disabled = false
+        if (document.getElementById("$" + i)) {
+            document.getElementById("$" + i).disabled = false
+        }
     }
 }
 
 async function manyCheckVerify(){
     let many = 0
     for(var i=0; i < colourOptions.length; i++){
-        if (document.getElementById("$" + i).checked){
+        if (document.getElementById("$" + i) && document.getElementById("$" + i).checked){
             many += 1
         }
     }
     if (many > 1){
         for(var i=0; i < colourOptions.length; i++){
-            document.getElementById("$" + i).checked = false
+            if (document.getElementById("$" + i)) {
+                document.getElementById("$" + i).checked = false
+            }
         }
     }
     await makeStorage("colourCollection", "114B5F-03A0B5")
@@ -312,7 +338,9 @@ async function checkWhenLoad(){
 
         for(var i=0; i < colourOptions.length; i++){
             if (colourOptions[i] == colOrder){
-                document.getElementById("$" + i).checked = true
+                if (document.getElementById("$" + i)) {
+                    document.getElementById("$" + i).checked = true
+                }
             }
         }
     }
@@ -321,7 +349,9 @@ async function checkWhenLoad(){
         for(var i=0; i < colourOptions.length; i++){
             for(var j=0; j < colArray.length; j++){
                 if (colArray[j] == colourOptions[i]){
-                    document.getElementById("$" + i).checked = true
+                    if (document.getElementById("$" + i)) {
+                        document.getElementById("$" + i).checked = true
+                    }
                 }
             }
         }
@@ -406,31 +436,47 @@ function displayDemoColour(colourString, i){
         "class": "checkboxes"
     })
     let backEl = $("<div>", {
-        "class": "btn mx-4",
-        "style": "background-color:" + backCol + "; width: 80%;"
+        "class": "btn mx-4 checkboxes",
+        "id" : "@" + i,
+        "style": "background-color:" + backCol + "; width: 75%;"
     })
     let bookEl = $("<div>", {
         "class": "d-flex btn",
         "style": "background-color:" + bookCol + "; width: 70%; margin: 0 auto; justify-content: center",
         "text" : "Bookmark"
     })
+    let binIcon = $("<i>", {
+        text: "delete",
+        class: "material-icons mt-1 delete-col",
+        id: "&" + i
+    })
+    binIcon.css("cursor", "pointer")
     backEl.append(bookEl)
     outerDiv.append(checkbox)
     outerDiv.append(backEl)
+    outerDiv.append(binIcon)
     $("#optionColour").append(outerDiv)
 }
 
 function showMoreOptions(){
     //Make it so a thing appears on the right hand side that can help pick colour themes from a lot of options
-    $("#multipleColours").css("display", "")
     console.log("do stuff")
     for(var i=0; i< colourOptions.length;i++){
         displayDemoColour(colourOptions[i], i)
     }
     $(".checkboxes").on("click", async function(){
         let id = this.id.slice(1)
+        if (this.id.slice(0,1) != "$") {
+            let obj = document.getElementById("$" + id)
+            if (obj.checked == false) {
+                obj.checked = true
+            }
+            else {
+                obj.checked = false
+            }
+        }
         if (colourConfig == "s"){
-            let obj = document.getElementById(this.id)
+            let obj = document.getElementById("$" + id)
             if (obj.checked == true){
                 // disableCheck(id)
                 unCheckOthers(id)
@@ -458,10 +504,40 @@ function showMoreOptions(){
             }
             await makeStorage("colourCollection", selectedArr)
         }
-
-        
-        
         console.log(id)
+    })
+    $(".delete-col").on("click", async function () {
+        if (colourConfig == "s") {
+            let id = this.id.slice(1)
+
+            //If the colour we are removing is the checked colour
+            if (document.getElementById("$" + id).checked == true) {
+                // document.getElementById("$" + id).checked = false;
+                // //Makes the next box ticked
+                // let nextBox = (parseInt(id) + 1) % (colourOptions.length)
+                // console.log(nextBox)
+                colourOptions.splice(parseInt(id),1)
+                await makeStorage("colourArray", colourOptions)
+                // document.getElementById("$" + String(nextBox)).checked = true;
+                $("#optionColour").empty()
+                storeColour(id)
+                // showMoreOptions("$" + id)
+                console.log("this is happening")
+            }
+            else {
+                colourOptions.splice(parseInt(id),1)
+                let fromTop = $("#optionColour").scrollTop()
+                await makeStorage("colourArray", colourOptions)
+                $("#optionColour").empty()
+                showMoreOptions()
+                checkWhenLoad()
+                $("#optionColour").css("top", fromTop)
+
+            }
+        }
+        else if (colourConfig == "r") {
+
+        }
     })
 }
 
@@ -469,7 +545,9 @@ function unCheckOthers(index){
     for(var i=0; i< colourOptions.length;i++){
         if (i != index){
             console.log(i, index)
-            document.getElementById("$" + i).checked = false
+            if (document.getElementById("$" + i)) {
+                document.getElementById("$" + i).checked = false
+            }
         }
     }
 }
@@ -497,7 +575,9 @@ function disableCheck(index){
 function undisableCheck(index){
     for(var i=0; i< colourOptions.length;i++){
         console.log(i, index)
-        document.getElementById("$" + i).disabled = false
+        if (document.getElementById("$" + i)) {
+            document.getElementById("$" + i).disabled = false
+        }
     }
 }
 
