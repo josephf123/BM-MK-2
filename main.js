@@ -1258,7 +1258,7 @@ async function displayIconModal(id){
     for(var i=0;i < tags.length; i++){
         let tag = $("<div>", {
             class: "btn m-2 d-inline-flex",
-            style: "border-radius: 1.5em; background-color: " + backgroundCol,
+            style: "border-radius: 1.5em; background-color: #" + backgroundCol,
             id: "clickToNavigate_" + tags[[i]]
         })
         let tagIncluded = tags[i]
