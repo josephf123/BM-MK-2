@@ -1,37 +1,38 @@
-var stored = function (id){
-    return new Promise(function (resolve, reject){
+var stored = function (id) {
+    return new Promise(function (resolve, reject) {
         chrome.storage.local.get([id], function (res) {
             resolve(res[id])
-    
+
         })
     })
 }
 // Line 1061
-const pSBC=(p,c0,c1,l)=>{
-	let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";
-	if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;
-	if(!this.pSBCr)this.pSBCr=(d)=>{
-		let n=d.length,x={};
-		if(n>9){
-			[r,g,b,a]=d=d.split(","),n=d.length;
-			if(n<3||n>4)return null;
-			x.r=i(r[3]=="a"?r.slice(5):r.slice(4)),x.g=i(g),x.b=i(b),x.a=a?parseFloat(a):-1
-		}else{
-			if(n==8||n==6||n<4)return null;
-			if(n<6)d="#"+d[1]+d[1]+d[2]+d[2]+d[3]+d[3]+(n>4?d[4]+d[4]:"");
-			d=i(d.slice(1),16);
-			if(n==9||n==5)x.r=d>>24&255,x.g=d>>16&255,x.b=d>>8&255,x.a=m((d&255)/0.255)/1000;
-			else x.r=d>>16,x.g=d>>8&255,x.b=d&255,x.a=-1
-		}return x};
-	h=c0.length>9,h=a?c1.length>9?true:c1=="c"?!h:false:h,f=this.pSBCr(c0),P=p<0,t=c1&&c1!="c"?this.pSBCr(c1):P?{r:0,g:0,b:0,a:-1}:{r:255,g:255,b:255,a:-1},p=P?p*-1:p,P=1-p;
-	if(!f||!t)return null;
-	if(l)r=m(P*f.r+p*t.r),g=m(P*f.g+p*t.g),b=m(P*f.b+p*t.b);
-	else r=m((P*f.r**2+p*t.r**2)**0.5),g=m((P*f.g**2+p*t.g**2)**0.5),b=m((P*f.b**2+p*t.b**2)**0.5);
-	a=f.a,t=t.a,f=a>=0||t>=0,a=f?a<0?t:t<0?a:a*P+t*p:0;
-	if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
-	else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
+const pSBC = (p, c0, c1, l) => {
+    let r, g, b, P, f, t, h, i = parseInt, m = Math.round, a = typeof (c1) == "string";
+    if (typeof (p) != "number" || p < -1 || p > 1 || typeof (c0) != "string" || (c0[0] != 'r' && c0[0] != '#') || (c1 && !a)) return null;
+    if (!this.pSBCr) this.pSBCr = (d) => {
+        let n = d.length, x = {};
+        if (n > 9) {
+            [r, g, b, a] = d = d.split(","), n = d.length;
+            if (n < 3 || n > 4) return null;
+            x.r = i(r[3] == "a" ? r.slice(5) : r.slice(4)), x.g = i(g), x.b = i(b), x.a = a ? parseFloat(a) : -1
+        } else {
+            if (n == 8 || n == 6 || n < 4) return null;
+            if (n < 6) d = "#" + d[1] + d[1] + d[2] + d[2] + d[3] + d[3] + (n > 4 ? d[4] + d[4] : "");
+            d = i(d.slice(1), 16);
+            if (n == 9 || n == 5) x.r = d >> 24 & 255, x.g = d >> 16 & 255, x.b = d >> 8 & 255, x.a = m((d & 255) / 0.255) / 1000;
+            else x.r = d >> 16, x.g = d >> 8 & 255, x.b = d & 255, x.a = -1
+        } return x
+    };
+    h = c0.length > 9, h = a ? c1.length > 9 ? true : c1 == "c" ? !h : false : h, f = this.pSBCr(c0), P = p < 0, t = c1 && c1 != "c" ? this.pSBCr(c1) : P ? { r: 0, g: 0, b: 0, a: -1 } : { r: 255, g: 255, b: 255, a: -1 }, p = P ? p * -1 : p, P = 1 - p;
+    if (!f || !t) return null;
+    if (l) r = m(P * f.r + p * t.r), g = m(P * f.g + p * t.g), b = m(P * f.b + p * t.b);
+    else r = m((P * f.r ** 2 + p * t.r ** 2) ** 0.5), g = m((P * f.g ** 2 + p * t.g ** 2) ** 0.5), b = m((P * f.b ** 2 + p * t.b ** 2) ** 0.5);
+    a = f.a, t = t.a, f = a >= 0 || t >= 0, a = f ? a < 0 ? t : t < 0 ? a : a * P + t * p : 0;
+    if (h) return "rgb" + (f ? "a(" : "(") + r + "," + g + "," + b + (f ? "," + m(a * 1000) / 1000 : "") + ")";
+    else return "#" + (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0)).toString(16).slice(1, f ? undefined : -2)
 }
-let data, popularList, textColour, backgroundCol,foregroundCol, imgUrl, img, bookmarkColourList;
+let data, popularList, textColour, backgroundCol, foregroundCol, imgUrl, img, bookmarkColourList;
 
 let currentState = "popularButtonSort"
 
@@ -60,7 +61,7 @@ let maxPerPage = 0;
 //     let invertedRGB = invertColour(rgbCol["r"], rgbCol["g"], rgbCol["b"])
 //     hexCol = rgbToHex(invertedRGB["r"], invertedRGB["g"], invertedRGB["b"])
 //     console.log("this")
-    
+
 // }
 
 // function imageLoad(src){
@@ -83,23 +84,23 @@ let maxPerPage = 0;
 
 
 
-chrome.runtime.onInstalled.addListener(async function(details) {
+chrome.runtime.onInstalled.addListener(async function (details) {
     console.log("Hoowee")
     console.log(details.reason)
     let colourOptions = [
-        "114B5F-03A0B5", "317773-E2D1F9", "48639C-82A0BC", "095256-D17A22","364156-D66853", "A23B72-247BA0","067BC2-F18F01","644536-B2675E",
+        "114B5F-03A0B5", "317773-E2D1F9", "48639C-82A0BC", "095256-D17A22", "364156-D66853", "A23B72-247BA0", "067BC2-F18F01", "644536-B2675E",
         "095256-E1612A", "446E80-A23B72", "8F3985-A675A1",
-        "5158BB-F18F01","067BC2-685470", "BC5D2E-FBCA9A", "2274A5-FF7733", "446E80-B1DDCA", "0277BD-00695C",
-        "247BA0-CA596E", "50635B-BDA63F", "247222-93C0A4", "247BA0-93C0A4","1D2F6F-FAC748",
-        "685470-BC5D2E",  "095256-F25F5C", "C0596E-F18F01", "4E6474-61CC3D",  "067BC2-B1DDCA",                                    
+        "5158BB-F18F01", "067BC2-685470", "BC5D2E-FBCA9A", "2274A5-FF7733", "446E80-B1DDCA", "0277BD-00695C",
+        "247BA0-CA596E", "50635B-BDA63F", "247222-93C0A4", "247BA0-93C0A4", "1D2F6F-FAC748",
+        "685470-BC5D2E", "095256-F25F5C", "C0596E-F18F01", "4E6474-61CC3D", "067BC2-B1DDCA",
     ]
-    if (details.reason == "install"){
-        await makeStorage("tags", ["Work","Entertainment","For Later"])
+    if (details.reason == "install") {
+        await makeStorage("tags", ["Work", "Entertainment", "For Later"])
         //For now just make it so it is only colours but later I will add photos
         await makeStorage("colConfig", "r")
         // This will be colour order, either col-col, col-random, random-col or random-random
         await makeStorage("colourOrder", "114B5F-03A0B5")
-        
+
         await makeStorage("colourCollection", colourOptions)
         // When the home button is pressed, will it go to default of popular
         await makeStorage("home", "popular")
@@ -110,7 +111,7 @@ chrome.runtime.onInstalled.addListener(async function(details) {
         // $("#updateMessage").modal("show")
     }
     // else if (details.reason == "update"){
-        
+
     //     // showUpdatePins()
     //     // $("#updateMessage").modal("show")
     // }
@@ -123,63 +124,65 @@ chrome.runtime.onInstalled.addListener(async function(details) {
     if (colourArrayStatus == undefined) {
         await makeStorage("colourArray", colourOptions)
     }
-    
-    
+
+
 });
 
 
 
 
-async function sendPageAndColour(){
+async function sendPageAndColour() {
     let colCol = await stored("colourCollection")
     console.log(colCol)
     ga('set', 'dimension1', colCol);
 
     //ga('set', 'dimension2', userID)
-    
+
     ga('send', 'event', 'colour scheme', colCol, "For colours");
 
     ga('send', 'pageview', "/newTab.html")
 }
 
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
 
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga'); // Note: https protocol here
-    
-    ga('create', 'UA-175257786-1', 'auto');
-    
-    ga('set', 'checkProtocolTask', function(){}); // Removes failing protocol check. @see: http://stackoverflow.com/a/22152353/1958200
-    
-    ga('require', 'displayfeatures');
+        (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
 
-    sendPageAndColour()
-    
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
 
-    // ga(function(tracker) {
-    //     // Logs the trackers name.
-    //     // (Note: default trackers are given the name "t0")
-    //     console.warn(tracker)
-    //     console.warn(tracker.get('name'));
-      
-    //     // Logs the client ID for the current user.
-    //     console.warn(tracker.get('clientId'));
-      
-    //     // Logs the URL of the referring site (if available).
-    //     console.warn(tracker.get('storedClientId'));
-    // });
-    //For the colour that the user uses
-    
-    
+})(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga'); // Note: https protocol here
+
+ga('create', 'UA-175257786-1', 'auto');
+
+ga('set', 'checkProtocolTask', function () { }); // Removes failing protocol check. @see: http://stackoverflow.com/a/22152353/1958200
+
+ga('require', 'displayfeatures');
+
+sendPageAndColour()
+
+
+// ga(function(tracker) {
+//     // Logs the trackers name.
+//     // (Note: default trackers are given the name "t0")
+//     console.warn(tracker)
+//     console.warn(tracker.get('name'));
+
+//     // Logs the client ID for the current user.
+//     console.warn(tracker.get('clientId'));
+
+//     // Logs the URL of the referring site (if available).
+//     console.warn(tracker.get('storedClientId'));
+// });
+//For the colour that the user uses
+
+
 
 //let hexCol = "247BA0"
 //"AB4E68"
 // randomColours[randomNum1]
 
-document.addEventListener("DOMContentLoaded", async() => {
+document.addEventListener("DOMContentLoaded", async () => {
     // chrome.tabs.query({"active": false, "currentWindow": true }, function (tabs) {
     //     console.log(tabs);
     // });
@@ -190,19 +193,19 @@ document.addEventListener("DOMContentLoaded", async() => {
     //let invert = rgbToHex(inverted["r"], inverted["g"], inverted["b"])
     let colConfig = await stored("colConfig")
     let dataColours;
-    if (colConfig == "s"){
+    if (colConfig == "s") {
         dataColours = await stored("colourOrder")
     }
-    else if (colConfig == "r"){
+    else if (colConfig == "r") {
         let arr = await stored("colourCollection")
         let randIndex = Math.round(Math.random() * arr.length)
         console.log(arr.length, randIndex, "h")
-        if (randIndex > (arr.length - 1)){
+        if (randIndex > (arr.length - 1)) {
             randIndex = arr.length - 1
         }
         dataColours = arr[randIndex]
     }
-    let backgroundColour = dataColours.slice(0,6)
+    let backgroundColour = dataColours.slice(0, 6)
     let hexCol = dataColours.slice(7)
     backgroundCol = backgroundColour;
     foregroundCol = hexCol;
@@ -228,9 +231,9 @@ document.addEventListener("DOMContentLoaded", async() => {
     let hexCol4 = pSBC(-0.6, hexCol1)
     let hexCol5 = pSBC(-0.7, hexCol1)
     let hexCol6 = pSBC(-0.75, hexCol1)
-    bookmarkColourList = [hexCol1, hexCol2 , hexCol3, hexCol4, hexCol5, hexCol6]
+    bookmarkColourList = [hexCol1, hexCol2, hexCol3, hexCol4, hexCol5, hexCol6]
     textColour = pickBlackOrWhite(bookmarkColourList[0])
-    
+
     // let backImg = "url(" + imgUrl + ")"
     // $("#bod").css("background-image", backImg)
     console.log("testing")
@@ -239,64 +242,111 @@ document.addEventListener("DOMContentLoaded", async() => {
     console.log("testt")
     // await renderTags()
     onSearchBarFocus()
-    
+
 
     $(".icon").on("hover", function () {
         console.log("testing")
     })
-    $("#tagPage").on("click", function (){
+    $("#tagPage").on("click", function () {
         window.location.href = "tagManage.html"
     })
-    $("#optionsPage").on("click", function (){
+    $("#optionsPage").on("click", function () {
         window.location.href = "options.html"
     })
     // $(".dropdown-item-tag").on("click", function (){
     //     console.log(this.id)
     //     displayWithTag(this.id)
     // })
-    $("#searchButton").on("keyup", function (e){
+    $("#searchButton").on("keyup", function (e) {
         console.log(e.target.value)
         searchFunction(e.target.value)
     })
     // await renderFolders()
-    $(".dropdown-item-folder").on("click", function (){
+    $(".dropdown-item-folder").on("click", function () {
         displayWithFolder(this.id)
     })
-    $("#saveChangesInfoModal").on("click", function(){
+    $("#saveChangesInfoModal").on("click", function () {
         let textModal = $("textarea")[0].value
         let id = $("textarea")[0].id.substring(1)
         console.log(textModal)
         console.log(id)
-        saveChangesModal(id,textModal)
+        saveChangesModal(id, textModal)
 
     })
-    $("#dropdownFolder").on("click", function(){
+    $("#dropdownFolder").on("click", function () {
         let array = []
         findAllFolders(data, array)
         $("#bookmarks").empty()
         onFocusOrFilter()
-        for(var i=0; i < array.length; i++){
+        for (var i = 0; i < array.length; i++) {
             printFolder(array[i])
             onClickOpen(array[i])
         }
     })
     $("#bookmarks").on("click", () => {
-        if (!hasBeenClicked){
+        if (!hasBeenClicked) {
             initialExpandingHome()
             $("#bookmarks").popover("hide")
         }
     })
     await addFilteringButtons(true)
-    
+    pinningBookmarks()
     // sortBookmarks()
     // $("#updateMessage").modal("show")
     // $("#bookmarks").popover({title: "Click me!", content: "Clicking in this area (not the bookmarks) expands it out", trigger: "manual"})
     // $("#bookmarks").popover("show")
-    
-    
+    changeFontSizeIfTooBig()
+
+
 
 
 })
+
+function changeFontSizeIfTooBig() {
+    $(".bookmark").each(function () {
+        console.log(this.id)
+        jsEl = document.getElementById(this.id)
+        if (checkOverflow(jsEl)) {
+            currFont = $(this).css("font-size").slice(0, -2)
+            console.log(currFont)
+            $(this).css("font-size", currFont - 4)
+        }
+    })
+}
+
+function checkOverflow(el) {
+    var curOverf = el.style.overflow;
+
+    if (!curOverf || curOverf === "visible")
+        el.style.overflow = "hidden";
+
+    var isOverflowing = el.clientWidth < el.scrollWidth || el.clientHeight < el.scrollHeight;
+
+    el.style.overflow = curOverf;
+
+    return isOverflowing;
+}
+
+// Add functionality later if people want pins (don't think they will)
+
+// async function isPinnedBookmark(id) {
+//     let pinnedBookmarksArr = await stored("pinnedBookmarks")
+//     if (!pinnedBookmarksArr) {
+//         pinnedBookmarksArr = []
+//     }
+//     if (pinnedBookmarksArr.indexOf(String(id)) == -1) {
+//         return false
+//     } else {
+//         return true
+//     }
+// }
+
+// function pinningBookmarks() {
+//     console.log("yoqpeor")
+//     return
+// }
+
+
 function printOpenAllChildren(obj) {
     /////////////////////////////////
     // Copy and pasted from printFolder
@@ -304,13 +354,13 @@ function printOpenAllChildren(obj) {
     let folderDiv = document.createElement("div")
     folderDiv.className = "folder btn col-2 m-3 btn-sm"
     folderDiv.id = obj.id
-    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(obj, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
+    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(obj, data)] + "; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
     let bookmarkRowDivision = document.createElement("div")
     bookmarkRowDivision.className = "d-flex flex-row margin"
     bookmarkRowDivision.style = "overflow-wrap: anywhere;"
 
     let bookmarkText = document.createElement("p")
-    bookmarkText.innerHTML = "Open all inside the folder" 
+    bookmarkText.innerHTML = "Open all inside the folder"
     bookmarkText.class = "d-inline-flex"
     fragment.appendChild(folderDiv)
     folderDiv.appendChild(bookmarkRowDivision)
@@ -318,45 +368,45 @@ function printOpenAllChildren(obj) {
 
     //////////////
 
-    folderDiv.addEventListener("click", function(){
-        for(var i=0; i < obj.children.length; i++){
-            chrome.tabs.create({"url": obj.children[i].url, "active": false})
+    folderDiv.addEventListener("click", function () {
+        for (var i = 0; i < obj.children.length; i++) {
+            chrome.tabs.create({ "url": obj.children[i].url, "active": false })
         }
     })
     document.getElementById("bookmarks").appendChild(fragment)
 }
 
 
-function pinFunctionality(element){
-    element.on("click", async (e) =>{
+function pinFunctionality(element) {
+    element.on("click", async (e) => {
         e.stopImmediatePropagation()
         let pinnedTabs = await stored("pinnedItems")
         let id = element[0].id
-        id = id.slice(0,-3)
+        id = id.slice(0, -3)
         id = id + "ButtonSort"
         console.log("does this even work?")
-        if (element.hasClass("pinned")){
+        if (element.hasClass("pinned")) {
             element.removeClass("pinned")
             console.log(id)
             pinnedTabs = pinnedTabs.filter(item => item != id)
             console.log(pinnedTabs)
         }
-        else{
+        else {
             element.addClass("pinned")
             pinnedTabs.push(id)
         }
         await makeStorage("pinnedItems", pinnedTabs)
         $("#middleLine").empty()
         await addFilteringButtons()
-    })  
+    })
 }
 
-function buttonDrag(element){
-    element.on("dragstart", function(e) {
+function buttonDrag(element) {
+    element.on("dragstart", function (e) {
         element.css("opacity", "0.4")
-        e.originalEvent.dataTransfer.setData('Text',element[0].id)
+        e.originalEvent.dataTransfer.setData('Text', element[0].id)
     })
-    element.on("dragend", function(e) {
+    element.on("dragend", function (e) {
         element.css("opacity", "1")
     })
     element.on("dragover", (e) => {
@@ -374,37 +424,37 @@ function buttonDrag(element){
     })
 }
 
-function showUpdatePins(){
+function showUpdatePins() {
     console.log("Hello?")
 }
 
-async function swapPinnedPositions(a,b){
+async function swapPinnedPositions(a, b) {
     let pinnedTabs = await stored("pinnedItems")
     console.log(pinnedTabs)
     console.log(a)
     console.log(b)
-    if (a == "" || b == ""){
+    if (a == "" || b == "") {
         return
     }
     let aIndex = pinnedTabs.findIndex(x => x == a)
     let bIndex = pinnedTabs.findIndex(x => x == b)
-    if (aIndex != null && bIndex != null){
+    if (aIndex != null && bIndex != null) {
         let tmp = pinnedTabs[aIndex]
         pinnedTabs[aIndex] = pinnedTabs[bIndex]
         pinnedTabs[bIndex] = tmp
         console.log(pinnedTabs)
         await makeStorage("pinnedItems", pinnedTabs)
     }
-    
+
 }
 
-async function addFilteringButtons(){
+async function addFilteringButtons() {
     let blackOrWhiteText = pickBlackOrWhite(backgroundCol)
     let textColourForFilter;
-    if (blackOrWhiteText){
+    if (blackOrWhiteText) {
         textColourForFilter = "black"
     }
-    else{
+    else {
         textColourForFilter = "#D3D3D3"
     }
     let popularButton = $("<div>", {
@@ -443,7 +493,7 @@ async function addFilteringButtons(){
     })
     tagButton.attr("data-toggle", "dropdown")
     tagButton.attr("draggable", "true")
-    
+
     buttonDrag(tagButton)
     let folderButtonEncapsulate = $("<div>", {
         class: "dropdown flex-fill",
@@ -457,7 +507,7 @@ async function addFilteringButtons(){
     })
     folderButton.attr("data-toggle", "dropdown")
     folderButton.attr("draggable", "true")
-    
+
     buttonDrag(folderButton)
     let allFiltersEncapsulate = $("<div>", {
         class: "dropdown flex-fill",
@@ -471,7 +521,7 @@ async function addFilteringButtons(){
     })
     allFilters.attr("data-toggle", "dropdown")
     allFilters.attr("draggable", "true")
-    
+
     allFiltersEncapsulate.css("height", $("#middleLine").css("height"))
     let bigDiv = $("<div>", {
         class: "row flex-fill",
@@ -497,7 +547,7 @@ async function addFilteringButtons(){
     bigDiv.css("height", middleLineHeight)
 
 
-    
+
     tagButtonEncapsulate.append(tagButton)
     let div = $("<div>", {
         class: "dropdown-menu",
@@ -506,7 +556,7 @@ async function addFilteringButtons(){
     })
     let tags = await stored("tags")
     console.log(tags)
-    for(var i=0; i < tags.length; i++){
+    for (var i = 0; i < tags.length; i++) {
         let aligningDiv = $("<div>", {
             class: "row mr-0 ml-0"
         })
@@ -526,10 +576,10 @@ async function addFilteringButtons(){
         div.append(aligningDiv)
     }
 
-    
+
     //Add divider and then manage tags div
     tagButtonEncapsulate.append(div)
-    
+
     let div2 = $("<div>", {
         class: "dropdown-menu",
         style: "border-radius: 20px; max-height: 500px; min-width: 270px;overflow-y:scroll"
@@ -537,16 +587,16 @@ async function addFilteringButtons(){
     })
     let folderArray = []
     findAllFolders(data, folderArray)
-    for(var i=0; i < folderArray.length; i++){
+    for (var i = 0; i < folderArray.length; i++) {
         let aligningDiv = $("<div>", {
             class: "row mr-0 ml-0 clickableItem",
         })
         let title = folderArray[i].title
-        if (title.length > 25){
-            title = title.slice(0,25) + "..."
+        if (title.length > 25) {
+            title = title.slice(0, 25) + "..."
         }
         let a = $("<a>", {
-            class: "dropdown-item folder-select-filter",
+            class: "dropdown-item folder-select-filter clickableItem",
             text: title,
             style: "border-radius: 1.5em;",
             id: "folderFilter" + folderArray[i].id
@@ -563,14 +613,14 @@ async function addFilteringButtons(){
 
     folderButtonEncapsulate.append(folderButton)
     folderButtonEncapsulate.append(div2)
-    
+
     let div3 = $("<div>", {
         class: "dropdown-menu",
         style: "border-radius: 20px; min-width: 160px"
 
     })
     let defLi = $("<li>")
-    let filterDefaultButton = $("<div>",{
+    let filterDefaultButton = $("<div>", {
         class: "d-flex"
     })
     let defPush = $("<i>", {
@@ -580,7 +630,7 @@ async function addFilteringButtons(){
     })
     pinFunctionality(defPush)
     let defClick = $("<a>", {
-        class: "dropdown-item dropdown-sort",
+        class: "dropdown-item dropdown-sort clickableItem",
         text: "Default",
         style: "border-radius:1.5em"
     })
@@ -589,7 +639,7 @@ async function addFilteringButtons(){
     defLi.append(filterDefaultButton)
     div3.append(defLi)
     let popLi = $("<li>")
-    let filterPopularButton = $("<div>",{
+    let filterPopularButton = $("<div>", {
         class: "d-flex"
     })
     let popPush = $("<i>", {
@@ -599,7 +649,7 @@ async function addFilteringButtons(){
     })
     pinFunctionality(popPush)
     let popClick = $("<a>", {
-        class: "dropdown-item dropdown-sort",
+        class: "dropdown-item dropdown-sort clickableItem",
         text: "Popular"
     })
     filterPopularButton.append(popClick)
@@ -607,7 +657,7 @@ async function addFilteringButtons(){
     popLi.append(filterPopularButton)
     div3.append(popLi)
     let newLi = $("<li>")
-    let filterNewButton = $("<div>",{
+    let filterNewButton = $("<div>", {
         class: "d-flex"
     })
     let newPush = $("<i>", {
@@ -617,7 +667,7 @@ async function addFilteringButtons(){
     })
     pinFunctionality(newPush)
     let newClick = $("<a>", {
-        class: "dropdown-item dropdown-sort",
+        class: "dropdown-item dropdown-sort clickableItem",
         text: "New"
     })
     filterNewButton.append(newClick)
@@ -638,7 +688,7 @@ async function addFilteringButtons(){
     })
     pinFunctionality(tagPush)
     let tagsClick = $("<a>", {
-        class: "dropdown-item dropdown-toggle",
+        class: "dropdown-item dropdown-toggle clickableItem",
         text: "Tags",
         style: "border-radius:2.5em; "
     })
@@ -665,7 +715,7 @@ async function addFilteringButtons(){
     })
     pinFunctionality(foldersPush)
     let foldersClick = $("<a>", {
-        class: "dropdown-item dropdown-toggle",
+        class: "dropdown-item dropdown-toggle clickableItem",
         text: "Folder",
         style: "border-radius:2.5em;"
     })
@@ -678,12 +728,12 @@ async function addFilteringButtons(){
     foldersLi.append(foldersFilterDiv)
     foldersLi.append(folderInside)
     div3.append(foldersLi)
-    for(var i=0; i < tags.length; i++){
+    for (var i = 0; i < tags.length; i++) {
         let aligningDiv = $("<div>", {
             class: "row "
         })
         let a = $("<a>", {
-            class: "dropdown-item tag-select-filter",
+            class: "dropdown-item tag-select-filter clickableItem",
             text: tags[i],
             style: "border-radius: 1.5em; width: 70%; position: relative; left: 15px",
             id: "tagAllFilter" + tags[i]
@@ -699,16 +749,16 @@ async function addFilteringButtons(){
         tagsInside.append(aligningDiv)
         pinFunctionality(innerTagPush)
     }
-    for(var i=0; i < folderArray.length; i++){
+    for (var i = 0; i < folderArray.length; i++) {
         let title = folderArray[i].title
-        if (title.length > 20){
-            title = title.slice(0,20) + "..."
+        if (title.length > 20) {
+            title = title.slice(0, 20) + "..."
         }
         let aligningDiv = $("<div>", {
             class: "row mr-0 ml-0"
         })
         let a = $("<a>", {
-            class: "dropdown-item folder-select-filter",
+            class: "dropdown-item folder-select-filter clickableItem",
             text: title,
             style: "border-radius: 10px; width:80%",
             id: "folderAllFilter" + folderArray[i].id
@@ -727,54 +777,54 @@ async function addFilteringButtons(){
 
     allFiltersEncapsulate.append(allFilters)
     allFiltersEncapsulate.append(div3)
-    if (arguments.length == 1){
+    if (arguments.length == 1) {
         let whichIsFocused = await stored("onLoad")
-        if (whichIsFocused == "popular"){
+        if (whichIsFocused == "popular") {
             popularButton.addClass("focused")
-        } else if (whichIsFocused == "default"){
+        } else if (whichIsFocused == "default") {
             defaultButton.addClass("focused")
-        } else{
-    
+        } else {
+
         }
     }
 
     biggerDiv.append(swapIcon)
-    
+
     let allPinnedButtons = [defaultButton, popularButton, newButton, tagButton, folderButton, allFilters]
 
     let pinnedTabsOrder = await stored("pinnedItems")
 
 
-    for(var i=0; i<pinnedTabsOrder.length; i++){
+    for (var i = 0; i < pinnedTabsOrder.length; i++) {
         console.log("The", i, "th is ", pinnedTabsOrder[i])
-        if (pinnedTabsOrder[i] == "defaultButtonSort"){
+        if (pinnedTabsOrder[i] == "defaultButtonSort") {
             bigDiv.append(defaultButton)
             defPush.addClass("pinned")
         }
-        else if (pinnedTabsOrder[i] == "popularButtonSort"){
+        else if (pinnedTabsOrder[i] == "popularButtonSort") {
             bigDiv.append(popularButton)
             popPush.addClass("pinned")
         }
-        else if (pinnedTabsOrder[i] == "newButtonSort"){
+        else if (pinnedTabsOrder[i] == "newButtonSort") {
             bigDiv.append(newButton)
             newPush.addClass("pinned")
 
         }
-        else if (pinnedTabsOrder[i] == "tagsButtonSort"){
+        else if (pinnedTabsOrder[i] == "tagsButtonSort") {
             bigDiv.append(tagButtonEncapsulate)
             tagPush.addClass("pinned")
 
         }
-        else if (pinnedTabsOrder[i] == "foldersButtonSort"){
+        else if (pinnedTabsOrder[i] == "foldersButtonSort") {
             bigDiv.append(folderButtonEncapsulate)
             foldersPush.addClass("pinned")
         }
         else {
-            let startingPart = pinnedTabsOrder[i].slice(0,2)
+            let startingPart = pinnedTabsOrder[i].slice(0, 2)
             console.log(startingPart)
-            if (startingPart == "T_"){
+            if (startingPart == "T_") {
                 let tagName = pinnedTabsOrder[i].slice(2,)
-                tagName = tagName.slice(0,-10)
+                tagName = tagName.slice(0, -10)
                 console.log(tagName)
                 let tagDiv = $("<div>", {
                     class: "flex-fill dropdown-sort clickableItem tag-select-filter",
@@ -788,9 +838,9 @@ async function addFilteringButtons(){
                 allPinnedButtons.push(tagDiv)
                 bigDiv.append(tagDiv)
             }
-            else if (startingPart == "F_"){
+            else if (startingPart == "F_") {
                 let folderId = pinnedTabsOrder[i].slice(2,)
-                folderId = folderId.slice(0,-10)
+                folderId = folderId.slice(0, -10)
                 console.log(folderId)
                 let folderObj = findIt(data, folderId)
                 let folderDiv = $("<div>", {
@@ -806,48 +856,48 @@ async function addFilteringButtons(){
                 allPinnedButtons.push(folderDiv)
                 bigDiv.append(folderDiv)
                 let folderPin = "F_" + folderId + "Pin"
-                $("#"+ folderPin).addClass("pinned")
+                $("#" + folderPin).addClass("pinned")
             }
         }
     }
     bigDiv.append(allFiltersEncapsulate)
     biggerDiv.append(bigDiv)
     biggerDiv.append(settingsCog)
-    
+
     $("#middleLine").append(biggerDiv)
 
     let allFilterWidth = allFiltersEncapsulate.css("width")
-    div3.css("width",allFilterWidth)
-    
+    div3.css("width", allFilterWidth)
+
     //To add "pinned" to the icon for tags
-    $(".innerTag").each(function (){
-        for(var i=0; i < pinnedTabsOrder.length; i++){
-            let start = pinnedTabsOrder[i].slice(0,2)
-            let checkingTag = $(this)[0].id.slice(0,-3)
-            let otherTag = pinnedTabsOrder[i].slice(0,-10)
-            if (start == "T_"){
-                if (checkingTag == otherTag){
+    $(".innerTag").each(function () {
+        for (var i = 0; i < pinnedTabsOrder.length; i++) {
+            let start = pinnedTabsOrder[i].slice(0, 2)
+            let checkingTag = $(this)[0].id.slice(0, -3)
+            let otherTag = pinnedTabsOrder[i].slice(0, -10)
+            if (start == "T_") {
+                if (checkingTag == otherTag) {
                     $(this).addClass("pinned")
                     console.log($(this)[0])
                 }
-            }   
+            }
         }
     })
 
     //Add "pinned" to the icon for folders
-    for(var x=0; x<folderArray.length;x++){
-        for(var i=0; i < pinnedTabsOrder.length; i++){
-            let start = pinnedTabsOrder[i].slice(0,2)
-            if (start == "F_"){
+    for (var x = 0; x < folderArray.length; x++) {
+        for (var i = 0; i < pinnedTabsOrder.length; i++) {
+            let start = pinnedTabsOrder[i].slice(0, 2)
+            if (start == "F_") {
                 let checkingFolder = "F_" + folderArray[x].id
-                let otherFolder = pinnedTabsOrder[i].slice(0,-10)
-                if (checkingFolder == otherFolder){
+                let otherFolder = pinnedTabsOrder[i].slice(0, -10)
+                if (checkingFolder == otherFolder) {
                     console.log(checkingFolder)
                     let folderPushString = "#F_" + folderArray[x].id + "Pin"
                     console.log(folderPushString)
                     $(folderPushString).addClass("pinned")
                 }
-            }   
+            }
         }
     }
 
@@ -857,14 +907,14 @@ async function addFilteringButtons(){
     swapIcon.on("click", async () => {
         let dataColours;
         let colConfig = await stored("colConfig")
-        if (colConfig == "s"){
+        if (colConfig == "s") {
             dataColours = await stored("colourOrder")
-            let backCol = dataColours.slice(0,6)
+            let backCol = dataColours.slice(0, 6)
             let frontCol = dataColours.slice(7)
             await makeStorage("colourOrder", frontCol + "-" + backCol)
             location.reload()
         }
-        else if (colConfig == "r"){
+        else if (colConfig == "r") {
             location.reload()
 
         }
@@ -877,27 +927,27 @@ async function addFilteringButtons(){
 
     $(".tag-select-filter").on("click", async (e) => {
         let id = e.target.id
-        if (id.slice(0,2) == "T_"){
+        if (id.slice(0, 2) == "T_") {
             id = id.slice(2,)
-            id = id.slice(0,-10)
+            id = id.slice(0, -10)
         }
-        else if (id.slice(0,12) == "tagAllFilter"){
+        else if (id.slice(0, 12) == "tagAllFilter") {
             id = id.slice(12,)
         }
-        else if (id.slice(0,9) == "tagFilter"){
+        else if (id.slice(0, 9) == "tagFilter") {
             id = id.slice(9,)
         }
         let tagArray = []
         await findTagArray(data, id, tagArray)
         console.log(tagArray)
-        if (tagArray.length != 0){
+        if (tagArray.length != 0) {
             currentState = "T+" + id
             hasBeenClicked = true
             onFocusOrFilter()
             $("#bookmarks").off("scroll")
             $("#bookmarks").empty()
-            for(var i=0; i < tagArray.length; i++){
-                if (tagArray[i].children){
+            for (var i = 0; i < tagArray.length; i++) {
+                if (tagArray[i].children) {
                     printFolder(tagArray[i])
                     onClickOpen(tagArray[i])
                 }
@@ -905,8 +955,9 @@ async function addFilteringButtons(){
                     printBookmark(tagArray[i])
                 }
             }
+            changeFontSizeIfTooBig()
         }
-        else{
+        else {
             $("#errorMessage").modal("show")
             let string = 'Sorry, there are no bookmarks that are under the tag "' + id + '"'
             $("#errorBody").text(string)
@@ -918,35 +969,36 @@ async function addFilteringButtons(){
         e.preventDefault()
         let id = e.target.id
         console.log(id, "this is id")
-        if (id.slice(0,2) == "F_"){
+        if (id.slice(0, 2) == "F_") {
             id = id.slice(2,)
-            id = id.slice(0,-10)
+            id = id.slice(0, -10)
         }
-        else if (id.slice(0,15) == "folderAllFilter"){
+        else if (id.slice(0, 15) == "folderAllFilter") {
             id = id.slice(15,)
         }
-        else if (id.slice(0,12) == "folderFilter"){
+        else if (id.slice(0, 12) == "folderFilter") {
             id = id.slice(12,)
         }
         let object = findIt(data, id)
         console.log(object)
         let objectChildren = object.children
-        if (objectChildren.length > 0){
+        if (objectChildren.length > 0) {
             currentState = "F+" + id
             hasBeenClicked = true
             onFocusOrFilter()
             $("#bookmarks").off("scroll")
             $("#bookmarks").empty()
-            for (var i=0; i < objectChildren.length; i++){
-                if (objectChildren[i].children){
+            for (var i = 0; i < objectChildren.length; i++) {
+                if (objectChildren[i].children) {
                     printFolder(objectChildren[i])
                     onClickOpen(objectChildren[i])
                 }
-                else{
+                else {
                     printBookmark(objectChildren[i])
                 }
             }
             printOpenAllChildren(object)
+            changeFontSizeIfTooBig()
         }
         else {
             $("#errorMessage").modal("show")
@@ -979,7 +1031,7 @@ async function addFilteringButtons(){
     newButton.on("click", () => {
         currentState = "newButtonSort"
         hasBeenClicked = true
-        let copyOfData = $.extend( true, [], data );
+        let copyOfData = $.extend(true, [], data);
         let reversedData = copyOfData.reverse()
         console.log(copyOfData)
         paginateLoadingFilter(reversedData)
@@ -987,7 +1039,7 @@ async function addFilteringButtons(){
     filterNewButton.on("click", () => {
         currentState = "newButtonSort"
         hasBeenClicked = true
-        let copyOfData = $.extend( true, [], data );
+        let copyOfData = $.extend(true, [], data);
         let reversedData = copyOfData.reverse()
         console.log(copyOfData)
         paginateLoadingFilter(reversedData)
@@ -995,27 +1047,27 @@ async function addFilteringButtons(){
 }
 
 //For the bookmarks so when you hover over them they go transparent
-function buttonHovering(array, colour, lighterColor, exclusive){
-    for(let i=0; i < array.length;i++){
+function buttonHovering(array, colour, lighterColor, exclusive) {
+    for (let i = 0; i < array.length; i++) {
         console.log(colour)
         $(array[i]).css("border", "2px solid " + colour)
         console.log("does this work")
-        if (arguments.length == 4 && arguments[3] == true){
+        if (arguments.length == 4 && arguments[3] == true) {
             $(array[i]).addClass("focused")
             changeFocus(array[i], colour, lighterColor)
         }
         else {
             changeFocus(array[i], colour, lighterColor)
-            $(array[i]).on("click", function(){
-                for(var k=0; k < array.length;k++){
-                    if (k == i){
+            $(array[i]).on("click", function () {
+                for (var k = 0; k < array.length; k++) {
+                    if (k == i) {
                         $(array[k]).addClass("focused")
                     }
-                    else{
+                    else {
                         $(array[k]).removeClass("focused")
                     }
                 }
-                for(var j=0; j < array.length; j++){
+                for (var j = 0; j < array.length; j++) {
                     changeFocus(array[j], colour, lighterColor)
                 }
             })
@@ -1023,57 +1075,57 @@ function buttonHovering(array, colour, lighterColor, exclusive){
     }
 }
 
-function changeFocus(obj, col, lighterColor){
-    if ($(obj).hasClass("focused")){
+function changeFocus(obj, col, lighterColor) {
+    if ($(obj).hasClass("focused")) {
         $(obj).css("background-color", col)
-        if (pickBlackOrWhite(col)){
+        if (pickBlackOrWhite(col)) {
             $(obj).css("color", "#D3D3D3")
         }
-        else{
+        else {
             $(obj).css("color", "black")
         }
-        $(obj).hover(function(){
+        $(obj).hover(function () {
             console.log(lighterColor)
             $(obj).css("background-color", lighterColor)
-            if (pickBlackOrWhite(bookmarkColourList[0])){
+            if (pickBlackOrWhite(bookmarkColourList[0])) {
                 $(obj).css("color", "#D3D3D3")
             }
-            else{
+            else {
                 $(obj).css("color", "black")
             }
-        }, function(){
+        }, function () {
             $(obj).css("background-color", col)
-            if (pickBlackOrWhite(col)){
+            if (pickBlackOrWhite(col)) {
                 $(obj).css("color", "#D3D3D3")
             }
-            else{
+            else {
                 $(obj).css("color", "black")
             }
         })
     }
-    else{
-        console.log("what what what ")         
+    else {
+        console.log("what what what ")
         $(obj).css("background-color", "transparent")
-        if (pickBlackOrWhite(bookmarkColourList[0])){
+        if (pickBlackOrWhite(bookmarkColourList[0])) {
             $(obj).css("color", "#D3D3D3")
         }
-        else{
+        else {
             $(obj).css("color", "black")
         }
-        $(obj).hover(function(){
+        $(obj).hover(function () {
             $(obj).css("background-color", col)
-            if (pickBlackOrWhite(col)){
+            if (pickBlackOrWhite(col)) {
                 $(obj).css("color", "#D3D3D3")
             }
-            else{
+            else {
                 $(obj).css("color", "black")
             }
-        }, function(){
+        }, function () {
             $(obj).css("background-color", "transparent")
-            if (pickBlackOrWhite(bookmarkColourList[0])){
+            if (pickBlackOrWhite(bookmarkColourList[0])) {
                 $(obj).css("color", "#D3D3D3")
             }
-            else{
+            else {
                 $(obj).css("color", "black")
             }
         })
@@ -1081,9 +1133,9 @@ function changeFocus(obj, col, lighterColor){
 
 }
 
-function findAllFolders(d, array){
-    for(var i=0; i < d.length; i++){
-        if (d[i].children){
+function findAllFolders(d, array) {
+    for (var i = 0; i < d.length; i++) {
+        if (d[i].children) {
             array.push(d[i])
         }
     }
@@ -1102,24 +1154,24 @@ function findAllFolders(d, array){
 //     return tagArray
 // }
 
-async function searchTags(searchWord, id){
+async function searchTags(searchWord, id) {
     let tags = await stored("tags")
     let storedTags = await stored(id)
-    if (storedTags == undefined){
+    if (storedTags == undefined) {
         storedTags = []
     }
     console.log(storedTags, "stored tags")
     let acceptedArray = []
     // I can optimise this to check if the searched word includes a tag that the obj already has
-    for(var i=0; i < tags.length;i++){
-        if ((tags[i].toUpperCase()).includes(searchWord.toUpperCase())){
+    for (var i = 0; i < tags.length; i++) {
+        if ((tags[i].toUpperCase()).includes(searchWord.toUpperCase())) {
             console.log(tags[i])
             acceptedArray.push(tags[i])
-            if (storedTags != []){
-                for(var j=0; j < storedTags.length; j++){
+            if (storedTags != []) {
+                for (var j = 0; j < storedTags.length; j++) {
                     console.log(storedTags[j])
                     console.log(tags[i])
-                    if (storedTags[j] == tags[i]){
+                    if (storedTags[j] == tags[i]) {
                         acceptedArray = acceptedArray.filter(word => word !== tags[i])
                     }
                 }
@@ -1131,54 +1183,54 @@ async function searchTags(searchWord, id){
     console.log(acceptedArray)
 }
 
-function displayTagOptions(arr, word, objId){
+function displayTagOptions(arr, word, objId) {
     let isWordInArr = false
-    if (word == ""){
+    if (word == "") {
         isWordInArr = true
     }
     // This makes it stop working but it was also not working before this so idk
     let largeTagDiv = $("<div id='largeTagDiv' style='position: absolute; z-index: 5; width:434px;height: 300px;overflow: auto'></div>")
-    for(var i=0; i < arr.length; i++){
-        if (arr[i].toUpperCase() == word.toUpperCase()){
+    for (var i = 0; i < arr.length; i++) {
+        if (arr[i].toUpperCase() == word.toUpperCase()) {
             isWordInArr = true
         }
-        let tagDiv = $("<div class='d-inline-flex addTag pl-2' style='background-color: white; height: 50px; width: 434px;'></div>") 
+        let tagDiv = $("<div class='d-inline-flex addTag pl-2' style='background-color: white; height: 50px; width: 434px;'></div>")
         tagDiv.css("border", "1px solid black")
         // tagDiv.css("font-size", "22px")
         tagDiv.css("border-width", 0)
         tagDiv.css("border-left-width", "1px")
         tagDiv.css("border-right-width", "1px")
         tagDiv.css("z-index", "5")
-        if (isWordInArr && i == arr.length -1){
+        if (isWordInArr && i == arr.length - 1) {
             tagDiv.css("border-bottom-width", "1px")
         }
         tagDiv.attr("id", arr[i])
         tagDiv.text(arr[i])
         largeTagDiv.append(tagDiv)
     }
-    if (!isWordInArr){
+    if (!isWordInArr) {
         let addTagString = "<div id='" + word + "' class='d-inline-flex addTag createTag pl-2' style='background-color: white; height: 50px; width: 434px;border: 1px solid black;'></div>"
         let addTag = $(addTagString)
-        if (arr.length == 0){
+        if (arr.length == 0) {
             addTag.css("border-top-width", 0)
         }
         addTag.text("Add tag: " + word)
         largeTagDiv.append(addTag)
     }
     $("#inputTags").after(largeTagDiv)
-    $(".addTag").each(function(){
+    $(".addTag").each(function () {
         console.log("bruhhhhh")
-        $(this).hover(function(){
+        $(this).hover(function () {
             $(this).css("background-color", bookmarkColourList[0])
-        }, function(){
+        }, function () {
             $(this).css("background-color", "white")
         })
-        $(this).on("click", async function(event){
+        $(this).on("click", async function (event) {
             event.stopPropagation();
             console.log(event)
             let tagName = this.id
             let tags = await stored(objId)
-            if (tags == undefined){
+            if (tags == undefined) {
                 tags = []
             }
             tagName = tagName.charAt(0).toUpperCase() + tagName.slice(1)
@@ -1187,7 +1239,7 @@ function displayTagOptions(arr, word, objId){
             console.log(tags)
             await makeStorage(objId, tags)
             console.log("this just worked")
-            if ($(this).hasClass("createTag")){
+            if ($(this).hasClass("createTag")) {
                 let allTags = await stored("tags")
                 let newTagAdding = tagName.charAt(0).toUpperCase() + tagName.slice(1)
                 allTags.push(newTagAdding)
@@ -1204,73 +1256,121 @@ function displayTagOptions(arr, word, objId){
             // await renderTags()
         })
     })
-    $("#inputTags").on("focusout", function(e){
+    $("#inputTags").on("focusout", function (e) {
         console.log(e)
         console.log(e.target.id)
         console.log("yea baby")
-        setTimeout(function(){
+        setTimeout(function () {
             $("#largeTagDiv").remove()
         }, 200)
-        
+
     })
     console.log("Add tag:", word)
 }
 
-async function saveChangesModal(id, text){
+async function saveChangesModal(id, text) {
     let key = "i" + id
     await makeStorage(key, text)
 }
 
-async function displayIconModal(id){
+async function displayIconModal(id) {
     console.log(id)
     let object = findIt(data, id)
     let tags = await stored(id)
-    if (object.children){
+    if (object.children) {
         $("#removeBookmarkModal").css("display", "none")
         $("#removeFolderModal").css("display", "")
-        $("#removeFolderModal").css("background-color", foregroundCol)
+        // $("#removeFolderModal").css("background-color", foregroundCol)
+        $("#removeFolderModal").addClass("btn btn-outline-danger")
     }
-    else{
+    else {
         $("#removeFolderModal").css("display", "none")
         $("#removeBookmarkModal").css("display", "")
-        $("#removeBookmarkModal").css("background-color", foregroundCol)
+        // $("#removeBookmarkModal").css("background-color", foregroundCol)
+        $("#removeBookmarkModal").addClass("btn btn-outline-danger")
+
     }
     $("#saveChangesInfoModal").css("background-color", backgroundCol)
     console.log(tags)
-    if (tags == undefined || tags == [] || tags.length == 0){
+    if (tags == undefined || tags == [] || tags.length == 0) {
         tags = ["No Tags"]
     }
-    else{
+    else {
 
     }
     console.log(tags)
     $("#infoModal").empty()
-    let url = $("<a>",{
+    $("#infoTitle").text(object.title)
+    let url = $("<a>", {
         href: object.url,
         text: object.url,
         class: "d-flex",
         style: "max-width: 400px; overflow:hidden"
     })
-    $("#infoTitle").text(object.title)
+    let pinButton = $("<div>", {
+        class: "badge m-2 clickableItem",
+        text: "pin",
+        style: "font-weight: normal; font-size: large; width: 60px;background-color: #" + foregroundCol
+    })
+    let unpinButton = $("<div>", {
+        class: "badge m-2 clickableItem",
+        text: "unpin",
+        style: "font-weight: normal; font-size: large; width: 60px;background-color: #" + foregroundCol
+    })
     
+    // Maybe add this feature later (whats the point of it tho). Wouldn't they just pin stuff that they use heaps,
+    // this will just be their most popular bookmarks
+
+
+    // pinButton.on("click", async function () {
+    //     let pinnedBookmarksArr = await stored("pinnedBookmarks")
+    //     console.log(pinnedBookmarksArr)
+    //     if (!pinnedBookmarksArr) {
+    //         pinnedBookmarksArr = []
+    //     }
+    //     let index = pinnedBookmarksArr.indexOf(id)
+    //     if (index == -1) {
+    //         pinnedBookmarksArr.push(id)
+    //     }
+    //     await makeStorage("pinnedBookmarks", pinnedBookmarksArr)
+    //     console.log(id)
+    //     console.log("qow")
+    //     console.log(pinnedBookmarksArr)
+    //     return displayIconModal(id)
+
+    // })
+    // unpinButton.on("click", async function () {
+    //     let pinnedBookmarksArr = await stored("pinnedBookmarks")
+    //     if (!pinnedBookmarksArr) {
+    //         pinnedBookmarksArr = []
+    //     }
+    //     let index = pinnedBookmarksArr.indexOf(String(id))
+    //     if (index != -1) {
+    //         pinnedBookmarksArr.splice(index, 1)
+    //     }
+    //     await makeStorage("pinnedBookmarks", pinnedBookmarksArr)
+    //     console.log(id)
+    //     console.log("qow")
+    //     return displayIconModal(id)
+    // })
     let tagParagraph = $("<p class='margin' style='text-align: center; margin-bottom:0px; font-size: 20px;'>Tags</p>")
     let div = $("<div id='containsTags'class='ml-2'>")
-    for(var i=0;i < tags.length; i++){
+    for (var i = 0; i < tags.length; i++) {
         let tag = $("<div>", {
-            class: "btn m-2 d-inline-flex",
+            class: "btn m-2 d-inline-flex clickableItem",
             style: "border-radius: 1.5em; background-color: #" + backgroundCol,
             id: "clickToNavigate_" + tags[[i]]
         })
         let tagIncluded = tags[i]
         let tagTextText = "<p class='mb-0'>" + tags[i] + "</p>"
         let tagText = $(tagTextText)
-        
-        let deleteTagIconText = "<i id=" + '' + "deleteButton_" + tagIncluded + ' ' + "class='material-icons ml-1' style='position:relative; left: 5px;'>cancel</i>"
+
+        let deleteTagIconText = "<i id=" + '' + "deleteButton_" + tagIncluded + ' ' + "class='material-icons ml-1 clickableItem' style='position:relative; left: 5px;'>cancel</i>"
         let deleteTagIcon = $(deleteTagIconText)
         tagText.appendTo(tag)
         tag.appendTo(div)
 
-        if (tags[i] != "No Tags"){
+        if (tags[i] != "No Tags") {
             deleteTagIcon.appendTo(tag)
             tag.on("click", async (e) => {
                 e.preventDefault()
@@ -1281,12 +1381,12 @@ async function displayIconModal(id){
                 await displayWithTag(id)
             })
         }
-        deleteTagIcon.on("click", async (e) =>{
+        deleteTagIcon.on("click", async (e) => {
             e.preventDefault()
             e.stopPropagation()
             let storedTags = await stored(object.id)
             console.log(object)
-            if (storedTags != ([] || undefined)){
+            if (storedTags != ([] || undefined)) {
                 let newTags = storedTags.filter(f => f !== tagIncluded)
                 console.log(newTags)
                 console.log(newTags)
@@ -1294,9 +1394,9 @@ async function displayIconModal(id){
                 await displayIconModal(object.id)
 
             }
-            
+
         })
-        
+
     }
     let addTagSearch = $("<div class='form-group mb-4 mx-3' style='z-index: 4'></div>")
     let inTagSearch = $("<input id='inputTags' placeholder='Search or create tags' class='form-control' style='border-width: 0; border-bottom-width: 1px; border-radius: 0; padding-left: 0;z-index: 5'>")
@@ -1304,7 +1404,7 @@ async function displayIconModal(id){
     let infoTitle = $("<p class='margin pt-3' style='font-size: 20px; text-align: center;'>Info</p>")
     // let infoSubscript = $("<p class='margin d-inline-flex pt-3' style='float:right; color: #A9A9A9'>max chars: 200</p>")
     let textInformation = await stored("i" + id)
-    if (textInformation == undefined){
+    if (textInformation == undefined) {
         textInformation = ""
     }
     // FIXXXX
@@ -1316,7 +1416,7 @@ async function displayIconModal(id){
     //     }
     // })
 
-    inTagSearch.on("focus", function(e){
+    inTagSearch.on("focus", function (e) {
         console.log("this is the rythm of the night")
         e.stopImmediatePropagation();
         console.log(e.isImmediatePropagationStopped())
@@ -1324,10 +1424,10 @@ async function displayIconModal(id){
         console.log("t")
         searchTags("", id)
     })
-    
-    inTagSearch.on("keyup", function (e){
+
+    inTagSearch.on("keyup", function (e) {
         $("#largeTagDiv").remove()
-        if (e.target.value != ""){
+        if (e.target.value != "") {
             searchTags(e.target.value, id)
         }
     })
@@ -1339,14 +1439,14 @@ async function displayIconModal(id){
             "text": "Are you sure you want to delete this bookmark. Once deleted, it can't be retrieved."
         })
         let confirmButton = $("<div>", {
-            class : "btn btn-danger clickableItem",
-            text : "Delete",
-            style : "position:sticky;left:100%"
+            class: "btn btn-danger clickableItem",
+            text: "Delete",
+            style: "position:sticky;left:100%"
 
         })
         let cancelButton = $("<div>", {
-            class : "btn btn-secondary clickableItem",
-            text : "Cancel"
+            class: "btn btn-secondary clickableItem",
+            text: "Cancel"
         })
 
 
@@ -1372,14 +1472,14 @@ async function displayIconModal(id){
             "text": "Are you sure you want to delete this folder and the content inside. Once deleted, it can't be retrieved."
         })
         let confirmButton = $("<div>", {
-            class : "btn btn-danger",
-            text : "Delete",
-            style : "position:sticky;left:100%"
+            class: "btn btn-danger",
+            text: "Delete",
+            style: "position:sticky;left:100%"
 
         })
         let cancelButton = $("<div>", {
-            class : "btn btn-secondary",
-            text : "Cancel"
+            class: "btn btn-secondary",
+            text: "Cancel"
         })
         cancelButton.css("cursor", "pointer")
         confirmButton.css("cursor", "pointer")
@@ -1397,31 +1497,7 @@ async function displayIconModal(id){
         $("#confirmBody").append(confirmButton)
     })
 
-    // $(".modal-content").on("click", function(){
-    //     if (inTagSearch.is(":focus")){
-    //         //Leave
-    //     }
-    //     else{
-    //         $("#largeTagDiv").remove()
-    //     }
-    // })
-
-    // inTagSearch.on("blur", function(e){
-
-    //     console.log("t")
-    //     console.log(e)
-    //     $("#largeTagDiv").remove()
-        
-        
-    // })
-    let textbox = $("<textarea>", {
-        row: "5",
-        style: "margin-left: 45px; width:405px;", 
-        text: textInformation, maxlength: "200", 
-        class : "form-control",
-        id: "m" + id
-    })
-    if (object.children){
+    if (object.children) {
         var biggerDivOpenChild = $("<div>", {
             class: "d-flex"
         })
@@ -1429,136 +1505,134 @@ async function displayIconModal(id){
             class: "btn clickableItem",
             text: "Open all bookmarks inside the folder",
             style: "width: 90%; margin: auto"
-    
+
         })
         openChildrenDiv.css("background-color", bookmarkColourList[0])
-        openChildrenDiv.on("click", function(){
-            for(var i=0; i < object.children.length; i++){
-                chrome.tabs.create({"url": object.children[i].url, "active": false})
+        openChildrenDiv.on("click", function () {
+            for (var i = 0; i < object.children.length; i++) {
+                chrome.tabs.create({ "url": object.children[i].url, "active": false })
             }
         })
     }
     let tagDivision = $("<div style='border-width: 0px 0px 0px 0px; border-style: solid; border-color: #03a0bf;min-height: 200px;'></div>")
-    // $("#infoModal").append(row)
     tagDivision.append(tagParagraph)
     tagDivision.append(addTagSearch)
     tagDivision.append(div)
-    // $("#infoModal").append(tagParagraph)
-    // $("#infoModal").append(addTagSearch)
-    // $("#infoModal").append(div)
     $("#infoModal").append(tagDivision)
-    // $("#infoModal").append(line)
-    // $("#infoModal").append(infoTitle)
     $("#infoTitle").append(url)
-    // $("#infoModal").append(infoSubscript)
-    // $("#infoModal").append(textbox)
-    if (object.children){
+
+    // Might add this later 
+
+    // if (await isPinnedBookmark(id)) {
+    //     $("#infoTitle").append(unpinButton)
+    // } else {
+    //     $("#infoTitle").append(pinButton)
+    // }
+
+
+    if (object.children) {
         $("#infoModal").append(biggerDivOpenChild)
         biggerDivOpenChild.append(openChildrenDiv)
     }
     $("#informationModal").modal('show')
-    // $('#informationModal').on('shown.bs.modal', function() {
-    //     inTagSearch.trigger("focus")
-    // });
-    
 
 }
 
 
-async function searchFunction(searchWord){
+async function searchFunction(searchWord) {
     console.log(currentState)
     let searchW = searchWord.toUpperCase()
     console.log(searchW)
 
     let displayedBookmarks = false;
-    console.log(currentState.slice(0,2))
-    if (currentState.slice(0,2) == "T+"){
+    console.log(currentState.slice(0, 2))
+    if (currentState.slice(0, 2) == "T+") {
         let tagName = currentState.slice(2)
         let array = []
         await findTagArray(data, tagName, array)
-        if (array.length > 0){
+        if (array.length > 0) {
             displayedBookmarks = array
         }
     }
-    else if (currentState.slice(0,2) == "F+"){
+    else if (currentState.slice(0, 2) == "F+") {
         console.log("wasa")
         let folderId = currentState.slice(3)
         console.log("this is FOLDER ID", folderId)
         let object = findIt(data, folderId)
         console.log(object)
-        if (object.children.length > 0){
+        if (object.children.length > 0) {
             displayedBookmarks = object.children
         }
-        
+
     }
-    else if (currentState == "popularButtonSort"){
+    else if (currentState == "popularButtonSort") {
         let array = []
-        for(var i=0; i < popularList.length;i++){
+        for (var i = 0; i < popularList.length; i++) {
             let object = findIt(data, popularList[i])
             array.push(object)
         }
         console.log(array)
         displayedBookmarks = array
     }
-    else if (currentState == "defaultButtonSort"){
+    else if (currentState == "defaultButtonSort") {
         displayedBookmarks = data
     }
-    else if (currentState == "newButtonSort"){
-        let copyOfData = $.extend( true, [], data );
+    else if (currentState == "newButtonSort") {
+        let copyOfData = $.extend(true, [], data);
         let reversedData = copyOfData.reverse()
         displayedBookmarks = reversedData
     }
     // let allBookmarks = $("#bookmarks").children()
     // console.log(allBookmarks)
     let searchArray = []
-    if (displayedBookmarks != false){
+    if (displayedBookmarks != false) {
         console.log(displayedBookmarks)
         await insideSearch(searchW, displayedBookmarks, searchArray)
     }
     console.log(searchArray)
     let all = $("#bookmarks").children()
-    for(var i=0; i < all.length; i++){
+    for (var i = 0; i < all.length; i++) {
         all[i].remove()
     }
-    for (var i=0; i < searchArray.length; i++){
+    for (var i = 0; i < searchArray.length; i++) {
         console.log(searchArray[i])
-        if (searchArray[i].children){
+        if (searchArray[i].children) {
             printFolder(searchArray[i])
             onClickOpen(searchArray[i])
         }
-        else{
+        else {
             printBookmark(searchArray[i])
         }
     }
 }
 
-async function insideSearch(searchWord, listBookmark, searchArray){
-    for (var i=0; i < listBookmark.length; i++){
+async function insideSearch(searchWord, listBookmark, searchArray) {
+    for (var i = 0; i < listBookmark.length; i++) {
         let id;
-        (listBookmark[i].id.startsWith("a")) ?  id = listBookmark[i].id.slice(1) : id = listBookmark[i].id
+        (listBookmark[i].id.startsWith("a")) ? id = listBookmark[i].id.slice(1) : id = listBookmark[i].id
         console.log(id)
         let object = findIt(data, id)
-        if (object.children){
+        if (object.children) {
             let infoData = await stored("i" + object.id)
             console.log(infoData)
-            if (infoData == undefined){
+            if (infoData == undefined) {
                 infoData = ""
             }
             let allData = (object.title + infoData).toUpperCase()
-            if (allData.includes(searchWord)){
+            if (allData.includes(searchWord)) {
                 searchArray.push(object)
             }
             await insideSearch(searchWord, listBookmark[i].children, searchArray)
         }
-        else{
+        else {
             let infoData = await stored("i" + object.id)
             console.log(infoData)
 
-            if (infoData == undefined){
+            if (infoData == undefined) {
                 infoData = ""
             }
-            let allData = (object.url + object.title + infoData).toUpperCase() 
-            if (allData.includes(searchWord)){
+            let allData = (object.url + object.title + infoData).toUpperCase()
+            if (allData.includes(searchWord)) {
                 searchArray.push(object)
             }
         }
@@ -1567,22 +1641,22 @@ async function insideSearch(searchWord, listBookmark, searchArray){
 }
 
 
-function displayWithFolder(folderName){
+function displayWithFolder(folderName) {
     let folderId = folderName.slice(1)
     let object = findIt(data, folderId)
     let objectChildren = object.children
-    if (objectChildren.length > 0){
+    if (objectChildren.length > 0) {
         currentState = "F+" + folderName
         $("#bookmarks").off("scroll")
         hasBeenClicked = true
         onFocusOrFilter()
         $("#bookmarks").empty()
-        for (var i=0; i < objectChildren.length; i++){
-            if (objectChildren[i].children){
+        for (var i = 0; i < objectChildren.length; i++) {
+            if (objectChildren[i].children) {
                 printFolder(objectChildren[i])
                 onClickOpen(objectChildren[i])
             }
-            else{
+            else {
                 printBookmark(objectChildren[i])
             }
         }
@@ -1592,40 +1666,40 @@ function displayWithFolder(folderName){
         let string = 'Sorry, there are no bookmarks that are in folder "' + object.title + '"'
         $("#errorBody").text(string)
     }
-    
+
 
 
 }
 
 
-async function findTagArray(data, tagName, array){
-    for(var i=0; i< data.length;i++){
-        if (await checkIfTag(data[i], tagName)){
+async function findTagArray(data, tagName, array) {
+    for (var i = 0; i < data.length; i++) {
+        if (await checkIfTag(data[i], tagName)) {
             array.push(data[i])
         }
     }
 }
 
-async function displayWithTag(tagName){
+async function displayWithTag(tagName) {
     let array = []
     await findTagArray(data, tagName, array)
-    if (array.length != 0){
+    if (array.length != 0) {
         currentState = "T+" + tagName
         $("#bookmarks").off("scroll")
         hasBeenClicked = true
         onFocusOrFilter()
         $("#bookmarks").empty()
-        for(var i=0; i < array.length; i++){
+        for (var i = 0; i < array.length; i++) {
             console.log("###################")
             console.log(array)
-            if (array[i].children){
+            if (array[i].children) {
                 printFolder(array[i])
                 onClickOpen(array[i])
             }
             printBookmark(array[i])
         }
     }
-    else{
+    else {
         $("#errorMessage").modal("show")
         let string = 'Sorry, there are no bookmarks that are under the tag "' + tagName + '"'
         $("#errorBody").text(string)
@@ -1725,8 +1799,8 @@ async function displayWithTag(tagName){
 //             })
 //             $("#folderMenu").append(drop)
 //         }
-        
-    
+
+
 //         let divider = $("<div>",{
 //             "class": "dropdown-divider",
 //             "id": "folderDivider"
@@ -1743,12 +1817,12 @@ async function displayWithTag(tagName){
 //             addFolder()
 //         })
 //     }
-    
+
 // }
 
-let destroy = function (id){
-    return new Promise(function (resolve){
-        chrome.storage.local.remove(id, function(){
+let destroy = function (id) {
+    return new Promise(function (resolve) {
+        chrome.storage.local.remove(id, function () {
             console.log(id)
             console.log("is cleared")
         })
@@ -1772,7 +1846,7 @@ let destroy = function (id){
 //           // Trigger the button element with a click
 //             $("#saveTagChangesModal").trigger("click")
 //         }
-        
+
 //     });
 //     $("#saveTagChangesModal").on("click", async function() {
 //         console.log("treyvaughn")
@@ -1781,7 +1855,7 @@ let destroy = function (id){
 //         //$("#folderMenu").empty()
 //         console.log("Success")
 //         renderFolders(true)
-        
+
 //     })
 // }
 
@@ -1859,7 +1933,7 @@ let destroy = function (id){
 //                 return
 //             }
 //         }
-        
+
 //         if (tagName != []){
 //             let newTagString = tagName.charAt(0).toUpperCase() + tagName.slice(1)
 //             tagArray = tagArray.push(newTagString)
@@ -1869,15 +1943,15 @@ let destroy = function (id){
 //             await renderTags()
 //             manage_tags()
 //         }
-        
-        
+
+
 //     })
 
 // }
 
-function findFolders(data, array){
-    for(var i=0; i < data.length; i++){
-        if (data[i].children){
+function findFolders(data, array) {
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].children) {
             array.push(data[i])
             findFolders(data[i].children, array)
         }
@@ -1925,7 +1999,7 @@ function findFolders(data, array){
 //         $("#tagMenu").append(divider)
 
 //     }
-    
+
 //     let manageTags = $("<div>",{
 //         "id": "dropdownAdd",
 //         "class": "dropdown-item btn-m hober",
@@ -1949,8 +2023,8 @@ function findFolders(data, array){
 // }
 
 
-function initializeFolderOpen(){
-    $(".folder").each( function () {
+function initializeFolderOpen() {
+    $(".folder").each(function () {
         console.log("fdsfd")
         let object = findIt(data, this.id)
         onClickOpen(object)
@@ -2028,7 +2102,7 @@ function clickClose(obj) {
 //                 for(var i=0; i < data.length; i++){
 //                     if (data[i].children){  
 //                         printFolder(data[i])
-                        
+
 //                     }
 //                     else if (!data[i].children){
 //                         printBookmark(data[i])
@@ -2055,7 +2129,7 @@ function clickClose(obj) {
 //                 for(var i=data.length -1; i >= 0; i--){
 //                     if (data[i].children){  
 //                         printFolder(data[i])
-                        
+
 //                     }
 //                     else if (!data[i].children){
 //                         printBookmark(data[i])
@@ -2067,25 +2141,25 @@ function clickClose(obj) {
 //                 console.log("nope")
 //             }
 //         }
-        
+
 
 //     })
 // }
 
 
-async function checkIfTag(object, tag){
+async function checkIfTag(object, tag) {
     let objectTag = await stored(object.id)
     console.log(objectTag)
-    if (objectTag != undefined){
+    if (objectTag != undefined) {
         console.log("hazas")
-        for(var i=0; i < objectTag.length; i++){
-            if (objectTag[i] == tag){
+        for (var i = 0; i < objectTag.length; i++) {
+            if (objectTag[i] == tag) {
                 return true
             }
         }
         return false
     }
-    else{
+    else {
         return false
     }
 }
@@ -2097,28 +2171,28 @@ async function checkIfTag(object, tag){
 
 
 
-function pickBlackOrWhite(colour){
-    let red = colour.slice(1,3)
+function pickBlackOrWhite(colour) {
+    let red = colour.slice(1, 3)
     red = parseInt(red, 16)
-    let green = colour.slice(3,5)
+    let green = colour.slice(3, 5)
     green = parseInt(green, 16)
-    let blue = colour.slice(5,7)
+    let blue = colour.slice(5, 7)
     blue = parseInt(blue, 16)
-    console.log(red*0.299 + green*0.587 + blue*0.114)
-    if ((red*0.299 + green*0.587 + blue*0.114) > 110){
-        
+    console.log(red * 0.299 + green * 0.587 + blue * 0.114)
+    if ((red * 0.299 + green * 0.587 + blue * 0.114) > 110) {
+
         return false
     }
     return true
 }
 
-function onSearchBarFocus(){
+function onSearchBarFocus() {
     $("#searchButton").focus(() => {
         initialExpandingHome()
     })
 }
 
-function onFocusOrFilter(){
+function onFocusOrFilter() {
     $("#searchContainer").addClass("searchContainerFocus")
     let menuLength = $("#dropdownButton").css("width")
     $("#dropdownAdd").css("width", menuLength)
@@ -2131,15 +2205,15 @@ function onFocusOrFilter(){
 }
 
 
-function checkIncep(object, data){
+function checkIncep(object, data) {
     let value = -1
-    function checkInception(object, data, value){
+    function checkInception(object, data, value) {
         total = value + 1
-        if (object.parentId > 1){
+        if (object.parentId > 1) {
             checkInception(findIt(data, object.parentId), data, total)
         }
         return total
-    }    
+    }
     return checkInception(object, data, value)
 }
 
@@ -2149,17 +2223,17 @@ let search = new Promise(function (resolve) {
     chrome.bookmarks.getTree(function (data) {
         if (data) {
             let result = data[0].children[0].children;
-            resolve(result) 
+            resolve(result)
         }
     })
 })
 
-let create = function (name, parentId){
-    return new Promise(function (resolve){
+let create = function (name, parentId) {
+    return new Promise(function (resolve) {
         chrome.bookmarks.create({
             "parentId": parentId,
             "title": name
-        },  async function (folder){
+        }, async function (folder) {
             console.log(folder)
             await makeStorage("newFolder", folder)
             await stored("newFolder")
@@ -2170,15 +2244,15 @@ let create = function (name, parentId){
 
 
 
-var makeStorage = function (id, text){
-    return new Promise(function (resolve, reject){
-        chrome.storage.local.set({[id]: text})
+var makeStorage = function (id, text) {
+    return new Promise(function (resolve, reject) {
+        chrome.storage.local.set({ [id]: text })
         resolve(text)
     })
 }
 
-var deleteBookmark = function (id){
-    return new Promise(function(resolve,reject){
+var deleteBookmark = function (id) {
+    return new Promise(function (resolve, reject) {
         chrome.bookmarks.remove(id, () => {
             console.log("you removed ", id)
             resolve(id)
@@ -2186,8 +2260,8 @@ var deleteBookmark = function (id){
     })
 }
 
-var deleteFolder = function (id){
-    return new Promise(function(resolve,reject){
+var deleteFolder = function (id) {
+    return new Promise(function (resolve, reject) {
         chrome.bookmarks.removeTree(id, () => {
             console.log("you removed ", id)
             resolve(id)
@@ -2223,20 +2297,20 @@ var deleteFolder = function (id){
 
 
 function innerfindIt(dataArray, objectId) {
-    for (var i = 0; i < dataArray.length; i++){
+    for (var i = 0; i < dataArray.length; i++) {
         if (dataArray[i].id == objectId) {
             let object = dataArray[i]
             return object
-            
+
         }
-        else{
+        else {
             if (dataArray[i].children) {
-                if (innerfindIt(dataArray[i].children, objectId) != false){
+                if (innerfindIt(dataArray[i].children, objectId) != false) {
                     return innerfindIt(dataArray[i].children, objectId)
                 }
-                
+
             }
-            else{
+            else {
                 continue;
             }
         }
@@ -2245,7 +2319,7 @@ function innerfindIt(dataArray, objectId) {
 
 }
 
-function findIt(dataArray, objectId){
+function findIt(dataArray, objectId) {
     let found = false
     let object;
     return innerfindIt(dataArray, objectId)
@@ -2253,14 +2327,14 @@ function findIt(dataArray, objectId){
 
 
 
-function printFolder(object){
+function printFolder(object) {
     let fragment = document.createDocumentFragment();
     let folderDiv = document.createElement("div")
     folderDiv.className = "folder btn col-2 m-3 btn-sm"
     folderDiv.id = object.id
-    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
-    if (arguments.length == 2 && arguments[1] == true){
-        folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%;border-radius: 1.5em; background-color:" + backgroundCol
+    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] + "; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
+    if (arguments.length == 2 && arguments[1] == true) {
+        folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(object, data)] + "; font-size: 120%;border-radius: 1.5em; background-color:" + backgroundCol
     }
     let bookmarkRowDivision = document.createElement("div")
     bookmarkRowDivision.className = "d-flex flex-row margin"
@@ -2271,57 +2345,57 @@ function printFolder(object){
     if (object.title.length >= 50) {
         bookmarkText.style = "width:70%; font-size: 80%"
     }
-    else{
+    else {
         bookmarkText.style = "width:70%;"
     }
-    
+
     bookmarkText.class = "d-inline-flex"
-    if (arguments.length == 1){
+    if (arguments.length == 1) {
         console.log("Im a fat phony")
         var bookmarkIcon = document.createElement("i")
         bookmarkIcon.innerHTML = "info"
         $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-1 item-info ml-auto")
-        $(bookmarkIcon).on("click", function (e){
+        $(bookmarkIcon).on("click", function (e) {
             e.stopPropagation()
             displayIconModal(object.id)
-    
+
         })
-        $(bookmarkIcon).hover(function(){
+        $(bookmarkIcon).hover(function () {
             $(bookmarkIcon).css("cursor", "pointer")
             $(bookmarkIcon).css("color", "white")
             $(bookmarkText).css("color", "black")
-        }, function(){
+        }, function () {
             $(bookmarkIcon).css("cursor", "default")
             $(bookmarkIcon).css("color", "black")
             $(folderDiv).hover(function () {
-    
+
             })
         })
-        $(folderDiv).mouseenter(function(){
-            if (!$(folderDiv).hasClass("open")){
+        $(folderDiv).mouseenter(function () {
+            if (!$(folderDiv).hasClass("open")) {
                 $(folderDiv).css("opacity", 1)
             }
-            else{
+            else {
                 $(folderDiv).css("opacity", 0.6)
             }
             //$(folderDiv).css("background-color", bookmarkColourList[checkIncep(object, data)])
-            $(bookmarkIcon).mouseenter(function(){
+            $(bookmarkIcon).mouseenter(function () {
                 $(bookmarkIcon).css("cursor", "pointer")
                 $(bookmarkIcon).css("color", "white")
-            }).mouseleave(function(){
+            }).mouseleave(function () {
                 $(bookmarkIcon).css("cursor", "default")
                 $(bookmarkIcon).css("color", "black")
-    
+
             })
-        }).mouseleave(function(){
-            if (!$(folderDiv).hasClass("open")){
+        }).mouseleave(function () {
+            if (!$(folderDiv).hasClass("open")) {
                 $(folderDiv).css("opacity", 0.6)
             }
-    
+
             //$(folderDiv).css("background-color", "white")
         })
     }
-    
+
 
 
     // $(folderDiv).on("click", function(){
@@ -2340,35 +2414,35 @@ function printFolder(object){
     fragment.appendChild(folderDiv)
     folderDiv.appendChild(bookmarkRowDivision)
     bookmarkRowDivision.appendChild(bookmarkText)
-    if (arguments.length == 1){
+    if (arguments.length == 1) {
         bookmarkRowDivision.appendChild(bookmarkIcon)
     }
-    
-    if (arguments.length == 2 && arguments[1] != true){
+
+    if (arguments.length == 2 && arguments[1] != true) {
         document.getElementById(arguments[1]).after(fragment)
     }
-    else{
+    else {
         document.getElementById("bookmarks").appendChild(fragment)
     }
 
 }
 
-function findDomain(url){
+function findDomain(url) {
     let expression = /https?:\/\/[a-zA-Z0-9_\.]+\//
-    if (expression.exec(url)){
+    if (expression.exec(url)) {
         let domain = expression.exec(url)[0]
         return domain
     }
     return false
 }
 
-function printBookmark(object, parent){
+function printBookmark(object, parent) {
     console.log(object)
     let hasParent;
-    if (arguments.length == 2){
+    if (arguments.length == 2) {
         hasParent = true
     }
-    else{
+    else {
         hasParent = false
     }
     let fragment = document.createDocumentFragment();
@@ -2384,15 +2458,15 @@ function printBookmark(object, parent){
 
     // }
 
-    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] +"; font-size: 120%; border-radius: 1.5em; height:120px;"
+    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] + "; font-size: 120%; border-radius: 1.5em; height:120px;"
 
 
     let bookmarkClickable = document.createElement("a")
     bookmarkClickable.href = object.url
     bookmarkClickable.class = "m-3 clickable"
     bookmarkClickable.id = "a" + object.id
-    
-    bookmarkClickable.addEventListener("click", function(e){
+
+    bookmarkClickable.addEventListener("click", function (e) {
         e.stopImmediatePropagation()
     });
     let bookmarkRowDivision = document.createElement("div")
@@ -2407,20 +2481,20 @@ function printBookmark(object, parent){
     let bookmarkTitle = object.title
     bookmarkText.className = "flex-fill flex-grow-1"
     let bookmarkTextStyleString = "margin-bottom:0px;"
-    if (bookmarkTitle.length > 20 && bookmarkTitle.length < 40){
+    if (bookmarkTitle.length > 20 && bookmarkTitle.length < 40) {
         bookmarkTextStyleString += "margin-top: 0px;"
         console.log("tgb")
     }
-    else if (bookmarkTitle.length > 40){
-        bookmarkTitle = bookmarkTitle.slice(0,40) + "..."
+    else if (bookmarkTitle.length > 40) {
+        bookmarkTitle = bookmarkTitle.slice(0, 40) + "..."
         bookmarkTextStyleString += "font-size: 80%; margin-top: 0px;"
     }
-    else{
+    else {
         bookmarkTextStyleString += "margin-top: 8px; font-size: 110%;"
     }
     bookmarkText.innerHTML = bookmarkTitle
 
-    if (textColour){
+    if (textColour) {
         bookmarkTextStyleString += "color: #D3D3D3;"
     }
     console.log(bookmarkTextStyleString)
@@ -2441,6 +2515,7 @@ function printBookmark(object, parent){
     //         bookmarkText.style = "width:70%;"
     //     }
     // }
+    console.log(object)
     let domain = findDomain(object.url)
     console.log(domain)
     let favicon = document.createElement("img")
@@ -2450,7 +2525,7 @@ function printBookmark(object, parent){
     // let sendMessage = "chrome-search://ntpicon/?size=24%401x&url=" + domain
     let sendMessage = "https://plus.google.com/_/favicon?domain=" + domain
 
-    switch(domain){
+    switch (domain) {
         case "https://www.youtube.com/":
             sendMessage = "https://www.youtube.com/s/desktop/ee2e5595/img/favicon_32.png"
             break;
@@ -2470,15 +2545,30 @@ function printBookmark(object, parent){
             sendMessage = "https://calendar.google.com/googlecalendar/images/favicons_fttmIIlBXU2Ldf6JaL09WmFY3NDc1zq1/v3/calendar_19.ico"
             break;
         case "https://docs.google.com/":
-            sendMessage = "https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico"
+            sendMessage = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico"
+        case "https://keep.google.com/":
+            sendMessage = "https://ssl.gstatic.com/keep/keep_2020q4v2.ico"
         default:
             break;
     }
 
+    // This is for some google domains since they don't return the right thing
+    if (object.url.includes("https://docs.google.com/spreadsheets")) {
+        sendMessage = "https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico"
+    }
+    if (object.url.includes("https://docs.google.com/document")) {
+        sendMessage = "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico"
+    }
+    if (object.url.includes("https://docs.google.com/presentation")) {
+        sendMessage = "https://ssl.gstatic.com/docs/presentations/images/favicon5.ico"
+    }
+
+
+
     favicon.src = sendMessage
     console.log(sendMessage)
     favicon.style = "width: 24px; height: 24px; margin: 4px 0px 0px 4px"
-    
+
 
     let bookmarkIcon = document.createElement("i")
     bookmarkIcon.innerHTML = "info"
@@ -2490,7 +2580,7 @@ function printBookmark(object, parent){
     bookmarkIcon.classList.add("item-info");
     // $(bookmarkIcon).addClass("d-inline-flex material-icons icon mt-2 mr-1 item-info")
     bookmarkIcon.id = "i" + object.id
-    bookmarkIcon.addEventListener("click", function(e){
+    bookmarkIcon.addEventListener("click", function (e) {
         e.preventDefault()
         e.stopImmediatePropagation()
         displayIconModal(object.id)
@@ -2500,12 +2590,12 @@ function printBookmark(object, parent){
     //     displayIconModal(object.id)
 
     // })
-    bookmarkIcon.addEventListener("mouseover", function(e){
+    bookmarkIcon.addEventListener("mouseover", function (e) {
         bookmarkIcon.style.cursor = "pointer"
         bookmarkIcon.style.color = "white"
         bookmarkText.style.color = "black"
     });
-    bookmarkIcon.addEventListener("mouseout", function(e){
+    bookmarkIcon.addEventListener("mouseout", function (e) {
         bookmarkIcon.style.cursor = "default"
         bookmarkIcon.style.color = "black"
         bookmarkText.style.color = "white"
@@ -2519,28 +2609,28 @@ function printBookmark(object, parent){
     //     $(bookmarkIcon).css("color", "black")
     // })
 
-    $(bookmarkDiv).mouseenter(function(){
-        if (textColour){
+    $(bookmarkDiv).mouseenter(function () {
+        if (textColour) {
             $(bookmarkText).css("color", "black")
         }
-        else{
+        else {
             $(bookmarkText).css("color", "#D3D3D3")
         }
-        $(bookmarkIcon).mouseenter(function(){
+        $(bookmarkIcon).mouseenter(function () {
             $(bookmarkIcon).css("cursor", "pointer")
             $(bookmarkIcon).css("color", "white")
             $(bookmarkText).css("color", "black")
-        }).mouseleave(function(){
+        }).mouseleave(function () {
             $(bookmarkIcon).css("cursor", "default")
             $(bookmarkIcon).css("color", "black")
             $(bookmarkText).css("color", "#D3D3D3")
 
         })
-    }).mouseleave(function(){
-        if (textColour){
+    }).mouseleave(function () {
+        if (textColour) {
             $(bookmarkText).css("color", "#D3D3D3")
         }
-        else{
+        else {
             $(bookmarkText).css("color", "black")
         }
     })
@@ -2553,11 +2643,11 @@ function printBookmark(object, parent){
     bookmarkRowDivisionText.appendChild(bookmarkText)
     bookmarkRowDivision.appendChild(favicon)
 
-    
-    if (arguments.length == 2){
+
+    if (arguments.length == 2) {
         document.getElementById(arguments[1]).after(fragment)
     }
-    else{
+    else {
         document.getElementById("bookmarks").appendChild(fragment)
     }
 
@@ -2565,33 +2655,33 @@ function printBookmark(object, parent){
 
 // Popular finding algorithm
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-async function onLoadApp(){
+async function onLoadApp() {
     let onLoad = await stored("onLoad")
-    if (onLoad == "popular"){
+    if (onLoad == "popular") {
         let list = []
-        await getAllInside(list,data)
+        await getAllInside(list, data)
         popularList = sortDescend(list)
         popularList = removeDuplicates(popularList)
         let counter = 0
         let endIt = false
-        while ($("#bookmarks").height() < ($("#bod").height()/2) || endIt){
-            for(var i=0; i < 5; i++){
+        while ($("#bookmarks").height() < ($("#bod").height() / 2) || endIt) {
+            for (var i = 0; i < 5; i++) {
                 let index = counter * 5 + i
                 console.log(popularList[index])
                 let object;
-                if (index < popularList.length){
+                if (index < popularList.length) {
                     object = findIt(data, popularList[index])
                     printBookmark(object)
-                    maxPerPage ++
+                    maxPerPage++
                 }
-                else{
+                else {
                     //Do nothing
                     endIt = true
                     break
                 }
-                
+
             }
-            if (endIt){
+            if (endIt) {
                 break
             }
             counter++
@@ -2609,86 +2699,101 @@ async function onLoadApp(){
         $("#bookmarks").append(outerDiv)
         //$("#bookmarks").append(expandIcon)
         console.log("hello?")
-        expandIcon.on("click", function(){
+        expandIcon.on("click", function () {
             initialExpandingHome()
         })
-        expandIcon.hover(function(){
+        expandIcon.hover(function () {
             expandIcon.css("cursor", "pointer")
-        }, function(){
+        }, function () {
             expandIcon.css("cursor", "")
-    
+
         })
     }
-    else if (onLoad == "default"){
+    else if (onLoad == "default") {
         console.log("heyo")
     }
 }
 
-function initialExpandingHome(){
-    if (currentState == "popularButtonSort"){
+function initialExpandingHome() {
+    if (currentState == "popularButtonSort") {
         paginateLoadingFilter(popularList)
     }
 }
 
 
-function paginateLoadingFilter(filterArray){
+function paginateLoadingFilter(filterArray) {
     $("#bookmarks").off("scroll")
     onFocusOrFilter()
     let startPoint = 0
     $("#bookmarks").empty()
     let isObject = true
-    if (typeof(filterArray[0]) == "string"){
+    console.log(typeof(filterArray[0]))
+    // I don't know what this means
+    if (typeof (filterArray[0]) == "string") {
         isObject = false
     }
     console.log("object val is", isObject)
-    for(var i=startPoint; 100 + startPoint > i;i++){
-        if (i < filterArray.length){
-            if (isObject){
-                if (filterArray[i].children){
+    for (var i = startPoint; 100 + startPoint > i; i++) {
+        if (i < filterArray.length) {
+            if (isObject) {
+                if (filterArray[i].children) {
+                    console.log("here")
                     printFolder(filterArray[i])
                     onClickOpen(filterArray[i])
                 }
-                else{
+                else {
                     printBookmark(filterArray[i])
                 }
-                
+
             }
-            else{
+            else {
                 let object = findIt(data, filterArray[i])
                 printBookmark(object)
             }
-            
+
         }
     }
+    changeFontSizeIfTooBig()
     startPoint += 100
     $("#bookmarks").on("scroll", () => {
         let totLength = document.getElementById("bookmarks").scrollHeight
         let scrolledLength = $("#bookmarks").height() + $("#bookmarks").scrollTop()
-        if (scrolledLength + 200 > totLength){
+        if (scrolledLength + 200 > totLength) {
             console.log("$$$$$")
-            for(var i=startPoint; 100 + startPoint > i;i++){
-                if (i < filterArray.length){
-                    if (isObject){
+            for (var i = startPoint; 100 + startPoint > i; i++) {
+                if (i < filterArray.length) {
+                    if (isObject) {
                         let object = filterArray[i]
-                        printBookmark(object)
+                        if (object.children) {
+                            printFolder(object)
+                            onClickOpen(object)
+                        } else {
+                            printBookmark(object)
+                        }
                     }
-                    else{
+                    else {
                         let object = findIt(data, filterArray[i])
-                        printBookmark(object)
+                        if (object.children) {
+                            printFolder(object)
+                            onClickOpen(object)
+                        } else {
+                            printBookmark(object)
+                        }
                     }
-                    
+
                 }
-                else{
+                else {
                     $("#bookmarks").off("scroll")
                 }
             }
             startPoint += 100
+            changeFontSizeIfTooBig()
         }
     })
 }
 
 
-async function renderPop(data){
+async function renderPop(data) {
     let list = [];
     await getAllInside(list, data)
     console.log(list)
@@ -2699,15 +2804,15 @@ async function renderPop(data){
     let counter = 0
     console.log($("#bookmarks").height())
     console.log($("#bod").height())
-    while ($("#bookmarks").height() < ($("#bod").height()/4)){
-        for(var i=0; i < 5; i++){
+    while ($("#bookmarks").height() < ($("#bod").height() / 4)) {
+        for (var i = 0; i < 5; i++) {
             tester += 1
             let index = counter * 5 + i
             console.log(popularList[index])
             let object = findIt(data, popularList[index])
             console.log(object)
             printBookmark(object)
-            maxPerPage ++
+            maxPerPage++
         }
         counter++
     }
@@ -2724,26 +2829,26 @@ async function renderPop(data){
     outerDiv.append(expandIcon)
     $("#bookmarks").append(outerDiv)
     //$("#bookmarks").append(expandIcon)
-    expandIcon.on("click", function(){
+    expandIcon.on("click", function () {
         expandIcon.remove()
         onFocusOrFilter()
         let children = maxPerPage
-        for(var i=children; popularList.length > i;i++){
+        for (var i = children; popularList.length > i; i++) {
             let object = findIt(data, popularList[i])
             printBookmark(object)
         }
         hasBeenClicked = true
     })
-    expandIcon.hover(function(){
+    expandIcon.hover(function () {
         expandIcon.css("cursor", "pointer")
-    }, function(){
+    }, function () {
         expandIcon.css("cursor", "")
 
     })
 }
-function removeDuplicates(list){
+function removeDuplicates(list) {
     let idList = []
-    for(var i=0; i < list.length;i++){
+    for (var i = 0; i < list.length; i++) {
         idList.push(list[i].id)
     }
     console.log(idList)
@@ -2776,35 +2881,35 @@ function removeDuplicates(list){
 
 
 
-async function getAllInside(list, dataArray){
-    for (var i=0; i < dataArray.length; i++){
-        if(!dataArray[i].children){
+async function getAllInside(list, dataArray) {
+    for (var i = 0; i < dataArray.length; i++) {
+        if (!dataArray[i].children) {
             await findAllVisits(list, dataArray[i].id, dataArray[i].url)
         }
-        else if (dataArray[i].children){
+        else if (dataArray[i].children) {
             await getAllInside(list, dataArray[i].children)
         }
     }
 }
 
-var findAllVisits = function (list, id, theURL){
-    return new Promise(function (resolve, reject){
+var findAllVisits = function (list, id, theURL) {
+    return new Promise(function (resolve, reject) {
         chrome.history.getVisits({ 'url': theURL }, function (res) {
-            list.push({"id": id, "visits": res.length})
+            list.push({ "id": id, "visits": res.length })
             resolve(res.length)
-    
+
         })
     })
 }
 
 function sortDescend(list) {
     let sortedList = list.slice(0)
-    sortedList.sort(function(a,b){
+    sortedList.sort(function (a, b) {
         return b.visits - a.visits
     })
     console.log(sortedList)
     return sortedList
-    
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2813,13 +2918,13 @@ function sortDescend(list) {
 function getAverageRGB(imgEl) {
 
     var blockSize = 5, // only visit every 5 pixels
-        defaultRGB = {r:0,g:0,b:0}, // for non-supporting envs
+        defaultRGB = { r: 0, g: 0, b: 0 }, // for non-supporting envs
         canvas = document.createElement('canvas'),
         context = canvas.getContext && canvas.getContext('2d'),
         data, width, height,
         i = -4,
         length,
-        rgb = {r:0,g:0,b:0},
+        rgb = { r: 0, g: 0, b: 0 },
         count = 0;
 
     if (!context) {
@@ -2834,40 +2939,40 @@ function getAverageRGB(imgEl) {
 
     try {
         data = context.getImageData(0, 0, width, height);
-    } catch(e) {
+    } catch (e) {
         /* security error, img on diff domain */
         return defaultRGB;
     }
 
     length = data.data.length;
 
-    while ( (i += blockSize * 4) < length ) {
+    while ((i += blockSize * 4) < length) {
         ++count;
         rgb.r += data.data[i];
-        rgb.g += data.data[i+1];
-        rgb.b += data.data[i+2];
+        rgb.g += data.data[i + 1];
+        rgb.b += data.data[i + 2];
     }
 
     // ~~ used to floor values
-    rgb.r = ~~(rgb.r/count);
-    rgb.g = ~~(rgb.g/count);
-    rgb.b = ~~(rgb.b/count);
+    rgb.r = ~~(rgb.r / count);
+    rgb.g = ~~(rgb.g / count);
+    rgb.b = ~~(rgb.b / count);
 
     return rgb;
 
 }
 
-function rgbToHex(r,g,b){
+function rgbToHex(r, g, b) {
     let partOne = r.toString(16)
     let partTwo = g.toString(16)
     let partThree = b.toString(16)
-    if (partOne.length == 1){
+    if (partOne.length == 1) {
         partOne = "0" + partOne
     }
-    if (partTwo.length == 1){
+    if (partTwo.length == 1) {
         partTwo = "0" + partTwo
     }
-    if (partThree.length == 1){
+    if (partThree.length == 1) {
         partThree = "0" + partThree
     }
     console.log(r)
@@ -2889,13 +2994,13 @@ function hexToRgb(hex) {
     return dict
 }
 
-function invertColour(r,g,b){
+function invertColour(r, g, b) {
     let invertRed = 255 - r
     let invertGreen = 255 - g
     let invertBlue = 255 - b
     let inverted = {
-        "r": invertRed, 
-        "g": invertGreen, 
+        "r": invertRed,
+        "g": invertGreen,
         "b": invertBlue
     }
     return inverted
