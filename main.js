@@ -354,7 +354,7 @@ function printOpenAllChildren(obj) {
     let folderDiv = document.createElement("div")
     folderDiv.className = "folder btn col-2 m-3 btn-sm"
     folderDiv.id = obj.id
-    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(obj, data)] + "; font-size: 120%; opacity: 0.6;border-radius: 1.5em; background-color:" + backgroundCol
+    folderDiv.style = "border: 2px solid " + bookmarkColourList[checkIncep(obj, data)] + "; font-size: 120%; opacity: 0.6;border-radius: 0.8em; background-color:" + backgroundCol
     let bookmarkRowDivision = document.createElement("div")
     bookmarkRowDivision.className = "d-flex flex-row margin"
     bookmarkRowDivision.style = "overflow-wrap: anywhere;"
@@ -459,7 +459,7 @@ async function addFilteringButtons() {
     }
     let popularButton = $("<div>", {
         class: "flex-fill dropdown-sort clickableItem",
-        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 10px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Popular",
         id: "popularButtonSort"
     })
@@ -467,7 +467,7 @@ async function addFilteringButtons() {
     buttonDrag(popularButton)
     let defaultButton = $("<div>", {
         class: "flex-fill dropdown-sort clickableItem",
-        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 10px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Default",
         id: "defaultButtonSort"
     })
@@ -475,7 +475,7 @@ async function addFilteringButtons() {
     buttonDrag(defaultButton)
     let newButton = $("<div>", {
         class: "flex-fill dropdown-sort clickableItem",
-        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; margin-bottom: 10px;border-radius: 10px; margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "New",
         id: "newButtonSort"
     })
@@ -487,7 +487,7 @@ async function addFilteringButtons() {
     })
     let tagButton = $("<div>", {
         class: "dropdown-toggle clickableItem",
-        style: "padding-top:3px; height: 100%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top:3px; height: 100%;border-radius: 10px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Tags",
         id: "tagsButtonSort"
     })
@@ -501,7 +501,7 @@ async function addFilteringButtons() {
     })
     let folderButton = $("<div>", {
         class: "dropdown-toggle clickableItem",
-        style: "padding-top: 3px; height:100%; border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; height:100%; border-radius: 10px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "Folders",
         id: "foldersButtonSort"
     })
@@ -515,7 +515,7 @@ async function addFilteringButtons() {
     })
     let allFilters = $("<div>", {
         class: "flex-fill dropdown-toggle clickableItem",
-        style: "padding-top: 3px; height: 100%;border-radius: 20px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+        style: "padding-top: 3px; height: 100%;border-radius: 10px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
         text: "All filters",
         id: "all FiltersButtonSort"
     })
@@ -551,7 +551,7 @@ async function addFilteringButtons() {
     tagButtonEncapsulate.append(tagButton)
     let div = $("<div>", {
         class: "dropdown-menu",
-        style: "border-radius: 20px"
+        style: "border-radius: 10px"
 
     })
     let tags = await stored("tags")
@@ -563,7 +563,7 @@ async function addFilteringButtons() {
         let a = $("<a>", {
             class: "dropdown-item tag-select-filter clickableItem",
             text: tags[i],
-            style: "border-radius: 1.5em;",
+            style: "border-radius: 0.8em;",
             id: "tagFilter" + tags[i]
 
         })
@@ -582,7 +582,7 @@ async function addFilteringButtons() {
 
     let div2 = $("<div>", {
         class: "dropdown-menu",
-        style: "border-radius: 20px; max-height: 500px; min-width: 270px;overflow-y:scroll"
+        style: "border-radius: 10px; max-height: 500px; min-width: 270px;overflow-y:scroll"
 
     })
     let folderArray = []
@@ -598,7 +598,7 @@ async function addFilteringButtons() {
         let a = $("<a>", {
             class: "dropdown-item folder-select-filter clickableItem",
             text: title,
-            style: "border-radius: 1.5em;",
+            style: "border-radius: 0.8em;",
             id: "folderFilter" + folderArray[i].id
 
         })
@@ -616,7 +616,7 @@ async function addFilteringButtons() {
 
     let div3 = $("<div>", {
         class: "dropdown-menu",
-        style: "border-radius: 20px; min-width: 160px"
+        style: "border-radius: 10px; min-width: 160px"
 
     })
     let defLi = $("<li>")
@@ -632,7 +632,7 @@ async function addFilteringButtons() {
     let defClick = $("<a>", {
         class: "dropdown-item dropdown-sort clickableItem",
         text: "Default",
-        style: "border-radius:1.5em"
+        style: "border-radius:0.8em"
     })
     filterDefaultButton.append(defClick)
     filterDefaultButton.append(defPush)
@@ -690,11 +690,11 @@ async function addFilteringButtons() {
     let tagsClick = $("<a>", {
         class: "dropdown-item dropdown-toggle clickableItem",
         text: "Tags",
-        style: "border-radius:2.5em; "
+        style: "border-radius:1.5em; "
     })
     let tagsInside = $("<ul>", {
         class: "dropdown-menu",
-        style: "width: 15em; border-radius: 1.5em; max-height: 400px;"
+        style: "width: 15em; border-radius: 0.8em; max-height: 400px;"
     })
     tagFilterDiv.append(tagsClick)
     tagFilterDiv.append(tagPush)
@@ -706,7 +706,7 @@ async function addFilteringButtons() {
     })
     let foldersFilterDiv = $("<div>", {
         class: "d-flex",
-        style: "border-radius: 2.5em"
+        style: "border-radius: 1em"
     })
     let foldersPush = $("<i>", {
         class: "material-icons mt-1 ml-4 mr-1 clickableItem pins",
@@ -717,11 +717,11 @@ async function addFilteringButtons() {
     let foldersClick = $("<a>", {
         class: "dropdown-item dropdown-toggle clickableItem",
         text: "Folder",
-        style: "border-radius:2.5em;"
+        style: "border-radius:1em;"
     })
     let folderInside = $("<ul>", {
         class: "dropdown-menu",
-        style: "width: 15em; border-radius: 1.5em; max-height: 400px;overflow-y:scroll;overflow-x:hide"
+        style: "width: 15em; border-radius: 0.8em; max-height: 400px;overflow-y:scroll;overflow-x:hide"
     })
     foldersFilterDiv.append(foldersClick)
     foldersFilterDiv.append(foldersPush)
@@ -735,7 +735,7 @@ async function addFilteringButtons() {
         let a = $("<a>", {
             class: "dropdown-item tag-select-filter clickableItem",
             text: tags[i],
-            style: "border-radius: 1.5em; width: 70%; position: relative; left: 15px",
+            style: "border-radius: 0.8em; width: 70%; position: relative; left: 15px",
             id: "tagAllFilter" + tags[i]
 
         })
@@ -828,7 +828,7 @@ async function addFilteringButtons() {
                 console.log(tagName)
                 let tagDiv = $("<div>", {
                     class: "flex-fill dropdown-sort clickableItem tag-select-filter",
-                    style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    style: "padding-top: 3px; margin-bottom: 10px;border-radius: 10px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
                     id: "T_" + tagName + "ButtonSort",
                     text: tagName
                 })
@@ -845,7 +845,7 @@ async function addFilteringButtons() {
                 let folderObj = findIt(data, folderId)
                 let folderDiv = $("<div>", {
                     class: "flex-fill dropdown-sort clickableItem folder-select-filter",
-                    style: "padding-top: 3px; margin-bottom: 10px;border-radius: 20px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
+                    style: "padding-top: 3px; margin-bottom: 10px;border-radius: 10px;margin-left: 8px; margin-right: 8px;text-align: center; background-color:" + backgroundCol + "; color:" + textColourForFilter,
                     id: "F_" + folderId + "ButtonSort",
                     text: folderObj.title
                 })
@@ -2458,7 +2458,7 @@ function printBookmark(object, parent) {
 
     // }
 
-    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] + "; font-size: 120%; border-radius: 1.5em; height:120px;"
+    bookmarkDiv.style = "background-color: " + bookmarkColourList[checkIncep(object, data)] + "; font-size: 120%; border-radius: 0.8em; height:120px;"
 
 
     let bookmarkClickable = document.createElement("a")
