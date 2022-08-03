@@ -7,31 +7,6 @@ var stored = function (id) {
     })
 }
 // Line 1061
-const pSBC = (p, c0, c1, l) => {
-    let r, g, b, P, f, t, h, i = parseInt, m = Math.round, a = typeof (c1) == "string";
-    if (typeof (p) != "number" || p < -1 || p > 1 || typeof (c0) != "string" || (c0[0] != 'r' && c0[0] != '#') || (c1 && !a)) return null;
-    if (!this.pSBCr) this.pSBCr = (d) => {
-        let n = d.length, x = {};
-        if (n > 9) {
-            [r, g, b, a] = d = d.split(","), n = d.length;
-            if (n < 3 || n > 4) return null;
-            x.r = i(r[3] == "a" ? r.slice(5) : r.slice(4)), x.g = i(g), x.b = i(b), x.a = a ? parseFloat(a) : -1
-        } else {
-            if (n == 8 || n == 6 || n < 4) return null;
-            if (n < 6) d = "#" + d[1] + d[1] + d[2] + d[2] + d[3] + d[3] + (n > 4 ? d[4] + d[4] : "");
-            d = i(d.slice(1), 16);
-            if (n == 9 || n == 5) x.r = d >> 24 & 255, x.g = d >> 16 & 255, x.b = d >> 8 & 255, x.a = m((d & 255) / 0.255) / 1000;
-            else x.r = d >> 16, x.g = d >> 8 & 255, x.b = d & 255, x.a = -1
-        } return x
-    };
-    h = c0.length > 9, h = a ? c1.length > 9 ? true : c1 == "c" ? !h : false : h, f = this.pSBCr(c0), P = p < 0, t = c1 && c1 != "c" ? this.pSBCr(c1) : P ? { r: 0, g: 0, b: 0, a: -1 } : { r: 255, g: 255, b: 255, a: -1 }, p = P ? p * -1 : p, P = 1 - p;
-    if (!f || !t) return null;
-    if (l) r = m(P * f.r + p * t.r), g = m(P * f.g + p * t.g), b = m(P * f.b + p * t.b);
-    else r = m((P * f.r ** 2 + p * t.r ** 2) ** 0.5), g = m((P * f.g ** 2 + p * t.g ** 2) ** 0.5), b = m((P * f.b ** 2 + p * t.b ** 2) ** 0.5);
-    a = f.a, t = t.a, f = a >= 0 || t >= 0, a = f ? a < 0 ? t : t < 0 ? a : a * P + t * p : 0;
-    if (h) return "rgb" + (f ? "a(" : "(") + r + "," + g + "," + b + (f ? "," + m(a * 1000) / 1000 : "") + ")";
-    else return "#" + (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0)).toString(16).slice(1, f ? undefined : -2)
-}
 let data, popularList, textColour, backgroundCol, foregroundCol, imgUrl, img, bookmarkColourList;
 
 let currentState = "popularButtonSort"
@@ -40,46 +15,6 @@ let hasBeenClicked = false
 
 let maxPerPage = 0;
 
-
-// chrome.browserAction.onClicked.addListener(function(){
-//     console.log("hiya")
-//     chrome.tabs.create({'url': chrome.extension.getURL('newTab.html')}, function(tab) {
-//         // Tab opened.
-//     });
-// })
-
-// async function findImgUrl(){
-//     imgUrl = await getURL()
-//     await imageLoad(imgUrl)
-//     // console.log(imgUrl)
-//     // img.crossOrigin = '';
-//     // img.src = imgUrl    
-//     let rgbCol = getAverageRGB(img)
-//     avgCol = rgbToHex(rgbCol["r"], rgbCol["g"], rgbCol["b"])
-//     console.log(avgCol)
-//     console.log("dfsf")
-//     let invertedRGB = invertColour(rgbCol["r"], rgbCol["g"], rgbCol["b"])
-//     hexCol = rgbToHex(invertedRGB["r"], invertedRGB["g"], invertedRGB["b"])
-//     console.log("this")
-
-// }
-
-// function imageLoad(src){
-//     return new Promise((resolve,reject) =>{
-//         img = new Image();
-//         img.onload = () => resolve(img)
-//         img.src = imgUrl
-//         img.crossOrigin = '';
-//     })
-
-// }
-
-// async function getURL(){
-//     let data = await fetch("https://api.unsplash.com/photos/random?count=1&collections=155105&client_id=a4cc58d9f413a6bf9645e3b03cfb04c23ee7e3bfb2d86b72ada163eef96ecc15")
-//     let source = await data.json()
-//     source = source[0]["urls"]["regular"]
-//     return source
-// }
 
 
 
@@ -131,57 +66,6 @@ chrome.runtime.onInstalled.addListener(async function (details) {
 
 
 
-async function sendPageAndColour() {
-    let colCol = await stored("colourCollection")
-    console.log(colCol)
-    ga('set', 'dimension1', colCol);
-
-    //ga('set', 'dimension2', userID)
-
-    ga('send', 'event', 'colour scheme', colCol, "For colours");
-
-    ga('send', 'pageview', "/newTab.html")
-}
-
-(function (i, s, o, g, r, a, m) {
-    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-
-        (i[r].q = i[r].q || []).push(arguments)
-    }, i[r].l = 1 * new Date(); a = s.createElement(o),
-
-        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-
-})(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga'); // Note: https protocol here
-
-ga('create', 'UA-175257786-1', 'auto');
-
-ga('set', 'checkProtocolTask', function () { }); // Removes failing protocol check. @see: http://stackoverflow.com/a/22152353/1958200
-
-ga('require', 'displayfeatures');
-
-sendPageAndColour()
-
-
-// ga(function(tracker) {
-//     // Logs the trackers name.
-//     // (Note: default trackers are given the name "t0")
-//     console.warn(tracker)
-//     console.warn(tracker.get('name'));
-
-//     // Logs the client ID for the current user.
-//     console.warn(tracker.get('clientId'));
-
-//     // Logs the URL of the referring site (if available).
-//     console.warn(tracker.get('storedClientId'));
-// });
-//For the colour that the user uses
-
-
-
-//let hexCol = "247BA0"
-//"AB4E68"
-// randomColours[randomNum1]
-
 document.addEventListener("DOMContentLoaded", async () => {
     // chrome.tabs.query({"active": false, "currentWindow": true }, function (tabs) {
     //     console.log(tabs);
@@ -218,19 +102,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     //     invert = temp
     // }
     console.log(backgroundCol)
-    //avgCol = pSBC(-0.7, "#" + invert)
     //avgCol = avgCol.slice(1)
     $("#bod").css("background-color", hexCol)
     $("#bookmarks").css("background-color", backgroundColour)
+    console.log($("#bod").css("background-color"))
+    console.log($("#bookmarks").css("background-color"))
     // $("#middleLine").css("background-color", backgroundColour)
     //await findImgUrl()
     let hexCol1 = "#" + hexCol
-    let hexCol2 = pSBC(-0.2, hexCol1)
-    console.log(hexCol1)
-    let hexCol3 = pSBC(-0.4, hexCol1)
-    let hexCol4 = pSBC(-0.6, hexCol1)
-    let hexCol5 = pSBC(-0.7, hexCol1)
-    let hexCol6 = pSBC(-0.75, hexCol1)
+    let hexCol2 = hexCol1;
+    let hexCol3 = hexCol1;
+    let hexCol4 = hexCol1;
+    let hexCol5 = hexCol1;
+    let hexCol6 = hexCol1
     bookmarkColourList = [hexCol1, hexCol2, hexCol3, hexCol4, hexCol5, hexCol6]
     textColour = pickBlackOrWhite(bookmarkColourList[0])
 
@@ -290,12 +174,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     })
     await addFilteringButtons(true)
-    pinningBookmarks()
+    // pinningBookmarks()
     // sortBookmarks()
     // $("#updateMessage").modal("show")
     // $("#bookmarks").popover({title: "Click me!", content: "Clicking in this area (not the bookmarks) expands it out", trigger: "manual"})
     // $("#bookmarks").popover("show")
     changeFontSizeIfTooBig()
+    $("#bookmarks").css("background-color", backgroundColour)
 
 
 
@@ -900,8 +785,7 @@ async function addFilteringButtons() {
             }
         }
     }
-
-    let lighterCol = pSBC(0.03, "#" + backgroundCol)
+    let lighterCol = backgroundCol;
     buttonHovering(allPinnedButtons, "#" + backgroundCol, lighterCol)
 
     swapIcon.on("click", async () => {
