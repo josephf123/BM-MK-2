@@ -28,7 +28,7 @@ chrome.runtime.onInstalled.addListener(async function (details) {
         "5158BB-F18F01", "067BC2-685470", "BC5D2E-FBCA9A", "2274A5-FF7733", "446E80-B1DDCA", "0277BD-00695C",
         "247BA0-CA596E", "50635B-BDA63F", "247222-93C0A4", "247BA0-93C0A4", "1D2F6F-FAC748",
         "685470-BC5D2E", "095256-F25F5C", "C0596E-F18F01", "4E6474-61CC3D", "067BC2-B1DDCA",
-        "B298DC-B298DC"
+        "B298DC-B298DC", "6A6A6A-C1C1C1"
     ]
     if (details.reason == "install") {
         await makeStorage("tags", ["Work", "Entertainment", "For Later"])
