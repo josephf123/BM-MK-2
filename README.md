@@ -1,8 +1,12 @@
 # BM-MK-2
-A chrome and firefox extension that help manage and organise bookmarks. This is the second version which has a completely redesigned framework from the first.__
-Available on the chrome web store and firefox add on store__
-[Chrome link](https://chrome.google.com/webstore/detail/bookmark-manager/agkebpnjkaemkbejjlinpbieghchlfda?hl=en-US)__
-[Firefox link](https://addons.mozilla.org/en-US/firefox/addon/bm/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search)__
+A chrome and firefox extension that help manage and organise bookmarks. This is the second version which has a completely redesigned framework from the first.
+
+Available on the chrome web store and firefox add on store
+
+[Chrome link](https://chrome.google.com/webstore/detail/bookmark-manager/agkebpnjkaemkbejjlinpbieghchlfda?hl=en-US)
+
+[Firefox link](https://addons.mozilla.org/en-US/firefox/addon/bm/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search)
+
 
 Displays and organises your bookmarks
 
