@@ -1,14 +1,21 @@
 # BM-MK-2
-An updated version of Bookmark Manager with a whole new framework. Available on the chrome web store
+An updated version of Bookmark Manager with a whole new framework. Available on the chrome web store and firefox add on store
+[Chrome link](https://chrome.google.com/webstore/detail/bookmark-manager/agkebpnjkaemkbejjlinpbieghchlfda?hl=en-US)
+[Firefox link](https://addons.mozilla.org/en-US/firefox/addon/bm/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search)
 
-This folder contains the contents that are installed when you download the chrome extension "BM Bookmark Manager"
+Displays and organises your bookmarks
 
-The main files in this application are "main.js", "tagManager.js" and "options.js"
+The problem with bookmarks is you always seem to have too many of them. This chrome extension removes this problem by creating a minimalist design that displays all your bookmarks in an easy to locate place. By having a tool to sort, filter and organise your bookmarks, you will be able find everything you need with ease.
 
-"main.js" contains the code that displays the main page when a new tab is opened. The code takes the stored data from chrome's
-api about the bookmarks that the user has and displays this. The code also allows for most of the features to operate.
+By creating a user interface that makes it easier to find a certain bookmark and categorise it, the functionality of bookmarks become a lot more apparent. Have some shoes you want to buy, bookmark it and tag it with the other clothes you want to buy. Have a long video you want to watch later, bookmark it and tag it with your videos. These can then be easily found with the Bookmark Manager.
 
-"tagManager.js" controls the page that manages tags. It produces a grid layout that allows users to change which bookmarks have 
-certain tags.
+The customisable colour scheme and your most popular bookmarks is displayed every time a new tab is open, allowing easy access to the bookmarks you use most while also being aesthetically pleasing.
 
-"options.js" controls the options page and is the brains behind the changing of colour scheme and others.
+Features:
+- Sort bookmarks by tags, folders or by most visited
+- Add information about your bookmarks, making it easier to locate using the search bar
+- Create tags in order to categorise your bookmarks
+- Search bar that finds bookmarks based on their title, url, tags and the information that you added to it
+- The ability to chose between several colour schemes or rotate between them
+
+(The chrome version of this extension uses Google Analytics to measure page views, colour theme and tag usage, all data taken is anonymous)
